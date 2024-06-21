@@ -1,0 +1,925 @@
+Date: Wed, 22 Jul 1998 16:12:14 -0600
+This is a FAQ about the strategy/rpg game called STRONGHOLD. This should help
+you beat this game a lot better now. Hope this helps you out.
+
+By CooperTeam
+
+VERSION 2.1 - JULY 22, 1998
+
+
+1.) HOW DO I USE THE PYRAMID?
+=============================
+The pyramid is used to control how fast or how much effort you want something 
+to be done for a particular area. If you have all RED, then you would be 
+BUILDING things faster than normal, if you have all ORANGE, you would be 
+TRAINING and getting experience for your characters faster, if you have it all 
+YELLOW, then you would be recuiting so you can have people join each character 
+in the game. Keep in mind that what ever pyramid you use, it will only effect
+the area you used the pryamid on, not just for ALL characters. Remember, you
+have to click on the proper characters pyramid for that character you want to
+effect. (Example = click on the elves pyramid to adjust the elves efforts for
+that area.)
+
+
+2.) OKAY, BUT WHAT ABOUT MOVING PEOPLE AROUND?
+==============================================
+Well, see that PINK bar just below the pyramid, that is what's called the
+MAGNET bar. In order to move charatcers around you must have your characters
+either READY or UNASSIGNED. Next, go to an area that you want to put that
+character in to. Then, click on the PYRAMID part of the race you made ready
+and click on his race pyramid. Now, click on the PINK bar to set it so you
+move only that character you have READY or UNASSIGNED. One thing to remember
+is that the ones who are READY will come first and have higher priority over
+the UNASSIGNED ones. Still confused? Here is an example of how to move an elf
+character to an area you want...
+
+a.) First, find a character you want to move, it can be anyone you want.
+b.) Click on a character (ELF) you want to move and set him/her for READY.
+c.) Then, choose an area you want that character you go to.
+d.) Now, look on the side of the screen for that character race pyramid.
+e.) Click on that characters pyramid (ELF) so you have the pyramid on top.
+f.) Click on the PINK bar until it says you are moving a character here.
+g.) Now, let some time pass by until he gets there. 
+h.) Click on the newly arrived character and set it to HOME so he stays there.
+i.) Repeat until you are happy with what you got.
+
+Please remember that each race has it's own pyramid, so remember to click on
+THAT RACES PYRAMID TO MOVE THAT RACE OR CHARACTER ONLY. That is the reason for 
+the (ELF) statement in the example. Also remember that you can move more than
+one unit to one area by making more characters READY and then setting the
+MAGNET bar to how many you had ready. Remember one thing though, any units
+that are UNASSIGNED will start to move to that area if you have no READY units
+avaliable to move, or if you set the bar to move more than what you have READY
+to move. You will know who's pyramid is who's from the capital LETTER after 
+the names of the leaders. The letters are as follows...
+
+C = Cleric race
+D = Dwarf race
+E = Elf race
+F = Fighter race
+H = Hobit or Halfling race
+M = Mage race
+T = Thief race
+
+
+3.) IS IT POSSIBLE TO BUILD THINGS FASTER?
+==========================================
+Yes, all you need to do is move characters to that area you want to build
+faster and make sure you properly set the pyramid for that race to 100% build.
+The more you have characters in a specific area, the faster it will be built.
+IT IS BEST TO HAVE IT'S OWN RACE BUILDING IT'S OWN STUFF IN AN AREA! The best
+and fair amount of people to have building something is 5-7 people. This many
+will build things at a pretty fair speed, even if they are BIG buildings. And
+as mentioned, make sure you set the pyramid to 100% build. When you are done
+building what ever it is, you can then set the pyramid to what ever you need
+to do, and at least make sure you don't have ANY red parts showing on the
+pyramid.
+
+
+4.) HOW COME THE ENEMIES DON'T ATTACK ME?
+=========================================
+Good question. To tell you the truth, I don't really know, but I do know that
+if you attack them first, they will start to come after you. And if you are
+trying to destroy the their stronghold, then they will keep attacking you. But
+if you do destroy the enemy stronghold, and there were some enemies left, then
+they will ALL start to attack you. Although, they will not go to attack your
+party, the enemies will go attack YOUR STRONGHOLD, so make sure you are ready
+for this. Also remember to have MORE THAN ONE attacking a creature. If you
+are up against a lot (like 10-15) then start moving characters into that area
+where they are attacking you. Also remember that each enemy has it's own
+strengths and weaknesses, so pay close attention on how they die quickly or
+slowly. If you want a better explanation, think of most of the enemies as
+bees, you don't bother them, they won't bother you.
+
+
+5.) HOW COME I CAN'T BUILD SOME STUFF EARLY IN THE GAME?
+========================================================
+That's due to your BARON, your STRONGHOLD leader. You see, you have to aquire
+a certain status or RANK if you want to build more stuff like INNS, ARENAS, 
+OUTPOSTS, BAZAARS, and more. When you get the rank of ARCHDUKE or ARCHDUCHESS, 
+you can build ALL this stuff.
+
+
+6.) HOW COME I CAN'T BUILD SOMETHING WITHOUT A CHARCTER BEING THERE?
+====================================================================
+The reason for thst is because the characters you create act as guards or
+defence for the city. If you want to build in a new region, you have to move
+a character to that region so you have some protection for your buildings.
+
+
+6.) WHO IS THE BARON?
+=====================
+You, the player are considered the BARON. You play as the STRONGHOLD leader
+and you also control the other 4 castles in the game. Your job, as BARON, is
+to help build a large kingdom for the STRONGHOLD, and to protect your
+STRONGHOLD from being destroyed by the enemy. It will also depend on if you
+chose to be a LAWFUL, NEUTRAL, or CHOTIC leader. Here are the missions for
+the 3 types...
+
+LAWFUL  = Just gain the status EMPEROR/EMPRESS.
+NEUTRAL = Become EMPEROR/EMPRESS and destroy all the enemy strongholds
+CHOATIC = Just destroy all the enemy strongholds
+
+
+7.) WHAT IS THE STRONGHOLD?
+===========================
+The STRONGHOLD is the first castle you built when you were starting a new
+game. It's the BIGGEST castle in the game. This STRONGHOLD is what is keeping
+you alive, once your STRONGHOLD is destroyed, the game is over.
+
+
+8.) CAN I BUILD OTHER CASTLES?
+==============================
+Yes, remember that when you start a new game, and you are choosing characters
+to place where you want, you can have 4 more additional castles. These other
+castles in the game are not that important. They are just there to help you
+defend the STRONGHOLD. Remember that your main goal is to DEFEND your main
+STRONGHOLD, and complete certain tasks set for the type of BARON you have.
+If you have a LAWFUL BARON, then all you have to do is aquire the EMPEROR or
+EMPERESS status, if you have a NUETRAL BARON, then you have to become EMPEROR
+or EMPERESS and kill all the enemies, if you have a CHAOTIC BARON, then you
+have to kill all the enemies. Keep in mind of course that you can play with
+just the STRONGHOLD and beat the game, the other 4 castles are there just to
+help you defend the STRONGHOLD.
+
+
+9.) SO HOW DO I BUILD STATUS?
+=============================
+First, click on the very top name on the right side of the screen. The top
+name is always the BARON leader. DO NOT CLICK ON THE PYRAMID, THAT IS USED
+DIFFERENTLY, JUST THE NAME. When you do, you will get a statistics look at
+your leader or BARON. You will know you are looking at the BARON if you see a
+percentage part of the statistics screen. This percentage tells you 2 things.
+The first or top one tells you your current status for right now, the bottom
+one tells you how much you need to have in order to gain next level of status.
+Over on the right side of the percentage are points for area owned. As before,
+the top one tells your current area owned, the bottom one tells how much you
+need in order to gain next status. When BOTH points and percentage have been
+met, that is when you will gain next status. None of the other character names
+will have this part of the statistical screen, only the TOP name will. The
+others just have the regular info about food, population, and income. Another
+way to build status is to...
+
+a.) Destroy the FIRST low intellegent enemy stronghold
+b.) Destroy the FIRST medium intellegent enemy stronghold
+
+Only attack or destroy an enemy stronghold if you have a good size army of 
+characters and they are at high enough levels to do so.
+
+
+10.) YOU MEAN THE CHARACTERS I GET CAN GAIN EXPERIENCE?
+=======================================================
+Yes, when in a certain area, you are done building stuff, change the pyramid
+for that character and set it to 100% TRAIN (ALL ORANGE). This will increase
+their experience and help them build levels for that area only. If you want
+other areas to gain more experience, you have to set that areas pyramid to
+all orange for that area. You can also attack enemies at anytime to help build
+experience to.
+
+
+11.) MY CHARACTERS CAN BUILD LEVELS TOO, LIKE IN RPG'S?
+=======================================================
+Yes, just like all the D&D and AD&D games, all characters can build experience
+levels. To see what level a character is, just use your mouse to click on any
+character you want to see. When the screen comes up, his experience level will
+be in the upper-right hand side of his picture. It will have a slash "/"
+separating the 2 sets of numbers. The numbers on the LEFT of the slash is the
+characters current experience level, the numbers on the RIGHT of the slash is 
+the number that character must reach in order to gain next experience level.
+Remember, this game is an OFFICIAL D&D game.
+
+
+12.) OKAY, SO WHAT KINDS OF ENEMIES WILL I RUN INTO?
+====================================================
+You will run into lots, but you only get a limited amount of enemies, it is
+impossible to have ALL enemies in one game. Although, the enemies you fight
+will be chosen at random.
+
+
+13.) CAN YOU GIVE ME SOME EXAMPLES OF SOME ENEMIES I MIGHT MEET?
+================================================================
+Well, how about MEDUSA'S, ORCS, SKELETONS, KOBOLDS, GIANT ANTS, GIANT FROGS,
+GIANT SCORPIONS, TROLLS, GOBLINS, HOBGOBLINS, and many more.
+
+
+14.) WHAT IS THE MOST POWERFUL ENEMY I WILL POSSIBLY FIND?
+==========================================================
+That would be the RED DRAGONS. Although not really the toughest, they have the
+best armor class of ANY enemy. Their armor class is -1, so be ready for them.
+The reason why they are not so powerful is because they have a limited attack
+range, so they can be easy to take out, with a good size army, but they can do
+lots of damage, so be ready for them. If you want to know who is the most
+annoying, that would be the BLUE DRAGONS, they have a much stronger attack and
+they can breathe electricity. They can fire it at a good range, away from the
+attacking armies you send, so make sure you have a good army ready for these
+creatures. Although there is one more creature that is very deadly to fight as
+well as having a good armor factor, the MANSCORPION's are a tough enemy to
+face.
+
+
+15.) OKAY, THEN WHAT IS THE WEAKEST ENEMY?
+==========================================
+Well, although very annoying, that would have to be the BLAST SPORES. They
+only have 1 hit point and 1-3 good hits will kill these things in no time. The
+reason why they can be annoying is because when you kill them, they explode,
+doing more damage to you, so make sure you are ready for that. Also, these
+creatures can poison your characters if they get too close to a character.
+When a character gets poisoned, you need to take them to a temple, or you need
+to get them to the closest cleric in the game, if they don't reach either one,
+poisoned characters die and the dead characters will spawn new BLAST SPORES.
+Please be very aware of this. If you want something with less hassle, then
+that would have to be GOBLINS, they only have 4 hit points, and can be taken
+out with little trouble. They have no special attack, they only use swords and
+they have a very low defense. One other creature that is just as weak as
+GOBLINS is the KOBALDS.
+
+
+16.) OKAY, SO IF THERE ARE ENEMIES, THEN THERE HAS TO BE AN ENEMY "BARON"?
+==========================================================================
+Yes, there is, but you only fight him if you chose the AGRESSIVE or HOSTILE
+difficulty when starting a new game. His name is MINDARK, and he is after you
+and wants to control ALL of the land for himself. In other words, get your 
+characters at high levels and then get ready to attack this guy. You see, when 
+he gets his STRONGHOLD up, he is able to build ALL types of enemies, like 
+skeletons, orcs, and evil versions of fighters, thieves, mages, and clerics. 
+If you do see his STRONGHOLD somewhere on your map, get rid of it A.S.A.P. The
+only thing is, you will not see him right away if you did chose the AGRESSIVE
+or HOSTILE difficulty. His STRONGHOLD will only appear when you have destroyed
+the FIRST SET of enemies that were given to you. After you have destroyed the
+FIRST SET of enemies, then his STRONGHOLD will appear somewhere on the map.
+
+
+17.) OKAY, ABOUT MY CHARACTERS, WHO IS BEST AT DOING WHAT?
+==========================================================
+Well, you are correct if you think that some of the characters you choose will
+have an UP side, and/or a DOWN side. Each character you have in the game will
+be good in some stuff, but bad in others, but some have a lot of very good
+abilities, others have, what I consider, not very useful abilities. Here is
+a list of what each character is good at if you choose to have that race on
+your side...
+
+CLERICS  = Don't really have much in building skills, but they make excellent
+fighters. They can cast healing spells, and a few offensive spells.
+
+DWARVES  = Best at mining, if you see a rock, have a DWARF mine it, if you 
+have one. DWARVES are also very skilled fighters.
+
+ELVES    = Best at getting the most out of trees. They are best at harvesting
+trees. Also, they make good fighters, can use bows and arrows, and can cast
+some offensive spells. Not only that, they suffer less damage when up against
+ANY DRAGON.
+
+FIGHTERS = They don't have much skills in harvesting, or anything, but they
+are GREAT in combat. They are the best when it comes to combatting monsters.
+FIGHTERS can create swordsmen and archers.
+
+HOBITS   = Also known as HALFLINGS, they have the skills of a thief and elf.
+They are great at harvesting crops, forests, and are great in combat. They
+also only suffer smaller damage from ANY DRAGON. And, like thieves, they can
+see more stuff on the map.
+
+MAGES    = They don't have much skill in building stuff, but they have the
+best magic abilities in the game.
+
+THIEVES  = Again, no skill in building stuff, but they can make mirrors to
+fight off MEDUSA. Once a THIEF has a mirror equiped, they are immune to the 
+deadly gaze of the MEDUSA. They can also see farther on the map than any other 
+characters in the game.
+
+
+18.) SO WHO ARE THE BEST CHARACTERS TO GET AND WHY?
+===================================================
+Well, if you are a first timer, then the best characters to start out with are
+as follows...
+
+STRONGHOLD LEADER    = Elf
+First Castle Leader  = Cleric
+Second Castle Leader = Mage
+Third Castle Leader  = Fighter
+Fourth Castle Leader = Thief
+
+Keep in mind of course, that if you choose the FIRST CITY option when you
+start a new game, you are given the characters for that game. If you choose
+the other options, you will be able to build what ever characters you need.
+Also keep in mind that the 1st - 4th castles can be in ANY order, but the
+above example is best for new players. Here is the reasons for each charatcer
+for this example...
+
+Elf      = They can harvest forests, and have good offensive attacks
+Clerics  = They have good fighting abilities, and can heal charatcers
+Mages    = They have very powerful spells to help destroy enemies
+Fighters = They can take out enemies fast, and they are the strongest type
+Thieves  = They are best for taking out MEDUSA and can help see farther
+
+As stated before, this is only the best for new players. If you have played
+this game before, and understand what you have to do, then you can choose what
+ever characters you want, either to test out the characters, or to see if you
+can beat the game with those characters.
+
+
+19.) OKAY, SO NOW I HAVE THIS PARTY STARTED, WHAT SHOULD I DO FIRST?
+====================================================================
+Well, the first thing you should do first is create plots and market places.
+You want to start building an income. Farmlands and market places will help. 
+Start with farmlands first, they will help build income for a while. Once you 
+have a few farmlands, then start building some market places.
+
+
+20.) WHY DO I NEED TO BUILD MARKET PLACES, THEY DON'T MAKE MUCH INCOME?
+=======================================================================
+True, but market places increase the farmland values, so you can get more
+income from farmlands to. One thing to keep in mind is that after you have
+built 10 market places, then that is the highest values the farmlands will 
+get. Any more market places will only give 5 more gold of income.
+
+
+21.) I NOTICE THAT CARTAIN LANDS HAVE CERTAIN COLORS, WHY?
+==========================================================
+Well, that is for your advantage or disadvantage, depending on where you start
+to build things. Building things in certain areas on land could increase or
+decrease the effects of what you build.
+
+
+22.) YOU MEAN I COULD GAIN OR LOSE MONEY DEPENDING ON WHERE I BUILD THINGS?
+===========================================================================
+Yes. A perfect example is building farmlands on the tan or brown areas. If you
+do build farmlands there, you won't get as much as you would from having
+farmlands on the green areas, or near/next to water areas.
+
+
+23.) WHAT CAN I BUILD IN THE TAN OR BROWN AREAS THAT INCREASE INCOME?
+=====================================================================
+Well, you can't really build anything that will increase income, but if you 
+find rocks in those areas, excavate them. By doing so, you have a greater 
+chance of finding iron, gold, or gems, And they mostly last longer than if you 
+were to find minerals on the green areas of the map.
+
+
+24.) WHAT ABOUT THE OTHER BUILDINGS, WHERE CAN I PUT THEM?
+==========================================================
+Anywhere, the rest only effect the characters, abilities, and sometimes the
+income you create. Although, if you can build towers, build them on mountains
+or higher areas than the green areas. By doing so, you can increase the range
+of how far you can see on the map. Of course you have to make sure you have
+enough room to build it.
+
+
+25.) WHAT IS THE MOST IMPORTANT THING IN THE GAME?
+==================================================
+Getting an income to make money, creating enough farmlands or forests to feed
+your characters, making room for each race to build things, building up each
+character to make them strong, building inns to help create more characters
+as they come, raising the status of your BARON, keeping your STRONGHOLD alive,
+and (IF THE GAME SAYS YOU HAVE TO) killing all the enemies in the game.
+
+
+26.) WHY DIDN'T YOU JUST TELL ME THAT IS WHAT I NEEDED TO DO?
+=============================================================
+Because you didn't ask that until now....DUUUUUHHHH.
+
+
+27.) HOW ABOUT A SMALL REVIEW OF SOME OF THE ENEMIES?
+=====================================================
+Okay, this is only a small list, I don't want to give EVERYTHING away, or you
+may lose the value of this game...
+
+BLAST SPORES = Although rather weak creatures, these are also dangerous to
+               face. These creatures float around and have a strange poison
+               inside their bodies. If your characters are hit by these
+               creatures, your characters have a chance at getting poinsoned.
+               If your characters don't get help from being poisoned, your
+               characters will disolve and will respawn more SPORES. The only
+               way to be cured is to have a cleric near you or head to the
+               nearest temple. (Only a cleric race can make temples)
+
+EVIL CHARACTERS = As you know, you can create mages, clerics, fighters, and
+                  thieves. Well, you might in fact, run into EVIL versions of
+                  these type of characters. Yes, mages and clerics can cast
+                  the same type of spells as you can. But the real thing about
+                  these characters is that they cannot gain experience, only
+                  you can.
+
+GIANT FROGS = Exactly like the name implies, frogs that are of large size.
+              These creatures are very annoying to elves, dwarves, and hobits.
+              If you have either one of these fighting a giant toad, they may
+              be eaten very easily by a toad. These creatures attack by 
+              lashing their tongues at the enemy and pulling them into their 
+              mouths and, if you are unlucky, eating them.
+
+GIANT SCORPIONS = Exactly like the name implies, scorpions that are of large
+                  size. These are very dangerous creatures if confronted. If
+                  you do decide to fight these creatures, bring clerics with
+                  you, because these scorpions have the ability to poison you
+                  with their deadly tail, and if a character gets poisoned,
+                  only a cleric can cure them of this. If you do not have
+                  clerics in your game, then who ever gets poisoned will die
+                  within a few turns.
+
+HARPY = These are very strange creatures. They have wings and claws of a bird,
+        but have the upper body of a female. These creatures you have to be
+        very careful when you attack. They have the power to charm your
+        characters so that your characters attack you instead of the enemy.
+        These creatures also fly, so it will be impossible to cast web on
+        these creatures.
+
+MEDUSA = Females with snakes as hair on their heads. They wear cloaks to
+         conceal their looks from enemies. Be very cautious about these
+         creatures, they may look weak, but they can take out even the most
+         powerful characters in the game. Only thieves have the real ability
+         to take out these deadly creatures, but only if they are equiped with
+         mirrors. You see, the MEDUSA'S have a deadly gaze that will turn
+         ordinary characters to stone, so only let thieves that have mirrors
+         take these out, or you will be fighting a never ending battle.
+
+OBSIDIAN STATUES = These are animated statues made of very strong material 
+                   such as obsidian, stone, gems, gold, and other such metals.
+                   These creatures can only take damage from enchanted weapons
+                   or magic, but cannot be charmed, stoned, or put to sleep.
+                   Make sure you have at least 2-3 fighting 1 statue, if not
+                   they will take you down fast. These creatures pack quite
+                   a punch when they hit you, so be ready for these creatures.
+
+ORCS = Creatures that are cross overs of man and animal. They have character-
+       istics of human, but their faces are more of an animal than man. They
+       are poor fightes and are easy to take out. Even a small army of
+       fighters could take them out.
+
+PURPLE WORMS = These creatures cannot be seen unless you attack them. They
+               burrow underground where they can surprize you and attack you
+               from anywhere. They are very strong and can take a lot of
+               punishment. They also have a nasty bite and can do a lot of
+               damage. Make sure you have armies fighting these creatures.
+
+SKELETONS = These are exactly like you see in other RPG type games, creatures
+            that have no flesh, but were once human. These are, what's known
+            as, animated dead. These creatures are created by a magic force.
+            These creatures are mindless, they only attack because that is all
+            they know how to do. Although fairly easy to take out, they can
+            be annoying.
+
+TROLLS = These are very carniverous creatures. They have human characteristics
+         but they like to eat their victims too. Although very easy to take
+         out with a good size army, they can also heal themselves while in
+         combat, so make sure you take them out fast to make sure you gain
+         the upper hand.
+
+WIGHTS = These are another version of undead creatures. They are human, but
+         unlike skeletons, they still have most of their flesh on them. Be
+         very careful when attacking these creatures. If they do attack you,
+         they might drain your characters of experience points if they touch
+         you. Meaning, your characters will lose levels and will have to gain
+         them back normally again.
+
+There are a lot more monsters to find, but I will let you find out for your-
+self who and what they are.
+
+
+28.) OKAY, WHAT IS THAT BAR AT THE BOTTOM RIGHT THAT APPEARS DURING COMBAT?
+===========================================================================
+That bar represents both your characters and the enemies chances at combat.
+The WHITE part is your bar, the RED is the enemies bar. The more of one of the
+colors that shows, the more of a chance that character or group of characters 
+has at winning a battle. It's basically a chance bar.
+
+
+29.) WHAT IS THE HOUR GLASS FOR?
+================================
+Obviously to show the passage of time. It's also tells when the seasons are
+going to change, once the hour glass is empty, a new season will come.
+
+
+30.) SEASONS, YOU MEAN SPRING, SUMMER, FALL, AND WINTER?
+========================================================
+Yes, it will change to those seasons. The reason is they wanted to make this
+game as real as possible, and they somewhat did. So, not only can you fight
+monsters, build castles, build a kingdom, and get income, but you also have
+to deal with the harsh elements of the seasons.
+
+
+31.) WILL THE SEASONS EFFECT ANYTHING I DO?
+===========================================
+Yes, they effect your crops and food production. During the spring and summer
+seasons, crops and trees will produce food at normal outcomes, during the fall
+season, crops and trees will increase 25% of normal outcomes, but during the
+winter seasons, crops and trees will drop down 75% of normal outcomes. That
+is the reason why you would want to make GRANARIES, they will store food for
+you so that if your crops can't produce enough food, the GRANARIES will help
+feed your characters.
+
+
+32.) WHAT IS THE BEST THING TO BUILD THAT WILL GENERATE MONEY?
+==============================================================
+There are 2 things to build that will help create more money. One is an INN.
+This will create $25 at first level, $50 when you first upgrade, and $75 on
+second upgrage. This also helps increase population at the same time. The
+other is a BAZAAR. This helps sell your access food that is not being used.
+At first level, it trades 5 food for $5, at first upgrade, it will sell 15
+food for $15, and at second upgrade, it will sell 40 food for $40. You can
+create as many INNs and BAZAARs as you want, and remember, the more you create
+INNs and BAZAARs, the more income you will generate. Keep in mind that you get
+that much money PER TURN, not by simply getting the money. Of course farmlands
+and trees will create money to, but not as much as INNs and BAZAARs will. Also
+remember that you can't build INNs and BAZAARs until you have gained a certain
+status in the game.
+
+
+33.) WHY NOT THE OTHER BUILDINGS THAT GENERATE MONEY?
+=====================================================
+I know about the other buildings, but they don't generate as much as INNs or
+BAZAARs do, those type of buildings only make like $15-$25 PER TURN, a LOT
+less than what an INN or BAZAAR would make. And besides, they are sometimes a
+lot more expensive than INNs or BAZAARs. Here is a list of the buildings that
+do generate money, but not as much as INNs or BAZAARs...
+
+TOY MAKER     = Only ELVES make this
+MAGIC MILL    = Only MAGES make this
+SCRIBERY      = Only CLERICS make this
+GAMBLING HALL = Only THIEVES make this
+BREAD SHOP    = Only HOBITS make this
+
+There may be more, but all these, besides INNs and BAZAARs can generate money,
+just not as much.
+
+
+34.) WHAT ABOUT MINES?
+======================
+Well, yes they do generate money, but eventually, they will run out and you
+will have to find another rock which has either iron, gold, or gems. If you
+have a DWARF race with you, only have them excavate a rock, because they have
+a better chance at finding minerals in rocks and making the mines last
+longer so they can get more out of rocks than anyone.
+
+
+35.) OKAY, DOES THE VAULT (BANK) SERVE A GOOD PURPOSE?
+======================================================
+Yes, a very good purpose. The vaults are used to store your gold and have a
+more readily supply of gold if you make lots of money. After all, castles can
+store so much, but a vault will store an extra $50,000 gold to you with max
+upgrade per VAULT, if you are making lots of gold. The reason for this is
+because there might be a time that you will need to store some money away for
+future use and reference. One more thing, the more VAULTS you have, the more
+money you can store for yourself.
+
+
+36.) ABOUT GETTING MORE POPULATION, WHY NOT USE HOUSING?
+========================================================
+Sure, go ahead if you feel like it, but the reason why you want the INN is
+because you can in fact hold more people in INNs than in HOUSING. Plus, you
+also get the benefit of getting money from the people who house in the INNS.
+
+
+37.) SO TELL ME HOW INNS CAN BE BETTER THAN HOUSING?
+====================================================
+Okay, lets just say you fill one area with HOUSING, and another area with INNs
+and check to see what area is getting more people. To help you out, here is a
+better way of looking at it. This is a small sample of how ONE AREA can hold
+HOUSING, and another holds INNS, this also tells who is better and getting
+more people and then some...
+
+AREA 1                        AREA 2
+======                        ======
+4 houses = 60 people          2 inns = 150 people + 150 gold
+
+As you can see, INNs are the better deal, and as I mentioned, INNs will reap
+the people of money so you get an income out of it. Yes INNs area very
+expensive, but the income you get from them are worth the price.
+
+
+38.) OKAY, WHAT ABOUT WEAPONS?
+==============================
+All characters that you get will have weapons ready for you.
+
+
+39.) CAN'T I MAKE BETTER WEAPONS THAN THE ONES THEY START OUT?
+==============================================================
+Yes, of course you can. Everyone, except for mages, can get better weapons
+made. To do so, you have to build something for them. Here is a list of what
+you need to build for each race, in order to help them get better weapons...
+
+FIGHTERS = Weapon Smith
+HOBITS   = Weapon Smith
+THIEVES  = Weapon Smith
+ELVES    = Fletcher Shop
+CLERICS  = Weapon Smith
+DWARVES  = Weapon Smith
+
+The reason why MAGES can't build anything that involves weapons is because
+they do not use any weapons, they use magic. Keep in mind of course that you
+have to upgrade them to make the weapons stronger. Please also remember that
+some enemies can't be hurt by normal weapons, you sometimes have to have +1 or
++2 weapons equiped on your characters.
+
+
+40.) WHAT ABOUT ARMOR, CAN'T THEY INCREASE ARMOR?
+=================================================
+Only some can, others can't.
+
+
+41.) WHO CAN BUILD ARMOR SHOPS?
+===============================
+Here is a list of who can build armories...
+
+FIGHTERS = ARMORY
+MAGES    = JEWELER
+
+That's all. Just like the WEAPON SMITHS, you need to upgrade the ARMORIES in
+order to get better armor and protection.
+
+
+42.) WHAT KIND OF SPELLS CAN MAGES AND CLERICS DO?
+==================================================
+Well, if you want to be more specific on what kind of spells, here is a spell
+list for you and it tells what level they will get that spell. Also keep in
+mind that elves can cast spells to, so I will include the spell list for them
+to...
+
+Mage Spells
+===========
+Level 1 = CHARM PERSON, MAGIC MISSILE, SLEEP
+Level 2 = WEB
+Level 3 = FIREBALL, HOLD PERSON, LIGHTNING BOLT
+Level 4 = CHARM MONSTER
+Level 6 = DEATH SPELL, DISINTIGRATE, FLESH TO STONE
+Level 8 = MASS CHARM
+
+Cleric Spells
+=============
+Level 1 = CURE LIGHT WOUNDS
+Level 2 = HOLD PERSON
+Level 3 = CURE DISEASE (poisons, stings, etc.)
+Level 4 = CURE SERIOUS WOUNDS
+Level 5 = CURE CRITICAL WOUNDS, FINGER OF DEATH
+Level 6 = CURE ALL
+
+Also keep in mind that the spells affectiveness and strength will increase as
+the characters increase in levels. Also keep in mind that elves use the MAGES
+spell list, but they gain the spells at a much slower rate of experience.
+
+
+43.) WHAT ARE ALL THE POSSIBLE PROMOTIONS/STATUS I CAN GAIN?
+============================================================
+The promotions are as follows, this also includes the status if you are male
+or female, this also includes in what order you gain them...
+
+1. Baron/Baroness (Start out as this)
+2. Viscount/Viscountess
+3. Count/Countess
+4. Marquis/Marquise
+5. Duke/Duchess
+6. Archduke/Archduchess
+7. Prince/Princess
+8. King/Queen
+9. Emperor/Empress
+
+
+44.) HOW COME I CAN ONLY BUILD SO MANY OUTPOSTS AND ARENAS?
+===========================================================
+Why would you WANT to build more? Sure, arenas look cool, and help increase
+your characters experience, and outposts help keep your characters in one
+place so you know where they will go first, but the other reasons are as
+follows...
+
+1.) EXPENSIVE
+2.) DO NOT INCREASE INCOME
+3.) TAKE UP A LOT OF VALUABLE SPACE
+4.) THEY HAVE AN UPKEEP COST TO KEEP THEM
+
+Okay, you got 4 reasons that tell you why, as for the actual reason, why would
+you need more anyway???
+
+
+45.) HOW COME I CAN'T SEEM TO MAKE MORE CHARACTERS AS I AM PLAYING?
+===================================================================
+That's because of the way the game was made. Once there is a certain amount of
+characters (INCLUDING ENEMIES), the game will not allow ANYONE to make more
+people. So, in order to make more characters, you have to go on a killing
+spree and clear up the enemies.
+
+
+46.) WHY IS IT THAT IT SHOWS I MADE NEW CHARACTERS, BUT I DON'T SEE THEM?
+=========================================================================
+Read question 45 to find that answer. It's a bug in the game. You may need to
+get a patch if that happens.
+
+
+47.) CAN I GET ANY INFO ABOUT ANYTHING, LIKE HOW MANY BUILDINGS I HAVE?
+=======================================================================
+Yes, just use your mouse and click on your STRONGHOLD leaders name. Over on
+the right hand side of the screen are some buttons to click on. One is called
+CENSUS, and another is called PROPERTY. Click on PROPERTY to see all the
+buildings you own, and to see how many are at a certain level. Plus, you can
+also find out where they are located on a map by clicking on a certain builds
+name.
+
+
+48.) HOW DO I KNOW IF I AM DOING A GOOD JOB AS A LEADER?
+========================================================
+Well, there are 2 ways. One is to click on your STRONGHOLD leaders name to get
+a statistics of your leader. All you have to do is compare the TOP percentage
+to the BOTTOM percentage. If the TOP one is higher than the BOTTOM one, then
+you are doing a good job. If you are still not sure, then the other way is to
+click on your people that is in ANY area. When you do, they will say what the
+main problems are, if there are any problems. Keep in mind of course, what
+ever race you talk to, they are only referring to THEIR race, not all races.
+Some examples include...
+
+("Some say we have enough housing, but try to look for a new place, and you)
+(will see how hard it is. We'd be happier if there were more housing."     )
+
+Obviously, they are saying you need more housing for that race.
+
+
+("We are doing fine now, but what if mines peter out, or monsters attack?)
+(We'd be happier if we had more income."                                 )         
+
+This means you need to be making more money. Create more FARMLANDs or INNs.
+
+
+("Some of the people here are starving, we need more to eat here.")
+
+This means you need to make more farms or get more trees.
+
+
+These are just a few examples. If they say...
+
+("We are doing well, thank you for all you have done.")
+
+then that means you are doing okay, no need to change anything, but it might
+help to plan ahead incase of an emergancy.
+
+
+49.) WHY IS IT THAT I AM CAUGHT UP, BUT THEY SAY THESE THINGS ANYWAY?
+=====================================================================
+That's because they are trying to get you to plan ahead. You are right if you
+say that they are very personal about certain things, and they are. The game
+itself is just trying to get you into the habit of planning ahead. ANY
+strategy game will be like that. If you do not plan for the worst at the right
+time, you will go down very fast.
+
+
+50.) DOES IT HELP TO PLAN AHEAD ANYWAY?
+=======================================
+Yes, as with ANY strategy game, it helps to plan ahead for ANY situation. You
+never know if you will run out of food, money, or get attacked. It also helps
+to have at least 5-10 characters in every area that has buildings or things
+that you own. As long at you check your statistical screen every now and then,
+and you make sure to upkeep your food, money and upgrade your buildings as
+soon as possible, you will do great in this game.
+
+
+51.) I NOTICED THAT CERTAIN BUILDINGS TAKE UP A CERTAIN AMOUNT OF SPACE, WHY?
+=============================================================================
+Well, it sometimes takes bigger and better buildings to get the bigger and
+better jobs done more efficiently. Of course you have small things like farm-
+lands, housing, markets, and a few other things.
+
+
+52.) COULD YOU LIST THE BUILDINGS THAT ARE BIG OR SMALL?
+========================================================
+Okay, I'll list what are big and small, and will tell you how many sections it
+takes to put in that area. (As you might be aware, buildings take up a certain
+amount of space in one area. I will give you an example here... ONE AREA HAS
+4 SECTIONS, FARMLANDS TAKE UP ONE SECTION, TREES TAKE UP ONE SECTION, INN'S
+TAKE UP 2 SECTIONS.)
+
+TYPE            SIZE / HOW MANY SECTIONS IT TAKES UP IN ONE AREA
+================================================================
+Farmland      = Small / 1
+Housing       = Small / 1
+Market        = Small / 1
+Bridge        = Small / 1
+Wall          = Small / 1
+Gate          = Small / 1
+Tower         = Small / 1
+Tree          = Small / 1 (Only Elves can build this, others have to claim)
+Armory        = Small / 1 (Only Fighters can build this)
+Weaponshop    = Small / 1 (Everyone but Mages and Elves can build this)
+Glassworks    = Small / 1 (Only Thieves can build this)
+Guardhouse    = Medium/ 2 (Only Fighters can build this)
+Fletcher      = Medium/ 2 (Only Elves can build this)
+Bread Shop    = Medium/ 2 (Only Hobits/Halfings can build this)
+University    = Medium/ 2 (Only Mages can build this)
+Mason Hall    = Medium/ 2 (Only Dwarves can build this)
+Scribery      = Medium/ 2 (Only Clerics can build this)
+Temple        = Medium/ 2 (Only Clerics can build this)
+Elf Garden    = Medium/ 2 (Only Elves can build this)
+Toy Maker     = Medium/ 2 (Only Elves can build this)
+Gambling Hall = Medium/ 2 (Only Thieves can build this)
+Builders Hall = Medium/ 2
+Vault         = Medium/ 2
+INN           = Medium/ 2
+Outpost       = Medium/ 2
+Castle        = Medium/ 2  (You are allowed to build only 4 max)
+Arena         = Large / All 4 sections
+Stronghold    = Large / All 4 sections (You are allowed to build only one)
+
+There may be a few more, but you should be able to figure it out anyway.
+
+
+53.) CAN THE PAUSE BUTTON SERVER A GOOD PERPOSE?
+================================================
+Yes, in fact, I use the PAUSE button during gameplay a lot so I know what to
+do without a pressure from being attacked from enemies or hassled by newly
+made characters. Although, if you do want a fast paced game, you can always
+let the gameplay run on it's own. The problem with this is it sometimes takes
+a while to let time or A TURN pass while the game is going. But, if you're a
+person who has to think about what you're doing while playing the game, then
+by all means, use the pause ability. Just incase you are wondering, if you
+want to let time pass while the game is paused, just press the SPACEBAR while
+the PAUSE button is on. Each time you press the SPACEBAR, one turn will pass.
+
+
+54.) ARE THERE ANY CHEATS TO THIS GAME?
+=======================================
+It just so happens there is a cheat for this game. This is a MAJOR cheat so if
+you use it, it's not my fault if you feel you were ripped off of a game.
+
+Start the game with this command line during DOS prompt, while in the games
+directory...
+
+strong debug
+
+This is OBVIOUSLY a debugging commnd line. Now, start a game, or load a saved
+game, and while in a game, hold the ALT key, then press one of the following
+keys for that cheat...
+
+B = Allows you to change ANYONES buildings to what ever you want. You must
+    first be in an area that has a character on screen, and they must have a
+    building of some type, second from the left. You can only change a
+    building if there IS a building already. This also includes rocks, trees,
+    ruins, swamp, and a lot more, but there MUST be something and YOU or THEY
+    must own it.
+
+C = Changes ANYONE to any creature or character you want in that area. Keep in
+    mind that you cannot control monsters if you change one of your characters
+    in the game. Also remember, if you do change one of YOUR characters to a
+    monster, the new monster will have the hit points of the character you
+    changed.
+
+D = Shows where all the characters are when you go to that area. MAP MODE.
+
+F = Similar to the B cheat.
+
+G = This will end the game with you as the loser, get to see the bad ending.
+
+H = This shows the string or HEX it uses for that area of the map. 
+
+J = All castles will gain 5-20 new troops, instead of waiting for troops. This
+    will also allow the enemies to gain this much at the same time.
+
+K = Instantly destroy an enemy stronghold or castle. Be prepared to fight ANY
+    monsters that were left if there was any monsters left of that castle.
+
+L = Raise levels for one character, but you can have multiple high level
+    characters. To do this, first, go to an area that has your characters
+    there. Then, use the cheat to raise the level until it says 36. You can
+    go higher, but the charatcers will only go up to 36. Now, click on your 
+    character in that area. That character from now on will be level 36. Now, 
+    do it again for another character. After a while, you will have lots of 
+    your people who will be level 36. You will have to leave the area, then
+    come back to see the changes of the character, but this will work. CAUTION
+    THIS CHEAT WILL ALSO WORK ON ENEMIES, THEY WON'T BE ANY STRONGER, BUT THEY
+    WILL HAVE HIGHER OR LOWER HIT POINTS IF YOU TRY THIS.
+
+M = DO NOT USE THIS CHEAT, THIS WILL DO SOMETHING YOU WILL NOT LIKE! IF YOU
+    USE THIS CHEAT, I WILL NOT BE HELD RESPONSIBLE FOR "ANY" DAMAGE THAT IS
+    CAUSED BY THIS CHEAT. YOU HAVE BEEN WARNED. (Relax, it's not a virus)
+
+P = BARON will gain a status like DUKE, or PRINCE or something like that. He
+    or she will gain NEXT status.
+
+Q = Press this a few times and the land near you will be covered with ruins.
+
+R = You will become EMPEROR/EMPRESS instantly when you use this.
+
+S = Change the season to the season you like best.
+
+Y = Kills 1 of ANYONE that is in that area. Sometimes will respawn.
+
+Z = Hurts ALL MONSTERS that are in that area. If you have your characters in
+    that area, only the monsters will take damage. Sometimes will respawn.
+    
+
+55.) WHO SHOULD I CONTACT ABOUT THIS FAQ?
+=========================================
+If you have any more questions for me, or if you feel I should clear up a
+particular subject in the game, please send E-mail to me and will see what I
+can do about clearing up that question, or anything you need or want to know
+about this game. My E-mail is...
+
+cooperteam@hotmail.com
+
+Please make sure you put the subject COOPERTEAM/STRONGHOLD so I will know what
+you are E-mailing me about. If you have any comments or recommendations to add
+to this FAQ, let me know and I will see what I can do. Please, no bogus stuff,
+just real and true info about this game. I want to make this FAQ as clear,
+complete, and real as possible for others to use.
+
+No part of this may be reproduced or displayed without permission my me. If
+you do make any additions to this FAQ, please give credit where credit is due.
+If you want me to add your name and E-mail to the next update to this FAQ,
+let me know or I will assume you want me to automatically put your name and
+E-mail on there. I will give you the credit if you find any new info for me.
+I MAY DO AN UPDATE FOR THIS FAQ, I AM VERY SURE I MISSED SOME QUESTIONS THAT
+I NEED TO CLEAR UP. Thanks.
+

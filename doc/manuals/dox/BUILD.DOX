@@ -1,0 +1,621 @@
+STRONGHOLD BUILDING CARD for IBM & Compatibles
+Dungeons&Dragons computer game
+
+STRONGHOLD
+
+A complete list of Stronghold buildings follows.  Each building has
+several categories of data:
+
+Builder: Which classes can build this building. Some may be built only
+by specific character classes, some only by the baron, others by 
+anyone.
+
+Income: How much money this building produces each turn.  A negative number
+indicates how much the building costs to maintain per turn.
+
+Cost: The amount of money required to construct this building.
+
+Population Capacity: The number of people this building can house.
+
+Food Production: How much food this building creates each turn.  For
+farms and trees, this number reflects spring or summer production.  It
+rises to 125% in the fall and decreases to 25% in the winter.  Other
+factors: near water=200%; green ground=150%; tan ground(hills)=75%;
+brown ground(high mountains)=37%.
+
+Food Storage: How much food the bulding stores.
+
+Durability: How long a building lasts while under attack or abandoned.
+
+BUILDING DATA
+
+Key: numbers and words spearated by slash (/) symbols denote upgrades.  For
+example, under the heading for Farm are the works Plot/Farm/Plantation.   
+When you first build it, it will be a Plot, and the first set of numbers
+in each column applies.  After the first upgrade, it becomes a Farm and you
+refer to the second set of numbers.  If only one number appears in any
+category, that number remains constant through all the upgrade levels.
+
+ALL WALLS
+Wall/Struday Wall/Manned Wall
+builter: anyone
+incom: -1/-5/-9
+cost: 20/50/200
+population capacity: 0/0/3
+food production: 0
+food storage: 0
+durability: 10/40/80
+
+ARENA
+builder: BARON (at DUKE level)
+income: - 25
+cost: 5000
+population capacity: 0
+food production: 0
+food storage: 0
+durability: 65
+
+ARMORY
+Leatherworks/Shieldsmith/Armory
+builder: DWARF or FIGHTER  
+income: -10/-20/-30
+cost: 400/1700/5000
+population capacity: 0
+food production: 0
+food storage: 0
+durability: 20/40/60
+
+BAKERY
+Bread Shop/Bakehouse/Bakery
+builder: HALFLING
+income: 4/8/16
+cost: 800/150/2800
+population capacity: 0
+food production: 4/8/16
+food storage: 0
+durability: 20/40/60
+
+BAZAAR
+Trading Post/Trade Faire/Bazaar
+builder: ANYONE 
+income: variable
+cost: 400/800/1600
+population capacity: 0
+food production: +/-: 5/15/40
+food storage: 0
+durability: 10/14/22
+
+BRIDGE
+builder: ANYONE 
+income: -5
+cost: 200
+population capacity: 0
+food production: 0
+food storage: 0
+duribility: 60
+
+BUILDER'S HALL 
+builder: ANYONE 
+income: -5
+cost: 1000
+population capacity: 0
+food production: 0
+food storage: 0
+duribility:  50
+
+CLERIC HOUSE
+Chamber/Refuge/Retreat
+builder: CLERIC
+income: 0
+cost: 10/200/800
+population capacity: 2/10/5
+food production: 0
+food storage: 30/160/500
+duribility:  20/60/99
+
+CLERIC KEEP
+Keep/Fortress/Castle
+builder: CLERIC
+income: 0/-9/-18
+cost: 0/2000/8000
+population capacity: 20/100/250
+food production: 5
+food storage: 150/800/2500
+duribility:  30/70/99
+
+DWARF HOUSE
+Home/Hall/Mansion
+builder: DWARF 
+income: 0
+cost: 10/200/800
+population capacity: 2/7/18
+food production: 0
+food storage: 20/100/350
+duribility: 30/60/99  
+
+DWARF KEEP
+Keep/Fortress/Castle
+builder: DWARF 
+income: 0/-10/-20
+cost: 0/2000/8000
+population capacity: 20/70/180
+food production: 5
+food storage: 100/500/1750
+duribility: 30/70/99 
+
+ELF GARDEN
+Nursery/Flower Garden/Elf Garden
+builder: ELF 
+income: -8/-16/-24
+cost: 1000/5000/10000
+population capacity: 0
+food production: 0
+food storage: 0
+duribility: 10/20/30
+
+ELF HOUSE
+House/Cottage/Home
+builder: ELF 
+income: 0
+cost: 10/250/900
+population capacity: 2/7/15
+food production: 0
+food storage: 10/120/400
+duribility:  10/40/80
+
+ELF KEEP
+Keep/Fortress/Castle
+builder: ELF 
+income: 0/-8/-18
+cost: 0/2500/9000
+population capacity: 10/70/150
+food production: 5
+food storage: 75/500/1500
+duribility: 20/40/60 
+
+ELF TREE
+elf Tree/Elf Grove/Elf Forest
+(Note: built or claimed by elves)
+builder: ELF 
+income: 2/6/18 
+cost: 30/600/4000
+population capacity: 0/2/10
+food production: 10/20/40
+food storage: 0/10/100
+duribility: N/A 
+
+FARM
+Plot/Farm/Plantation
+builder: ANYONE
+income: variable
+cost: 10/500/3000
+population capacity: 0
+food production: variable
+food storage: 0
+duribility: 10/20/30 
+
+FIGHTER HOUSE
+Residence/House/Mansion
+builder: FIGHTER
+income: 0
+cost: 10/100/500
+population capacity: 2/8/20
+food production: 0
+food storage: 18/80/220
+duribility: 20/50/80 
+
+FIGHTER KEEP
+Keep/Fortress/Castle
+builder: FIGHTER 
+income: 0/-10/-20
+cost: 0/1000/5000
+population capacity: 20/80/200
+food production: 5
+food storage: 90/400/1100
+duribility: 30/60/90 
+
+FLETCHER
+Arrowmaker/Arrowsmith/Fletcher's Shop
+builder: ELF
+income: -10/-20/-30
+cost: 600/2500/6500 
+population capacity: 0
+food production: 0
+food storage: 0
+duribility: 15/30/50 
+
+FORESTER'S CAMP
+builder: ANYONE
+income: -4
+cost: 100
+population capacity: 5
+food production: 0
+food storage: 50
+duribility: 15 
+
+FORGE
+Metalworks/Swordmaker's Shop/Forge
+builder: ANYONE (except MAGE or ELF) 
+income: -10/-20/-30
+cost: 500/2000/6000
+population capacity: 0
+food production: 0
+food storage: 0
+duribility: 20/40/60 
+
+GAMING HALL
+Dice Den/Card Parlor/Gaming Hall
+builder: THIEF
+income: 5/10/20
+cost: 400/700/1300
+population capacity: 0
+food production: 0
+food storage: 0
+duribility: 10/15/30 
+
+GATE
+Gate/Sturdy Gate/Manned Gate
+builder: ANYONE 
+income: -8/-10/-12
+cost: 200/300/450
+population capacity: 0/0/4
+food production: 0
+food storage: 0
+duribility: 10/40/80 
+
+GLASSWORKS
+builder: THIEF 
+income: -8
+cost: 1500
+population capacity: 0
+food production: 0
+food storage: 0
+view range: +5
+duribility: 40 
+
+GRANARY
+Storage Shed/Storehouse/Granary
+builder: ANYONE
+income: -10/-25/-40
+cost: 100/600/5000
+population capacity: 0
+food production: 0
+food storage: 500/3000/10000
+duribility: 10/30/60 
+
+GUARD HOUSE
+Guard House/Drill Hall/Training Hall
+builder: FIGHTER or DWARF
+income: -5/-15/-30
+cost: 500/1000/4000
+population capacity: 0
+food production: 0
+food storage: 0
+duribility: 25/50/75 
+
+HALFLING HOUSE
+Lodge/Adobe/Dwelling
+builder: HALFLING
+income: 0
+cost: 10/100/400
+population capacity: 2/6/13
+food production: 0
+food storage: 50/180/520
+duribility: 30/60/90 
+
+HALFLING KEEP
+Keep/Fortress/Castle
+builder: HALFLING
+income: 0/-10/-15
+cost: 0/1000/4000
+population capacity: 20/60/130
+food production: 5
+food storage: 250/900/2600
+duribility: 30/70/99 
+
+INN
+Guest House/Tavern/Inn
+builder: ANYONE
+income: 15/35/75
+cost: 2000/4000/8000
+population capacity: 15/35/75
+food production: 0
+food storage: 0
+duribility: 30/50/70
+
+JEWELER
+Trinketer/Ringmaker/Jeweler
+builder: MAGE
+income: -10/-20/-30
+cost: 750/3000/7000
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 25/50/70
+
+MAGE HOUSE
+Room/Cottage/Manor 
+builder: MAGE
+income: 0
+cost: 10/300/1000
+population capactiy: 2/5/15
+food production: 0
+food storage: 15/100/300
+durability: 10/40/80
+
+MAGE KEEP
+Keep/Fortress/Castle
+builder: MAGE
+income: 0/-8/-16
+cost: 0/3000/10000
+population capactiy: 10/70/150
+food production: 5
+food storage: 50/600/2000
+durability: 20/40/60
+
+MAGIC MILL
+Apothercary/Alchemist's Lab/Magic Mill
+builder: MAGE
+income: 4/8/16
+cost: 800/1500/2900
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 20/40/60
+
+MAIN CASTLE
+Main Castle/Fortified Castle/Stronghold
+builder: BARON
+income: 0/-20/-40
+cost: 0/7000/15000
+population capactiy: 25/100/250
+food production: 5
+food storage: 375/1500/4500
+durability: 30/70/99
+
+MARKETPLACE
+builder: ANYONE
+income: 5
+cost: 100
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 1
+
+MASON'S HALL
+Brick Kiln/Stonemasonry/Mason's Hall
+builder: DWARF
+income: -5/-10/-15
+cost: 500/750/1000
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 60/75/90
+
+MINES 
+Iron/Gold/Gem (Note: not upgrades)
+builder: ANYONE
+income: 50/125/250
+cost: 0
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 10/20/20
+
+OUTPOST
+builder: ANYONE
+income: -20
+cost: 3000
+population capactiy: 10
+food production: 0
+food storage: 300
+durability: 50
+
+PUBLIC BATH
+Steam Bath/Bath House/Public Bath
+builder: CLERIC 
+income: -7/-14/-21
+cost: 700/1400/2800
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 10/20/30
+
+SCRIBERY
+Clerk's Office/Transcriber's shop/Scribery
+builder: CLERIC
+income: 6/12/24
+cost: 500/900/1700
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 20/25/30
+
+SOCIAL HALL
+S. Club/Hall of Fellowship/Social Hall
+builder: HALFLING
+income: -10/-17/-24
+cost: 750/3500/6000
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 30/60/99
+
+TEMPLE
+Shrine/Church/Temple
+builder: CLERIC
+income: -5/-15/-25
+cost: 500/4000/8000
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 20/40/80
+
+THIEF HOUSE
+Hut/Shack/House
+builder: THIEF
+income: 0
+cost: 10/60/200
+population capactiy: 2/8/20
+food production: 0
+food storage: 12/56/160
+durability: 10/20/40
+
+THIEF KEEP
+Keep/Fortress/Castle
+builder: THIEF
+income: 0/-5/-10
+cost: 0/600/2000
+population capactiy: 20/80/200
+food production: 5
+food storage: 60/280/800
+durability: 10/20/30
+
+THIEVES' GUILD
+Den/Black Market/Guild
+builder: THIEF
+income: -4/-10/-22
+cost: 350/3000/6000
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 10/20/30
+
+
+TOWER
+Small Tower/Tower/Large Tower
+builder: ANYONE
+income: -10/-15/-20
+cost: 500/2000/5000
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 30/65/99
+
+TOYMAKER
+Woodcarver/Puppetmaker/Toymaker
+builder: ELF
+income: 6/12/24
+cost: 500/900/1700
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 20/40/60
+
+TREE
+Tree/Grove/Forest
+(Note: built or claimed by non-elves)
+builder: ANYONE
+income: 1/5/20
+cost: 30/400/2000
+population capactiy: 0
+food production: 5/10/30
+food storage: 0
+durability: N/A
+
+UNIVERSITY
+School/Collage/University
+builder: MAGE
+income: -15/-22/-36
+cost: 1000/5000/10000
+population capactiy: 0
+food production: 0
+food storage: 0
+durability: 30/75/99
+
+VAULT
+Money-dealer's Shop/Bank/Vault
+builder: ANYONE
+income: -2/-8/-24
+cost: 500/2000/8000
+population capactiy: 0
+food production: 0
+gold storage: 2000/10000/50000
+durability: 10/50/90
+
+
+SPECIAL NOTES
+
+Arena: Increases training stronhold-wide.  Available at promotion
+level Duke.  Training boost starts at 40%, and increases 4% for every
+promotion thereafter.  Can only build one.
+
+Armory: Upgrades the armor worn by units, with imporvements
+increasing with each upgrade.  Distributes to one unit per turn.
+Will not improve a mage's armor.
+
+Bakery:  Generates income and produces food.  Food rate is 25% of normal
+in spring, 50% in summer, 100% in fall, and 125% in winter.
+
+Bazaar: Buys or sells 5-15-40 food during a food shortage or surplus
+at rate of one gold piece per food unit.  Won't buy food until shortage
+is empty.  Available at promotion level Count.
+
+Builder's Hall: Repairs all damaged buildings for the owner once per year.
+Two halls allow two repairs a year, etc., up to four halls for times a year.
+
+Fletcher: First level repairs broken bows, first upgrade makes +1 bows,
+second upgrade   makes +2.  Bows are distributed to one unit per turn.  Multiple
+Fletcheries distribute faster.
+
+Forester's Camp: Units claim trees automatically after a camp is built.
+
+Forge: First level repairs broken weapons, first upgrade makes +1 weapons,
+second upgrade makes +2.  Weapons are distributed to one unit per turn.
+Multiple Forges distribute faster.
+
+Gaming Hall: Generates income.  Also increases income for inns at the
+expense of other party members at the rate of 3% per upgrade, up to maximum
+50% of the stronghold's total income.  For example, if the total Stronghold
+income is 300, a Dice Den wouls skim 9 gp from that total if the thief owns  
+an inn.  Each Hall requires its own inn to generate extra income.
+
+Glassworks: Requieres a level 3 (or higher) thief to build.  Incerases the 
+range of towers by 5 blocks.  Also distributes mirrors ( to one unit per
+turn) for use in combat against medusae.
+
+Grainery: Stores food.  Automatically distributes food to starving leaders
+when needed. 
+
+Jeweler: makes rings of protection, +1, +2, and +3.  Only makes rights for
+mages.
+
+Magic Mill: Generates income.  Creates a random chance a Forge, Gletcher,   
+Jeweler or Armory will make a more magical product (+3 instead of +2
+weapons, for example).  Each upgrade adds a 3% chance of this happening
+Rings of protection never go above +3.
+
+Marketplace: Each one gives 10% access to the Fund.  Also improves farm
+income and food production.  Maximum of 10 per leader.
+
+Mason's hall: Increases the building construction rate, +10%, +20%, and
+30%.  Works on three buildings at a time.
+
+Outpost:  Generates new units at a remote location.  Not available until
+Baron reaches Marquis; can build one per level threeafter.
+
+Public Baths: Increases maximum unit size; increase is by 1,2, or 3, according
+to upgrade level.  Each Bath effects 5 units at a time.
+
+Tower:  Allows units to see surrounding countryside.  View ranges are 15
+block at first upgrade, then 30 and 45 with the following upgrades.  Rangers
+increase at higher elevations.
+
+Training Halls:  Includes Social Hall, Elf Gardens, Training Hall, University,
+Temple and Thieves' Guild.  Increases the rate at which units go up in level.
+Effects all units belonging to the leader, not just the ones in the block with
+the training hall.
+
+Vault: Works like a granary, but for gold.
+
+Walls/Gates:  Block passage of non-flying monsters.  Gates allow passage
+of friendly units only.  Note: N/S gates allow E/W passage and vice versa.
+
+
+SSI Strategic Simulations, Inc.
+
+Dungeons & Dragons is a trademark owned by and used under license from TSR,
+Inc. Lake Geneva, WI, USA.  All TSR characters, character names, and
+the distinctive likenesses thereof are trademarks owned by and used under
+license form TSR, Inc.  (c) 1993 TSR, Inc.  All rights reserved. (c) 1993
+Strategic Simultions, Inc.  All rights Reserved.

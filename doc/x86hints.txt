@@ -1,0 +1,84 @@
+`int     0x2F` -- setjmp interrupt
+`int     0x2F` -- also multiplex/XMS interrupt
+
+`int 0x67` -- EMS service
+Example EMS code in OpenWatcom overlay manager
+https://github.com/amindlost/cw/blob/01702a8bf5a7b31988eb280b514f97145818e614/src/wl/ovlmgr.asm#L4001
+
+And old touhous source code
+https://github.com/nmlgc/ReC98/blob/87eed57ade4e2abd0f12272e568fe65a3643aeb3/libs/master.lib/ems_free.asm
+
+lea dx,offset //same as mov dx,offset
+
+
+; reads a 16-bit value from the memory location pointed to by data_label
+; and places it on the stack by decrementing the stack pointer and storing
+; the value at the new stack pointer address.
+push word ptr [data_label]
+push word [data_label]     ;; same as above
+
+
+;; Load the starting address of the environment block into ES:DI.
+les di, dword ptr _envLng@
+
+lodsw  ; Load word from [DS:SI] into AX,
+       ; then increment SI by 2 if DF=0 or decrement SI by 2 if DF=1
+
+lodsw SI ;same as above but SI explicit
+
+//The ES:DI segment override changes it from the default DS:DI 
+MOVSW.REP ES:DI,SI ;; while(cx--) ES[DI++] = DS[SI++]
+
+Destination for LODS (grabs byte/word from [DS:SI] and INCreses SI)
+    ex: lodsb   (same as:   mov al,[ds:si] ; inc si )
+        lodsw   (same as:   mov ax,[ds:si] ; inc si ; inc si )
+
+Source for STOS      (puts AX/AL into [ES:DI] and INCreses DI)
+    ex: stosb   (same as:   mov [es:di],al ; inc di )
+        stosw   (same as:   mov [es:di],ax ; inc di ; inc di )
+
+REP prefix to repeat an instruction CX number of times
+    ex: mov cx,10
+        mov ax,0
+        rep stosb ;this would write 10 zeros to [ES:DI] and increase
+                  ;DI by 10.
+
+
+MyMessage db    "This is a message!$" 
+    ...
+    mov     dx,OFFSET MyMessage
+    mov     ax,SEG MyMessage
+    mov     ds,ax
+    mov     ah,9
+    int     21h
+
+Far functions do `mov var0,[BP + 0x6]` to access the first arg
+The includes return segment,offset and the saved BP
+Near functions do `mov var0,[BP + 0x4]` to access the first arg
+
+Note that Ghidra doesn't count the saved frame pointer to be part of the offset,
+when you declare argument locations.
+
+Calling Conventions:
+* cdecl:
+  * Pushed right to left (ss:[sp] has first arg)
+  * Caller pops args
+* stdcall:
+  * Pushed right to left (ss:[sp] has first arg)
+  * Callee pops args
+* pascal:
+  * Pushed left to right (ss:[sp] has last arg)
+  * Callee pops args
+
+Both pascal and stdcall conventions have the callee clean up the stack, but stdcall typically specifies the number of bytes to clean up directly in the RET instruction:
+
+  foo:
+    ;; do work
+    RET 8 ; pop two uint32_t parameters 
+
+pascal: Register usage and function name mangling can vary, but traditionally, it doesn't follow a specific set of rules for registers.
+
+stdcall: The stdcall convention may involve specific rules for register usage and typically includes standardized name mangling, often appending an underscore prefix and adding an @ symbol followed by the number of bytes of parameters to the function name (e.g., _FunctionName@8 for a function with 8 bytes of parameters).
+
+pascal: Commonly used in the Pascal language and some early Windows API functions.
+stdcall: Widely used in the Windows API, making it the standard for many Windows system calls.

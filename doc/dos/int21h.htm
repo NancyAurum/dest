@@ -1,0 +1,2882 @@
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>INT 21h</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h2><font color="#0000FF">INT 21h - The general function
+despatcher</font></h2>
+
+<p>Most of the general functions and services offered by DOS are
+implemented through this interrupt . The functions available are
+well standardised and should be common to all MSDOS, PCDOS and
+DOS Plus systems. Well behaved programs, therefore, should use
+these facilities in preference to any other methods available for
+the widest range of compatibility.</p>
+
+<p>INT 21h in the 512's implementation of DOS Plus 2.1 provides
+77 official functions, two of which are non-functional and return
+with no action. Within this range some calls have subfunctions
+which further extend the range of operations.</p>
+
+<p>In all calls, on entry AH defines the function. Other
+parameters may also be required in other registers. Where a
+memory block is used by the call this is specified in the normal
+segment:offset form. In all cases the general programming
+technique is to set AH to the function pointer, set up the
+required register contents (and the memory block if necessary)
+then to issue the call by the assembly code INT instruction. To
+call the recommended program terminate routine, INT 21h function
+4Ch, the relevant parts of the code would be:</p>
+
+<blockquote>
+    <pre>; Constant equates
+Prog_exit		equ 4ch
+Function_despatcher	equ 21h
+			org 0100
+			program code here
+			.......
+			.......
+			.......
+exit:							; common program exit
+point			mov	al, Return_code		; set up result
+			mov	ah, Prog_exit		; Set up terminate
+							; process
+			int	Function_despatcher	; and leave
+; variable data
+Return_code		db ?				; Default 0 success
+							; set value on failure
+END</pre>
+</blockquote>
+
+<p>There are other methods of implementing INT calls, but they
+are not recommended as normal techniques and are less efficient.
+The two most likely to be encountered are included here only for
+infomation.</p>
+
+<ol>
+    <li>Setting up the entry conditions and executing a long call
+        to 0050h in the PSP <br>
+        (only works in DOS v.2+).<br>
+        </li>
+    <li>Loading the CL register with the function number and
+        executing an intra-sgment call to offset 0050h in the
+        PSP, which contains a long call to the function
+        despatcher. This method only works for function calls of
+        24h or less, and has the further disadvantage that the
+        contents of register AX are always destroyed.</li>
+</ol>
+
+<p>If calls are made by the approved method the contents of all
+registers are preserved through calls, except where those
+registers are used to return results. The obvious exception to
+this is function 4Bh, EXEC, which transfers control to a spawned
+program, when the state of all registers except the instruction
+pointers, but including the stack pointers, should be treated as
+undefined unless specific returned values are expected.</p>
+
+<p>If spawning is employed register contents which must be be
+preserved should be pushed onto the stack, and the stack
+registers themselves (i.e. SS:SI) should be saved in known memory
+locations for explicit later retrieval.</p>
+
+<p>INT 21h functions 00h to 24h are based on and are, with a few
+exceptions, direct equivalents to the corresponding CP/M calls.
+In these calls success or failure is typically signalled by the
+value returned in register AL. For the remaining (i.e. MSDOS)
+calls, the carry flag is more usually used, carry clear
+indicating success, carry set indicating failure of the function,
+often accompanied by an error code in register AX.</p>
+
+<p>Functions up to and including 57h<i> </i>are documented in
+this section, all INT 21h functions with a higher number applying
+to later versions of DOS than 2.11. Note that functions 32h, 34h
+and 50h and above are included, though they are not supported by
+DOS Plus, because these do occur in MSDOS version 2.0 and above,
+and might be encountered in MSDOS v2.0 programs.</p>
+
+<p><font color="#0000FF"><b>Function 0- Program terminate</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">On execution the call restores vectors
+        for INTS 22h to 24h from the PSP, flushes any buffers and
+        transfers control to the terminate handler address.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 0<br>
+        CS = Segment address of PSP</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Equivalent of CP/M BDOS call 00h. INT
+        21h function 4Ch is preferred.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 1- Character input with echo</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a character from the standard
+        input device and echoes it to the standard output device.
+        <br>
+        If no character is ready it waits until one is available.
+        <br>
+        I/O can be re-directed, but prevents detection of OEF.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 01h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 8 bit data input</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Equivalent to CP/M BDOS call 01h, except
+        that if the character is CTRL-C an INT 23h is performed.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 2 - Character output</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Outputs a character to the standard
+        output device. I/O can be re-directed, but prevents
+        detection of 'disc full'.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 02h<br>
+        DL = 8 bit data (usually ASCII character)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">&nbsp;</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 3- Auxiliary input</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a character from the current
+        auxilliary device.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 03h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 8 bit data input</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">There is no way to read the status of
+        the serial port or to detect errors through this call,
+        therefore most PC comms packages drive the hardware
+        directly, hence their general incompatibility with the
+        512.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 4- Auxiliary output</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Outputs a character to the current
+        auxiliary device.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 04h<br>
+        DL = 8 bit data</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">There is no way to read the status of
+        the serial port or to detect errors through this call.
+        Comments as Function 3.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 5- Printer output</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Sends a Character to the current listing
+        device.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 05h<br>
+        DL = 8 bit data</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If the printer is busy this call will
+        wait until the data is sent. <br>
+        There is no way to poll the printer status in DOS.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 6- Direct console I/O</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a character from the standard
+        input device or returns zero if no character available.
+        Also can write a character to the current standard output
+        device. I/O can be redirected but prevents detection of
+        EOF on input or 'disc full' on output.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 06h<br>
+        DL = function requested: 0Ch to 0FEh = output <br>
+        (DL = character to be output)<br>
+        0FFh = Input request</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">If output - nothing<br>
+        If input - data ready: zero flag clear, AL = 8 bit data <br>
+        If data not ready: zero flag set</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call ignores CTRL-X.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 7 - Unfiltered character
+input no echo</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a character from the standard
+        input device without echoing it to the display. <br>
+        If no character is ready it waits until one is available.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 07h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 8 bit data input</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call ignores CTRL-C, use function 8
+        if CTRL-C processing is required. There is no CP/M
+        equivalent.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 08- Character input with no
+echo</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a character from the standard
+        input device without copying it to the display.<br>
+        <br>
+        If no character is ready it waits until one is available.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 08h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 8 bit data input</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If CTRL-C is detected INT 23h is
+        executed.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 09- Output character string</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Writes a string to the display.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 09h<br>
+        DS:DX = segment:offset of string</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The string must be terminated by the $
+        character (24h), which is not transmitted. Any ASCII
+        codes can be embedded within the string.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 0Ah - Buffered input</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a string from the current input
+        device up to and including an ASCII carriage return
+        (0Dh), placing the received data in a user-defined buffer
+        Input can be re directed, but this prevents detection of
+        EOF</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 0Ah<br>
+        DS:DX = segment:offset of string buffer</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The first byte of the buffer specifies
+        the maximum number of characters it can hold (1 to 255).
+        This value must be supplied by the user. The second byte
+        of the buffer is set by DOS to the number of characters
+        actually read, excluding the terminating RETURN. If the
+        buffer fills to one less than its maximum size the bell
+        is sounded and subsequent input is ignored.<br>
+        <br>
+        If a CTRL-C is detected an INT 23h is executed. Normal
+        DOS keyboard editing is supported during input</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 0Bh - Get input status</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Checks whether a character is available
+        from the standard input device. Input can be redirected</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 0Bh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if no character available <br>
+        AL = 0FFh if character available</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Notes: if an input character is waiting
+        this function continues to return a true flag until the
+        character is read by a call to function 1, 6, 7, 8 or
+        0Ah.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 0Ch - Reset input buffer and
+input</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Clears the standard input buffer then
+        invokes one of the standard input functions.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 0Ch<br>
+        AL = number of input function to be invoked, which must
+        be 1, 6, 7, 8 or 0Ah.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">If function 0Ah - Nothing<br>
+        If function 1, 6, 7, or 8 then AL = 8 bit data</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The purpose of this function is to
+        ignore any type-ahead data and force a wait for new
+        character input which must occur after the call is
+        issued.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 0Dh - Disc reset</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Flush all outstanding file buffers by
+        physically updating to disc.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 0Dh </td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call does <i>not </i>update disc
+        directories for any open files.<br>
+        If the program fails to close files before the disc is
+        removed and the files have changed size, their directory
+        entries will be incorrect.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 0Eh - Set default disc drive</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Sets the specified drive to be the
+        default drive and returns the total number of logical
+        drives in the system.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 0Eh<br>
+        DL = drive code (A: = 0, B: = 1, etc)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = the number of logical drives in the
+        system.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">In the 512's DOS Plus (2.1) this call
+        always returns five as the number of logical drives,
+        though a maxirnum of four are supported.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><strong>Function 0Fh - Open a file</strong></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Opens a file and makes it available for
+        read/write operations.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 0Fh<br>
+        DS:DX = segment:offset of the file control block (FCB)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if file found<br>
+        AL = FFh if file not found</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call requires a user allocated
+        memory control block.<br>
+        If the call is successful the FCB data is filled by DOS.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 10h - Close file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Closes a file and updates the directory
+        if the file has been modified.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 10h<br>
+        DS:DX = Segment offset of the FCB for the file</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if directory updated successfully
+        <br>
+        AL = 0FFh if fiIe not found in directory</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call may only be used after a file
+        has been successfully opened and an FCB created.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 11h - Find first file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Search for a specified filename in the
+        current directory of the current drive.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 11h<br>
+        DS:DX = Segment:offset of the FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if matching filename found <br>
+        AL = 0FFh if no matching file found</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">It is important to use INT 21h function
+        1Ah to set the DTA to a buffer of adequate size before
+        using this call.<p>In MSDOS v2 only the '?' wildcard is
+        permitted. If wildcards are specified the first matching
+        name is returned.</p>
+        <p>If an extended FCB is used, an attribute byte
+        determines the type of files searched for. INT 21h
+        function 4Eh is preferred to this call.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 12h - Find next file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Searches the current directory in the
+        current drive for the next matching filename after a
+        previously successful call to function 11h.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">DS:DX = segment:offset of the FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if matching filename found <br>
+        AL = 0FFh if no matching file found</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">As for Function 11h. Function 4Fh is
+        preferred.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 13h - Delete file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Deletes all matching files from the
+        current directory.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 13h<br>
+        DS:DX = Segment:offset of the FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if matching fie(s) deleted<br>
+        AL = 0FFh if no matching file found or all matching files
+        are read-only.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The '?' wildcard is permitted. If more
+        than one match occurs all matched filenames will be
+        deleted.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 14h - Sequential read</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads the next sequential block of data
+        from a file and increments the file pointer.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 14h<br>
+        DS.DX = Segment:offset of previously opened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if successful<br>
+        AL = 1 if end of file reached<br>
+        AL = 2 if segment wrap occurs<br>
+        AL = 3 if partial record read at end of file</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The record is read into memory at the
+        DTA address specified by the most recent call to function
+        1Ah. The size of the block read is is specified by the
+        record size field in the FCB.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 15h - Sequential write</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Writes the next sequential block of data
+        to a file and increments the file pointer.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 15h<br>
+        DS.DX = Segment:offset of previously opened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if successful <br>
+        AL = 1 if disc full<br>
+        AL = 2 if segment wrap occurs</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The record is written from memory at the
+        DTA address specified by the most recent call to function
+        1Ah. The size of the block written is specified by the
+        record size field in the FCB.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 16h - Create or truncate
+file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Creates a new entry in the current
+        directory for the named file, or truncates the length of
+        an existing file of the given name to zero length. The
+        file is opened for read/wnte access.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 16h<br>
+        DS:DX = segment:offset of unopened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 00h if successful<br>
+        AL = 0FFh if unsuccessful (directory full)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Notes: This call is the equivalent of
+        'OPENOUT' in BBC BASIC and should be used with care. By
+        using an extended PCB and setting the appropriate bit the
+        opened file may be assigned an attribute. To create files
+        in other directories use function 3Ch.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 17h- Rename file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Renames all matching files in the
+        current directory</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 17h<br>
+        DS:DX = Segment:offset of special FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if successful<br>
+        AL = 0FFh if no match found or new filename already
+        exists</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">&nbsp;</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 18h - Reserved<br>
+Function 19h - Get default disc drive</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the drive code of the current or
+        default drive.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 19h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = drive code (0 = A:, 1 = B: etc)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Some DOS functions use drive codes
+        starting at 1 (e.g. function 1Ch) reserving zero for the
+        current dnve.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 1Ah - Set disc transfer area
+address</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Specifies<b> </b>the memory area to be
+        used for subsequent FCB operations.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 1Ah<br>
+        DS:DX = Segment:offset of DTA </td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If this function is not used by a
+        program, the DTA defaults to a 128 byte buffer in the PSP
+        at 080h, the area used to hold the original command tail,
+        which will then be destroyed by any disc activity.<p>It
+        is the programmer's responsibility to ensure that the DTA
+        is large enough for any relevant disc operation. The only
+        exception is that DOS will abort any transfer which would
+        wrap around within the segment.</p>
+        <p>This function <i>must </i>be called before using
+        functions 11h, 12h, 14h or 4Fh, to ensure that DOS has a
+        large enough scratch area when searching directories.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 1Bh - Get current drive
+allocation data</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Obtains selected information about the
+        current disc drive and a pointer to the identification
+        byte of the FAT.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 1Bh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">If successful<br>
+        AL = Number of sectors per cluster<br>
+        DS:BX = Segment:offset of FAT identification byte<br>
+        CX = Size in bytes of physical disc sector<br>
+        DX = Number of clusters for the drive <br>
+        If unsuccessful (invalid drive) AL = 0FFh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">DS:BX points only to the FAT information
+        byte. To read the contents of the FAT into memory use INT
+        25h.<p>To obtain infomation about discs other than the
+        default drive use function 1Ch. See also function 36h
+        which returns similar data.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 1Ch - Get alloc. data for
+specified drive</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Action: As for Function 1Bh, but any
+        drive can be specified.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 1Ch<br>
+        DL = Drive code (NOTE 0 = current, 1 = A:, 2 = B:)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">If successful<br>
+        AL = Number of sectors per cluster<br>
+        DS.BX = Segment:offset of FAT identification byte<br>
+        CX = Size in bytes of physical disc sector<br>
+        DX = Number of clusters for the specified drive<br>
+        If unsuccessful (invalid drive or critical error) <br>
+        AL = 0FFh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Except for the ability to specify a
+        drive this call is the equivalent of Function 1Bh.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Functions 1Dh to 20h - Reserved</b></font></p>
+
+<p><font color="#0000FF"><b>Function 2lh - Random read</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a selected record from an opened
+        file.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 21h<br>
+        DS:DX = Segment:offset of previously opened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if successful<br>
+        AL = 1 if end of file reached<br>
+        AL = 2 if segment wrap occurs<br>
+        AL = 3 if partial record read at end of file</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The record is read into memory at the
+        DTA address spedfied by the most recent call to Function
+        1Ah. The size of the block read is specified by the
+        record size field in the FCB.<p>If the size of the DTA
+        and the record are such that segment wrap occurs, the
+        call fails with a return code of 2. If a partial record
+        read occurs the remaining space is padded with zeros. The
+        current file pointer is not advanced after this function.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 22h - Random write</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 22h<br>
+        DS:DX = Segment:offset of previously opened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if successful <br>
+        AL = 1 if disc full<br>
+        AL = 2 if segment wrap occurs</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The record is written from memory at the
+        DTA address specified by the most recent call to Function
+        1Ah. The size of the block written is specified by the
+        record size field in the FCB. If the size of the record
+        and the location of the DTA are such that segment wrap
+        occurs, the call fails with a return code of 2.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 23h - Get file size in
+records</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the record count of a matching
+        file.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 23h<br>
+        DS:DX = Segment:offset of unopened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if matching file found<br>
+        AL = 0FFh if no matching file found</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Before using this call you must set an
+        appropriate record size in the FCB's record size field.
+        After the call the random record field is set to the
+        record count of the specified file.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 24h - Set random record
+number</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Sets the random record field of an FCB
+        to correspond to the current file position as recorded in
+        the opened FCB.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 24h<br>
+        DS:DX = segment:offset of previously opened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing. The random record field in the
+        FCB is updated</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This function is used to change from
+        sequential to random I/O file access.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 25h - Set interrupt vector</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Initialises an interrupt vector to point
+        to the supplied address.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 25h<br>
+        AL = Interrupt number<br>
+        DS:DX = segment:offset of new vector address</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This is the approved way to amend
+        interrupt vector contents.<p>Before changing the contents
+        of a vector, Function 35h should be used to obtain the
+        original entry, which should be re-instated when your
+        code terminates. The only exceptions to this rule are
+        interrupt vectors 22h to 24h, which are automatically
+        restored from the PSP on program termination.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 26h - Create program segment
+prefix</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Copies the PSP of the current program to
+        a specified segment address in free memory, then updates
+        the new PSP to make it usable by a new program.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 26h<br>
+        DX = Segment for new PSP</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call has been rendered obsolete by
+        EXEC, Function 4Bh in DOS 2.0 and later and should no
+        longer be used.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 27h - Random block read</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads one or more sequential records
+        from an open file starting at the file's current record
+        position</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 27h<br>
+        CX = Number of records to be read<br>
+        DS.DX = Segment:offset of previously opened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if all requested records read<br>
+        AL = 1 if end of file<br>
+        AL = 2 if segment wrap<br>
+        AL = 3 if partial record read at end of file<br>
+        CX = Actual number of records read</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The records are read into memory at the
+        DTA address specified by the most recent call to Function
+        1Ah. The size and number of blocks read is specified by
+        the random record and the record size field in the FCB.<p>If
+        the size and. location of the DTA and the number of
+        records to be read are such that segment wrap occurs, the
+        call fails with a return code of 2, possibly after
+        reading one or more records. if a partial record read
+        occurs at the end of the file the remaining record space
+        is padded with zeros The random record, current block and
+        current record fields are updated after this function.
+        The call is similar to Function 21h except that multiple
+        blocks are permitted.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 28h - Random block write</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Write one or more sequential records to
+        an open file starting at the file's current record
+        position.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 28h<br>
+        CX = Number of records to be wriflen or zero (see notes) <br>
+        DS:DX = Segment:offset of previously opened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if all requested records written <br>
+        AL = 1 if disc full<br>
+        AL = 2 if segment wrap<br>
+        CX = Actual number of words written</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The records are written from memory at
+        the DTA address specified by the most recent call to
+        Function 1Ah.<p>If the size and location of the DTA and
+        the number of records to be written are such that segment
+        wrap occurs the call fails with a return code of 2,
+        possibly after writing one or more records.</p>
+        <p>The random record, current block and current record
+        fields are updated after this function. The call is
+        similar to Function 21h except that multiple records may
+        be read.</p>
+        <p>If the call is executed with zero in CX no data is
+        written, but the file length is set to the value implied
+        by the current random record field and the record size.</p>
+        <p>This call is similar to function 22h, except that
+        multiple records may be written.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 29h - Parse filename</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Parses a text string into the various
+        fields of an FCB.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 29h<br>
+        AL = flags to control parsing, as follows:<br>
+        Bit 3: If set, the extension field in an existing FCB
+        will be modified only if an extension is specified in the
+        string being parsed. If clear, the extension field will
+        always be modified. If no extension is specified the FCB
+        extension field will be set to blanks (20h).<br>
+        <p>Bit 2: if set, the filename field in an existing FCB
+        will be modified only if a filename is specified in the
+        string being parsed. if clear, the filename field will
+        always be modified. If no filename is specified the FCB
+        filename field will be set to blanks (20h).</p>
+        <p>Bit 1: if set, the drive ID<b><i> </i></b>byte in the
+        resulting FCB will be modified only if a drive ID is
+        specified in the string being parsed. if clear, the drive
+        ID will always be modified. If no drive is specified the
+        drive ID in the resulting FCB will be set to zero,
+        (default).</p>
+        <p>Bit 0: if set, leading separators will be ignored.</p>
+        <p>DS:SI = Segment:offset of text string<br>
+        ES:DI = Segment:offset of FCB</p>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if no global (wildcard)
+        characters encountered<br>
+        AL = 1 if parsed string contains global characters<br>
+        AL = 0FFh if drive specifier is invalid<br>
+        DS:SI = Segment:offset of first character after parsed
+        name<br>
+        ES:DI = Segment:offset of formatted, unopened FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Permitted separators are: - : . ; , = +
+        TAB and SPACE <p>The call regards all control characters,
+        the above separators (when trailing) and &lt; &gt; I /
+        " [ and [ as terninating characters. If no valid
+        filename is present the contents of ES:DI+1 is a blank.
+        If a '*' occurs in an extension, it and all remaining
+        characters in the FCB are set to '?'. This function (and
+        FCBs in general) cannot be used with file specifications
+        which include a path.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 2Ah - Get system date</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the system day, month and year
+        plus the day of the week.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 2Ah</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">CX = year (1980 to 2099)<br>
+        DH = month (1 to 12)<br>
+        DL = day of month(1 to 31)<br>
+        AL = day number in week (0 to 6 = Sunday to Saturday)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The format of the registers returned by
+        this call is the same as that required by Function 2Bh.
+        Although shown above as decimal values for clarity, all
+        values are in hex.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 2Bh - Set system date</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reset the date held in the system clock</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 2Bh<br>
+        CX = year (1980 to 2099)<br>
+        DH = month (1 to 12)<br>
+        DL = day of month (1 to 31)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if successful<br>
+        AL = if invalid date supplied (no change)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The system time of day is unaffected by
+        this call.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 2Ch - Get system time</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the time of day as held by the
+        system clock.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 2Ch</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">CH = hour(0 to 23)<br>
+        CL = minute (0 to 59)<br>
+        DH = second (0 to 59)<br>
+        DL = centiseconds (0 to 99)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The register format returned by this
+        call is the same as that required by Function 2Dh.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 2Dh - Set system time</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Sets the time of day held in the system
+        clock.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 2Dh<br>
+        CH = hour(0 to 23)<br>
+        CL = minute (0 to 59)<br>
+        DH = second (0 to 59)<br>
+        DL = centiseconds (0 to 99)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if time reset successfully<br>
+        AL = 0FFh if invalid time supplied (no change)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">&nbsp;</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 2Eh - Set verify flag</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Sets or cancels the system read after
+        write verify flag.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 2Fh<br>
+        AL = 0 to turn verification off<br>
+        AL = 1 to turn verification on<br>
+        DL should be set to zero</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call is intended to provide
+        increased data integrity by allowing read after write
+        verification on all data written to disc.<p>It is the
+        equivalent to the DOS command VERIFY and, like the manual
+        command, is non-functional in DOS Plus 2.1.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 2Fh - Get DTA address</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the segment:offset of the
+        current DTA for read/write operations.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 2Fh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">ES:BX = Segment.offset of current DTA</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If the DTA has not been explicitly set
+        it defaults to 080h in the PSP.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 30h - Get DOS version</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the version number of the
+        Operating System.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 30h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = Major version number (e.g. 2.10 =
+        2)<br>
+        AH = Minor version number (e.g. 2.10 = 0Ah) </td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">In the 512 this call returns 2.11.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 31h - Terminate &amp; stay
+resident (keep)</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Terminate program execution but leave
+        memory allocated.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 31h<br>
+        AL = Return code<br>
+        DX = memory size to be reserved (in paragraphs)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Notes: TSR programs are usually
+        re-entered by having previously re-directed an interrupt
+        vector to point back into the code. In this way the
+        program may be re-entered as a result of normal system
+        activity, or as a result of an explicit call by another
+        program.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 32h - Get disc info
+(Undocumented call)</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the pointer to the specified
+        disc drive information block</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 32h<br>
+        DL = drive number (0 = default, 1 = A: etc)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if drive valid<br>
+        DS:BX = segment:offset of disk information block <br>
+        AL = 0FFh if invalid drive number</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call is unofficial and is not
+        supported by DOS Plus.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 33h Get or set CTRL-BREAK
+flag</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns or sets the CTRL-BREAK action</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 33h<br>
+        If getting the status of the flag: AL = 0 <br>
+        If setting the flag: AL = 1<br>
+        DL = 0 to turn CTRL-BREAK checking off <br>
+        DL = 1 to turn CTRL-BREAK checking on</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">DL = 0 if CTRL-BREAK checking off <br>
+        DL = 1 if CTRL-BREAK checking on</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Notes: This command is the functional
+        equivalent of the DOS command BREAK. Like that command,
+        in the 512 this call is non-functional.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><strong>Function 34h - Find active byte
+(Undocumented)</strong></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the number of currently active
+        processes</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 34h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">ES:BX = Segment:offset of active byte
+        address</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call is unofficial and is not
+        supported by DOS Plus. In MSDOS it is mainly used by TRS.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 35h - Get interrupt vector</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns the segment:offset of a
+        nominated vector.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 35h<br>
+        AL = interrupt number</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">ES:BX = Segment offset of interrupt
+        vector contents</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This is the approved way to read
+        interrupt vector contents. The original contents of the
+        vector, after storage, can be amended by a call to
+        function 25h.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 36h - Get free disc space</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Gives the number of free clusters on a
+        specified disc.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 36h<br>
+        DL = Drive code (0 = default, 1 = A: etc)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">If specified drive valid:<br>
+        AX = Sectors per cluster<br>
+        BX = number of available clusters <br>
+        CX = bytes per sector<br>
+        DX = Clusters (allocation units) per drive <br>
+        If specified drive is invalid: <br>
+        AX = 0FFFFh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Similar information is returned by
+        functions 1Bh and 10h</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 37h- Reserved</b></font></p>
+
+<p><font color="#0000FF"><b>Function 38h - Get country
+information</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reading geographically variable system
+        constants.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 38h<br>
+        AL = 0<br>
+        DS.DX = Segment:offset of a 32 byte control block</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">If unsuccessful Carry flag set AX =
+        Error code<p>If successful the 32 byte block contents are
+        as follows.</p>
+        <p>5 byte currency symbol add, null terminated<br>
+        2 byte thousands separator, null terminated<br>
+        2 byte decimal separator, null terminated<br>
+        2 byte date separator, null terminated</p>
+        <p>1 byte bit field currency format<br>
+        Bit 0: clear if currency symbol precedes value, set if
+        value precedes currency symbol<br>
+        Bit 1: clear if no space between the value and the
+        currency symbol, Set if a space required</p>
+        <p>1 byte time format<br>
+        Bit 0: clear for 12 hour clock, set for 24 hour clock</p>
+        <p>2 words for case map call address<br>
+        2 bytes data list separator, null terminated<br>
+        5 words reserved</p>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Unlike its MSDOS counterpart, this call
+        does not permit the stored information to be amended.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 39h - Create subdirectory</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Creates a new subdirectory using the
+        specified drive and path data.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 39h<br>
+        DS:DX = Segment:offset of ASCIIZ path specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry: clear if successful, set if
+        unsuccessful, when:<br>
+        AX = 3 if path not found, 5 if access denied </td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The function fails if:<ol>
+            <li>Any part of the pathname does not exist.</li>
+            <li>A directory of the same name already exists in
+                the same path.</li>
+            <li>The parent directory is the root and it is full.</li>
+        </ol>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 3Ah - Delete subdirectory</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Deletes a specified subdirectory.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 3Ah<br>
+        DS:DX = Segment:offset of ASCIIZ path specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if succesful<br>
+        Carry set if unsuccessful, when:<br>
+        AX = Error code as follows:<br>
+        3: path not found<br>
+        5: access denied<br>
+        6: current directory<br>
+        16: directory contains files</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The function fails if:<ol>
+            <li>Any part of the pathname does not exist.</li>
+            <li>The specified directory is the curmnt directory.</li>
+            <li>The specified directory still contains files.</li>
+        </ol>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 3Bh - Set current directory</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Sets the specified directory to be the
+        current directory.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 3Bh<br>
+        DS.DX = Segment:offset of ASCIIZ path specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful,<br>
+        Set if unsuccessful, when:<br>
+        AX = Error code 3: path not found</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The call fails if any part of the
+        pathname does not exist.<p>Commonly the current directory
+        is ascertained by a call to function 47h, then stored by
+        a program so the original current directory can be reset
+        on completion of operations.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><strong>Function 3Ch - Create or
+truncate file</strong></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Creates a new entry in the specified
+        directory on the specified drive for the named file, or
+        truncates the length of an existing file of the given
+        name and path specification to zero length. The file is
+        opened for read/write access and a 16 bit handle is
+        returned for future access.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 3Ch<br>
+        CX = File attribute:<br>
+        0 = normal<br>
+        1 = read only,<br>
+        2 = hidden, <br>
+        3 = system <br>
+        DS:DX = Segment:offset of ASCIIZ file specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful: AX = file
+        handle<br>
+        Carry set if unsuccessful: AX = Error code as follows<br>
+        3: Path not found<br>
+        4: No handle available (too many files)<br>
+        5: Access denied</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The function fails if:<ol>
+            <li>Any part of the pathname does not exist.</li>
+            <li>A file of the same name afready exists in the
+                same path with the read only attribute set.</li>
+            <li>The parent directory is the root and it is full.</li>
+        </ol>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 3Dh - Open file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Opens a file in the specified or default
+        directory on the specified drive for the named file. A
+        16-bit handle is returned for future access.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 3Dh<br>
+        AL = access mode, where:<br>
+        0 = read access<br>
+        1 = write access<br>
+        2 = read/write access<br>
+        All other bits off<br>
+        DS.DX = Segment:offset of ASCIIZ file specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful: AX = file
+        handle<br>
+        Carry set if unsuccessful AX = Error code as follows<br>
+        2: File not found<br>
+        3: Path does not exist<br>
+        4: No handle available (too many files)<br>
+        5: Access denied<br>
+        0Ch: Access code invalid</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">Any normal system or hidden file with a
+        matching name will be opened by this function. On return
+        the read/write pointer is set to zero, the start of the
+        file.<p>The call fails if:<br>
+        1. Any part of the path does not exist.<br>
+        2. A read only file is opened for write or read/write
+        access.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 3Eh - Close file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Closes a successfully opened file. All
+        buffers are flushed to disc and the file handle is freed
+        for re-use. If the file was modified, the date and time
+        stamps and the file length are updated in the directory
+        entry.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 3Eh<br>
+        BX = the file handle</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful, set if
+        failed, when AX = error code 6, invalid handle or not
+        open</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">In MSDOS calling this function with a
+        handle of zero closes the standard input device! DOS Plus
+        does not suffer from this bug.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 3Fh - Read file or device</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a specified number of bytes from a
+        successfully opened file or device.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 3Fh<br>
+        BX = File handle<br>
+        CX = Nurnber of bytes to be read<br>
+        DS:DX = Segment:offset of buffer area</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful<br>
+        AX = number of bytes read<br>
+        AX = 0 means that EOF was already reached.<br>
+        Carry set if failed, and AX = Error code as follows:<br>
+        5: Access denied<br>
+        6: Invalid handle or not open</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If reading frorn a character device in
+        cooked mode, a maximum of one line will be read, as a
+        carriage return (0Dh) is treated as a record terminator.<p>If
+        the carry flag is clear and AX is less than CX a partial
+        record was read or there was an error.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 40h - Write to file or
+device</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads a specified number of bytes from a
+        successfully opened file or device.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 40h<br>
+        BX = File handle<br>
+        CX = Number of bytes to be written <br>
+        DS:DX = Segment:offset of buffer area</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful, when <br>
+        AX = number of bytes written <br>
+        AX = 0 means the disc is full<br>
+        Carry set if failed, when:<br>
+        AX = Error code as follows:<br>
+        5: Access denied<br>
+        6: Invalid handle or not open</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If the carry flag is clear and AX is
+        less than CX, this means that a partial record was
+        written or there was an error.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 41h - Delete file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Deletes a file from the specified or
+        default disc and directory.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 41h<br>
+        DS.DX = Segment:offset of ASCIIZ file specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful, set if
+        failed, when AX = Error code as follows:<br>
+        2: File not found<br>
+        5: Access denied</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This deletes a file by deleting its
+        directory entry. The ASCIIZ string specifying the file
+        may not include wildcards. The function fails if:<ol>
+            <li>Any part of the path does not exist.</li>
+            <li>The specified file has a read-only attribute.</li>
+        </ol>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 42h- Move file pointer</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Sets the file pointer to the specified
+        position relative to the start or end of the file, or to
+        the current pointer location.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 42h,<br>
+        AL = method code as follows.<br>
+        0: Absolute byte offset from start of the file. (Always
+        +ve double integer)<br>
+        1: Byte offset from current location (+ve or -ve double
+        integer)<br>
+        2: Byte offset from the end of the file (+ve or -ve
+        double integer)<br>
+        BX = File handle<br>
+        CX = MSB of offset<br>
+        DX = LSB of offset</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful <br>
+        DX = MSB of new pointer location <br>
+        AX = LSB of new pointer location<br>
+        Carry set if failed, when AX = Error code as follows:<br>
+        1: function number invalid<br>
+        6: invalid handle or not open</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The method code determines the relative
+        base for the pointer move, which uses a 32 bit integer to
+        set the new location.<p>Method 2, if called with an
+        offset of zero returns the length of the file as the new
+        pointer value.</p>
+        <p>Method 1 or 2 can set the pointer to a location before
+        the start of the file, but an error will occur if a
+        subsequent attempt is made to use this pointer location.</p>
+        <p>For all methods (and results) the returned pointer
+        location is always an absolute byte offset from the start
+        of the file.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 43h - Get or set file
+attributes</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Obtains or sets the attributes of the
+        specified file.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 43h<br>
+        AL = 0, get file attribute or AL = 1, set file attribute <br>
+        CX = new attribnte (when AL = 1) as follows:<br>
+        bit 5 = archive <br>
+        bit 2 = system <br>
+        bit 1 = hidden <br>
+        bit 0 = read only<br>
+        DS:DX = Segment:offset of ASCIIZ file specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful, <br>
+        CX = attribute (when AL was 1)<br>
+        Carry set if failed, AX = Error code as follows:<br>
+        1: function code invalid<br>
+        2: file not found<br>
+        3: path not found or file not found<br>
+        5: attribute cannot be changed</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This function cannot be used to set a
+        file's volume label bit (3), or the sub-directory bit
+        (4). These may only be changed by using an extended ECB.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 44h- Device driver control
+(IOCTL)</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Passes information directly between an
+        application and a device driver.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 44h<br>
+        AL = 6 get input status<br>
+        AL = 7 - get output status<br>
+        BX = handle</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful<br>
+        AL = 0: For device or output file = Not Ready. For input
+        file = Pointer at EOF<br>
+        AL = FFh: For device, input or output file = Ready<br>
+        Carry set if failed, when AX = Error code as follows:<br>
+        1: AL not 6 or 7<br>
+        5: Acces denied<br>
+        6: Invalid handle or not open<br>
+        0Dh: Invalid data</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call is a partial implementation of
+        the full MS/PCDOS flindion, as it only supports status
+        checkng in the 512.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 45h - Duplicate handle</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns a second handle for a file or
+        device which has already been successfully opened.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 45h<br>
+        BX = existing file or device handle</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful <br>
+        AX = new handle<br>
+        Carry set if failed, when <br>
+        AX = Error code as follows:<br>
+        4: No handle available<br>
+        6: Handle invalid or not open</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If the file pointer attached to one
+        handle is implicitly moved by a seek, read or write, the
+        pointer for the other handle is also moved.<p>The purpose
+        of this call is to force directory updating for a file
+        without having to close it (and then re-open it). After
+        obtaiidng the new handle, the logical file associated
+        with it is closed by function 3Eh, forcing a directory
+        update, but leaving the original handle available for
+        further input/output operations.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 46h - Force duplicate of
+handle</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Given two handles, make the second refer
+        to the same file at the same point as the first.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 46h<br>
+        BX = first file handle<br>
+        CX = second file handle</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful, set if failed
+        when AX = Error code <br>
+        4: No handles available<br>
+        6: Invalid handle or not open</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If the handle specified in CX already
+        refers to an open file, that file is closed before this
+        function is performed.<p>After the call, if the file
+        pointer attached to one handle is implicitly moved by a
+        seek, read or write, the pointer for the other handle is
+        also moved.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 47h - Get current directory</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Obtains the ASCIIZ string of the current
+        directory's path.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 47h<br>
+        DL = Drive code (0 = default, 1 = A:, etc) <br>
+        DS:SI = Segment:offset of 64byte scratch buffer</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful, full
+        directory pathnarne is placed in the buffer.<br>
+        Carry set if failed when AX = Error code as follows:<br>
+        4: No handle available<br>
+        6: Drive specification invalid</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The returned pathnarne does not mdude
+        the drive ID, nor is it prefixed with a '\'. It is
+        terminated by a null byte, therefore if this call is
+        issued from the root directory, the first byte in the
+        buffer will be zero.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 48h - Allocate memory</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Allocates a block of memory and returns
+        a pointer to the start of the area.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 48h<br>
+        BX Number of paragraphs of memory needed</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful when AX =
+        first segment of allocated block<br>
+        Carry set if failed when AX = Error code as follows:<br>
+        7: memory control blocks destroyed<br>
+        8: insufficient memory, BX = size of largest available
+        block</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">If the call succeeds AX:0000 points to
+        the start of the block.<p>When a COM file loads, it
+        conceptually owns all the remainder of memory from its
+        PSP upwards. This call may be used to lirnit a program's
+        memory allocation to its immediate requirements.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 49h - Release memory</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Releases memory to make it available to
+        other programs.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 49h<br>
+        BX = New requested block size in paragraphs <br>
+        ES = Start segment of block to be modified</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful, set if failed
+        when AX = Error code as follows:<br>
+        7 = memory control blocks destroyed<br>
+        8 = insufficient memory<br>
+        9 = incorrect segment in ES<br>
+        BX = Size of largest available block</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call modifies the size of a block
+        of memory previously allocated through Function 48h. The
+        call <em>must</em> be used by a COM program to release
+        all unused memory before spawning by means of EXEC,
+        Function 4Bh. EXE programs may also use this call.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 4Bh - Execute program</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Loads a program for execution under the
+        control of an existing program. By means of altering the
+        INT 22h to 24h vectors, the calling prograrn can ensure
+        that, on termination of the called program, control
+        returns to itself.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 4Bh<br>
+        AL = 0: Load and execute a program<br>
+        AL = 3: Load an overlay<br>
+        DS.DX = segment:offset of the ASCIIZ pathname<br>
+        ES:BX = Segment:offset of the parameter block<br>
+        Parameter block bytes:<br>
+        0-1: Segment pointer to envimmnemnt block<br>
+        2-3: Offset of command tail<br>
+        4-5: Segment of command tail<br>
+        6-7: Offset of the first FCB to be copied to new PSP+5Ch<br>
+        8-9: Segment of the first FCB<br>
+        Ah-Bh Offset of the second FCB to be copied to new
+        PSP+6Ch<br>
+        Ch-Dh Segment of the second FCB</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful. On return <em>all</em>
+        register contents are destroyed, including the stack
+        pointers.<br>
+        Carry set if failed when AX = Error code as follows:<br>
+        1: Function invalid<br>
+        2: File not found or path invalid<br>
+        5: Access denied<br>
+        8: Insufficient memory<br>
+        0Ah: Environment invalid<br>
+        0Bh Format invalid</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">To protect the caller's register
+        contents they should be pushed on the stack and the stack
+        pointers, SS:SP stored in a known location before the
+        call. On return these should be retrieved immediately
+        with interrupts disabled to prevent interrupts occuring
+        before stack integrity is regained.<p>The ASCIIZ
+        pathnarne must include the drive, path and filename of
+        the program to be loaded. The environment block must be
+        paragraph-aligned and consist of one or more ASCIIZ
+        strings, all terminated by an extra zero byte.</p>
+        <p>Command tails are in the usual format for PSPs, that
+        is, a count byte and the command tail terminated by a
+        carriage return, which is not included in the count.</p>
+        <p>All active handles, devices and I/O redirection
+        assignments in the calling program are inherited by the
+        executed program.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 4Ch - Terminate program with
+return code</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Terminates execution of a program with
+        return to <font face="Courier New">COMMAND.COM</font> or
+        a calling routine, passing back a return code. Allocated
+        memory is freed, vectors for interrupts 22h to 24h are
+        restored from the PSP and all file buffers are flushed to
+        media. All files are closed and directories are updated.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 4Ch<br>
+        AL = Return code (Error level)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Nothing</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This is the approved method of
+        terminating program execution. It is the only way that
+        does not rely on the contents of any segment register and
+        is thus the simplest exit, particularly for EXE files.<p>The
+        return code can be interrogated by a calling program by
+        means of function 4Dh, and by the batd' file commands, <font face="Courier">IF ERRORLEVEL</font>. Conventionally a
+        return code of zero indicates success, any other value
+        failure. Standard DOS return codes are:</p>
+        <p>0: Successful operation<br>
+        1: CTRL-BREAK termination<br>
+        2: Critical error terrnination<br>
+        3: Terminated and stayed resident</p>
+        <p>Return code values can be used at the discretion of
+        the programmer (avoiding codes 1 to 3), thus both success
+        or a wide range of failure types may be indicated by
+        varying the code. For the return of result codes to the
+        caller by an EXEced program a better method is to use
+        other registers, but only the contents of register AL are
+        significant to the batch command <font face="Courier New">ERRORLEVEL</font>.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><strong><b>Function 4Dh - Get return
+code</b></strong></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Used by a parent task to obtain the
+        return code of a program executed by a call to function
+        4Bh.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 4Dh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AH = Exit type:<br>
+        0 Normal termination<br>
+        1: CTRL-C termination<br>
+        2: Terminated by critical device error<br>
+        3: Terminated by a call to function 31h<br>
+        AL = Return code</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call is a 'one-shot' function, that
+        is, it will yield the return code of a called program
+        once only.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 4Eh - Search for first match</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Searches the default or specified
+        drive:directory for the first occurrence of a matching
+        filename.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 4Eh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">CX = Attribute to use in search<br>
+        DS:DX = Segment:offset of ASCIIZ file specification</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">&nbsp;</td>
+    </tr>
+</tbody></table>
+
+<p>CX = 0 if successful. The current DTA is filled as follows:</p>
+
+<p>Bytes<br>
+0-20: Reserved for use by DOS in subsequent calls<br>
+21: Attribute of matched file<br>
+22-23: File time stamp<br>
+24-25: File date stamp<br>
+26-27: least significant word of file size<br>
+28-29: Most significant word of file size<br>
+30-42:: Filenarne.extension in ASCIIZ string form<br>
+Carry set if failed, AX = Error code as follows<br>
+02h path invalid<br>
+12h: no rnatching directory entry</p>
+
+<p>This call assumes the DTA has heat set up by a successful call
+to function 1Ah.</p>
+
+<p>Both wildcards (? and *) are permitted in filenames, but only
+the first matching name is returned.</p>
+
+<p>if the attribute in CX is zero only normal files are searched.
+If the volume label attribute bit is set only volume labels are
+returned. For all other attribute settings, (i.e, hidden, system
+or directory) those files and normal files are searched</p>
+
+<p><font color="#0000FF"><b>Function 4Fh - Search for next match</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Searches for the next matching file
+        after a previously successful call to Function 4Eh.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 4Fh</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful<br>
+        The current DTA is filled as follows:-<br>
+        Bytes<br>
+        0-20 : reserved for use by DOS in subsequent calls<br>
+        21: Attribute of matched file<br>
+        22-23: File time stamp<br>
+        24-25: File date stamp<br>
+        26-27: least significant word of file size<br>
+        28-29: Most significant word of file size<i><br>
+        </i>30-42: Filenarne.extension in ASCIIZ string form<br>
+        Carry set if failed, AX = Error code<br>
+        12h: no matching directory entry</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">When used this call requires a DTA
+        containing returned data from a previously successful
+        call to function 4Eh or 4Fh.<p>Use of function 4Fh is
+        only relevant when the original file spedacation used in
+        function 4Eh included at least one wildcard.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 50h - Get disc information
+(Undocumented call)</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Returns a pointer to the disc
+        information block.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 50h<br>
+        DL = drive number (0 = default, 1 = A: etc)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if drive exists<br>
+        DS:BX = Segment:offset of disc information block<br>
+        AL = 0FFh if failed</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call is unofficial and is not
+        supported by DOS Plus.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 51h - Reserved</b></font></p>
+
+<p><font color="#0000FF"><b>Function 52h- Reserved</b></font></p>
+
+<p><font color="#0000FF"><b>Function 53h - Reserved</b></font></p>
+
+<p><font color="#0000FF"><b>Function 54h - Get verify flag</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Reads the current state of the verify
+        flag.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 54h</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">AL = 0 if verify off <br>
+        AL = 1 if verify on</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">This call is the countepart of function
+        2Eh. In DOS Plus AL is always returned as zero.</td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 55h - Reserved</b></font></p>
+
+<p><font color="#0000FF"><b>Fundion 56h - Rename file</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">Renames a file and or moves its
+        directory entry to a different directory on the disc.</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 55h<br>
+        DS:DX = Segment:offset of current ASCIIZ filename ES:DI =
+        Segment:offset of new ASCIIZ filename</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful<br>
+        Carry set if failed, AX = Error code as follows:<br>
+        2: File not found<br>
+        3 : path not found or the file doesn't exist<br>
+        5: Access denied<br>
+        11h : new name not same device</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The call fails if:<ol>
+            <li>Any part of the pathnarne does not exist.</li>
+            <li>The new filename refers to a different disc.</li>
+            <li>The new name is in the root directory, which is
+                full.</li>
+            <li>A file with the new path and name already exist.</li>
+        </ol>
+        </td>
+    </tr>
+</tbody></table>
+
+<p><font color="#0000FF"><b>Function 57h - Get or set file date
+and time</b></font></p>
+
+<table border="0" cellspacing="5">
+    <tbody><tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Action:
+        </strong></font></td>
+        <td valign="top">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>On
+        entry: </strong></font></td>
+        <td valign="top">AH = 57h<br>
+        BX = file handle<br>
+        AL = 0 to get date and time <br>
+        AL = 1 to set date and time<br>
+        CX = time:<br>
+        bits 9-0Fh = hours (0-23)<br>
+        bits 5-8 = minutes (0-59)<br>
+        bits 0-4 = No. of two-second increments (0-29)<br>
+        DX = date.<br>
+        bits 9 - = year relative to 1980 (0-119, i.e. 1980-2099)<br>
+        bits 5-8 = month of year(1 to 12)<br>
+        bits 0-4 = day of month(1 to 31)</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Returns:
+        </strong></font></td>
+        <td valign="top">Carry clear if successful<br>
+        If getting date and time:<br>
+        CX = time (in format above)<br>
+        DX = date (in format above)<br>
+        Carry set if failed, AX = Error code as follows:<br>
+        1 - function code invalid<br>
+        6 - file handle invalid</td>
+    </tr>
+    <tr>
+        <td valign="top" nowrap="nowrap"><font color="#0000FF"><strong>Notes:
+        </strong></font></td>
+        <td valign="top">The file must have been previously
+        opened or created by a call to function 3Ch or 3Dh.<p>For
+        simplicity the date and time formats are shown above in
+        the sequence they are stored in the directory.</p>
+        </td>
+    </tr>
+</tbody></table>
+
+<p>This completes the list of INT 21h function codes valid in DOS
+PIus 2.1.</p>
+
+<p>Functions 58h and above are only available in versions of
+MSDOS later than 2.11, and with the exception of function 63,
+later than version 3.0.</p>
+
+<p>Interrupts 22h through 24 are not user callable and are
+therefore not documented. (See chapter 8).</p>
+
+
+</body></html>

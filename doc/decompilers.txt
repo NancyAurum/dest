@@ -1,0 +1,77 @@
+A resource on decompilers
+http://www.backerstreet.com/decompiler/simple_decompiler.php
+
+* IDA Pro:
+  * While very popular, it is also very expensive and requires obtaining
+    a pirated copy, which is usually outdated, incomplete and has viruses.
+  * Closed source and has limited way to modify the tool to suit your needs.
+    Outside of decompiling the decompiler itself.
+    So if it fails to decompile your code, you have no way to fix it.
+  * Doesn't spport decompiling 16 bit x86.
+    And there is no way to implement support, outside of connecting to
+    an external decompiler, like DCC.
+* Ghidra ( https://ghidra-sre.org/ ):
+  * Very popular and well documented.
+  * Open source (MIT license), so can be modified to do anything you want.
+    But being US government project made to analyze malware and vulnerabilities,
+    its ability decompile DOS games is a fortunate byproduct.
+    The code is boilerplate rich Java, with all the crazy OOP patterns
+    you can imagine used for the simplest of tasks.
+  * It became standard, so if you plan to work with others on a paid project,
+    you better know.
+  * Comes with enterprise integration and automation, like headless mode,
+    to process large loads of code without a human being to drive it.
+  * It supports decompiling 16bit x86!!!
+* Reko (  https://github.com/uxmal/reko ):
+  * A C# challenger to Ghidra, with a bit cleaner code, without most of the
+    Java bullshit.
+    It is a community project, not a government initative,
+    so feels much more free.
+  * Much better Windows support, because of C#.
+  * Supports decompiling 16bit x86 and loading OMF files.
+    It even supports some packers.
+    Moreover, it claims that:
+    "16-bit real mode" is "The first architecture targeted by Reko"
+    https://github.com/uxmal/reko/wiki/Supported-binaries
+    I.e. authors made it to analyze DOS executables.
+* e2c ( http://annex.retroarchive.org/cdrom/pier-02/038A/EXE2C/index.html )
+  * The first x86 decompiler ever.
+  * Released in 1992 is year older than STRONG.EXE!!!
+* DCC ( https://github.com/nemerle/dcc/ ):
+  * The first production-ready decompiler
+  * Open source, the code is early C++, so without the later Uncle Bob nonsense.
+  * Has to be run in combination with a separate disassembler, like IDA.
+  * Specifically targets DOS code 16bit code.
+* Boomerang ( https://github.com/BoomerangDecompiler/boomerang ):
+  * Another classic C++ decompiler.
+  * Like DCC, doesn't provide a propeg GUI of its own and needs a separate
+    disassembler and hex editor.
+    So could be be a companion plugin for IDA.
+  * Doesn't support 16-bit x86.
+* ExeToC ( https://github.com/wyrover/ExeToC-Decompiler/tree/master )
+  * Really strange C++ decompiler made by a single person.
+  * The license.txt is missing.
+    Doesn't appear to be a student diploma project,
+    so likely an illegal dump of some proprietary solution.
+  * 32-bit x86 only. Would take ages to implement 16bit support.
+* relimpoC ( https://sourceforge.net/projects/relipmoc/ )
+  * Translates GCC generated AT&T assembly back to C.
+  * Would require some work to accept Intel syntax
+  * Could be used in conjunction with IDA if you feed it disassembled code.
+    Think adhock solution.
+* REC Studio ( http://www.backerstreet.com/rec/recdload.htm )
+             ( http://www.backerstreet.com/rec/rec.htm )
+  * Rather unusual decompiler with good support for PS1 games
+* RetDec ( https://github.com/avast/retdec )
+  * Another mature full feature disassembler, wihch was recently made public
+    https://blog.avast.com/avast-open-sources-its-machine-code-decompiler
+    Apparently its development followed the LLVM along.
+  * Open source (MIT license), but compared to Ghidra it is C++ and LLVM based.
+* C4Decompiler ( http://www.c4decompiler.com/ )
+ 
+* Rizin ( https://github.com/rizinorg/rizin )
+  Obscure fork of radare.
+
+* BinNavi ( https://www.zynamics.com/binnavi.html )
+  IDE similar to IDA and Ghidra, but without a decompiler
+  

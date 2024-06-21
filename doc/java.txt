@@ -1,0 +1,25 @@
+In Java instead of `\n` they write `%n` and printf is hidden inside System.out
+
+System.out.printf("HELLO!!!%n");
+
+System.out.printf("Decompiled HighSymbols for %s:%n", function.getName()
+
+
+Example of writing to a file:
+  private void dumpResults(String raw) {
+    if (raw == null) {
+      return;
+    }
+    try {
+      File tmpFile = File.createTempFile("decomp", ".xml");
+      OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+      out.write(raw.getBytes());
+      out.flush();
+      out.close();
+      Msg.info(this, "Dumped decompile data to: " + tmpFile);
+    }
+    catch (IOException e) {
+         TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }

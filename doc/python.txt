@@ -1,0 +1,16 @@
+Ghidra
+_________
+
+Use the "Window -> Python" menu and discover the flat API using “dir()”:
+
+
+Useful Scripts:
+* Data/ImportSymbolsScript.py (Ghidra/Features/Python/ghidra_scripts)
+  It has format:
+
+    NAME SEGMENT:OFFSET TYPE
+  
+  where type can be 'l' (label) or 'f' (function)
+  'l' is default and can be omitted
+  
+  see sym/int21.txt for an example of DOS syscall map.

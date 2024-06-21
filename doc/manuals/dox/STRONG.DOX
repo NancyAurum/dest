@@ -1,0 +1,2370 @@
+STRONGHOLD MANUAL
+--Index--
+
+TABLE OF CONTENTS
+
+INTRODUCTION                                            1
+
+MAIN MENU                                               1
+    New Game                                            1
+    Save Game, Load Game                                2
+    Delete Game                                         2
+    Quit Game                                           2
+    Message Delay                                       2
+    Great Achievements                                  2
+    Begin Play                                          2
+MOVEMENT                                                3
+    Terrain                                             3
+
+THE OVERHEAD VIEW                                       4
+
+CHARACTER CREATION                                      4
+     Attributes                                         4
+     Races & Classes                                    5
+     Alignment                                          6
+     Name Your Character                                7
+     Place Your Castle                                  7
+     Create Party Members                               7
+CONSTRUCTING BUILDINGS                                  8
+     Undeveloped Land                                   8
+     Trees, Rocks and Swamps                            9
+     Construction in Progress                           10
+     Automatic Expansion                                10
+     The Common Fund                                    10
+COMPLETED BUILDINGS                                     11
+     Information                                        11
+     Repair                                             11
+     Upgrade                                            12
+     Salvage                                            12
+     Demolish                                           12
+     Change Active Party                                12
+     Change Owner                                       12
+     Done                                               12
+CONTROLLING THE GAME                                    13
+     Pyramids                                           13
+     Setting Multiple Pyramids Simultaneously           14
+     Moving Units                                       14
+     Main Menu Button                                   14
+     Speeding up Time                                   14
+     Pausing the Game                                   15
+VIEWING UNITS                                           15
+     Ready-Home-Unassigned                              16
+VIEWING THE LEADER                                      17
+     Population-Food-Housing                            17
+     Gold & Income                                      18
+     Fund Access                                        18
+     Popularity                                         18
+     Census                                             19
+     Property                                           19
+     Baron                                              19
+     Next Leader                                        20
+COMBAT                                                  20
+     Combat Thermometer                                 20
+     Spellcasting                                       21
+     Spells                                             21
+
+OPPONENTS                                               22
+
+GAME PLAYING HINTS                                      25
+
+
+--Index--
+--Page 1--
+
+INTRODUCTION
+
+STRONGHOLD is a kingdom simulator
+based in the DUNGEONS &
+DRAGONS game. You can civilize
+and conquer vast new lands by
+leading a party of up to five
+characters who create and maintain a growing
+empire. You choose when and where
+to build your castle,
+build housing, or clear land. You
+take care of existing buildings and
+try to acquire more. You recruit
+units to your "stronghold" and train
+them for combat. You defend your
+land from evil enemies. And, you
+even have the power to speed up or
+pause time in your kingdom.
+
+Where will your people live?
+How will they survive? Will they
+prosper? Will history record your
+name to be forever remembered
+and revered by all?
+
+Take a small party of adventurers
+and set forth. The wilderness
+awaits you!
+
+
+Main Menu
+
+Press ESC to exit the demo.
+
+
+New Game
+
+Starts a new game. If you have
+an auto-saved game (you had a
+game in progress and quit playing
+previously), a message will ask if
+you're sure you want to get rid of
+that game. Starting a new game
+deletes the auto-saved one for-
+ever. To preserve an auto-saved
+game, select Save to assign it a
+permanent saved game position.
+
+NOTE: press ESC to return to the
+main menu. The ESC key always
+backs up to the previous menu.
+Clicking the right mouse button
+also returns to the previous menu.
+
+--Page 1--
+--Page 2--
+
+Choose World
+
+After selecting "New Game", pick
+which world you want to play in,
+STRONGHOLD comes with five
+pregenerated maps. If you wish to
+play on one of those, click on the
+button alongside the name of the
+map you prefer. Select "Random" to
+create a completely new map.
+
+
+Choose Hostility
+
+After choosing a world, you deter-
+mine how hostile an environment
+that world will be. In STRONGHOLD,
+difficulty is governed by the intel-
+ligence of the monsters. The more
+hostile the world, the more enemy
+strongholds appear, and the more
+intelligent the enemies are.
+
+The "CUSTOM" option allows you
+to determine for yourself how
+many opponents appear in the
+world. The limit is sixty total,
+including all intelligence levels
+and a second wave of enemies
+that appears later.
+
+After choosing a hostility level,
+select "BEGIN PLAY" to start your
+game. All new games start in early
+spring to give you plenty of time to
+prepare for winter.
+
+
+Save Game, Load Game
+These options allow you to save a
+game in progress or load a
+previously saved game.
+
+
+Delete Game
+
+If you want to delete one of your
+saved games, use Delete Game to do so.
+
+
+Quit Game
+
+Selecting "Quit" performs an "auto-
+save" and returns you to DOS.
+STRONGHOLD automatically saves the
+game in progress when you quit,
+and reloads that saved game the
+next time you play. This eliminates
+the need to save each time you
+exit the game.
+
+
+Message Delay
+
+Adjusts the time the program
+pauses to allow you to read text
+messages. Remember, longer
+delays slow the game down,
+because it's pausing for longer
+periods. Select "Message Delay" to
+increase or decrease the delay
+time, or to test the delay to see
+how long the pause is.
+
+
+Great Achievements
+
+Players may make the Great Achieve-
+ments board. The board maintains
+the top five players, by name, title
+(Baron, Lord, King, etc.), and number
+of enemies destroyed. At the bottom
+of the list is a record of the player's
+last game, and whether it ranks
+among the top five or not.
+
+
+Begin Play
+Start playing STRONGHOLD.
+
+--Page 2--
+--Page 3--
+
+MOVEMENT
+
+After selecting Begin Play, your first
+task is to choose a location for your
+main castle. This is what you see:
+
+There are two views: the large
+window, which shows a close-up of
+the terrain, called the "postcard
+view," and the small window in the
+upper right, which displays an
+"overhead view" of a portion of the
+map. Between the two windows is a
+button with an arrow on it. Click on
+the button to swap the postcard and
+overhead views. In this way you can
+see more of the wilderness map.
+
+In the overhead view is a small
+yellow rectangle. This is the map
+spot, or 'block', the postcard view
+is displaying. To display a different
+block, point to a different place in
+the overhead view, and click. The
+yellow rectangle moves, and the
+postcard view changes. You may
+also use the keyboard cursor keys
+to move around the map:
+
+Arrow Keys move up, down, left,
+or right one block.
+
+Page Up and Page Down: move
+up or down 16 blocks.
+
+Home and End: move left or right
+8 blocks.
+
+Underneath the small window is a
+compass. Another way to explore
+the wilderness is to click on com-
+pass points: you move one block in
+the direction you click on. Only
+north, south, east, and west are
+legal; you may not move diagonally.
+
+You will also see two numbers
+in parentheses, separated
+by a comma. These are the
+X (horizontal), Y (vertical)
+coordinates of the location
+currently displayed in the
+postcard view. The upper-left
+corner of the map is (0,0).
+
+
+Terrain
+
+The various terrains help your
+people develop in some ways and
+hinder them in others:
+
+Water (blue) is good near farms;
+food production increases where
+irrigation is easy and plentiful. Water
+is also a natural line of defense.
+Enemies may not be able to cross
+lakes, rivers, and streams. You may
+build bridges to cross water.
+
+Plains or valleys (green) are best for
+farming. Crops grow strong and pro-
+duce best in the rich soil there. How-
+ever, these areas are the worst loca-
+tions for mines; they run dry quickly.
+
+Mountains (brown) are best for
+mines; they last longest if placed
+there. But crops grow poorly in
+cold, harsh climates. Also, building
+in the mountains can be difficult,
+because of the steep faces and
+severe cliffs.
+
+Hills (tan) are the middle ground
+between the plains and the
+mountains. Both mines and farms
+do well, producing average
+amounts of minerals and food.
+Just as in the mountains, steep
+hills can be difficult to build on.
+
+--Page 3--
+--Page 4--
+
+THE OVERHEAD VIEW
+
+As your stronghold grows, white
+dots accumulate on the overhead
+map. Each of these dots repre-
+sents at least one of your units.
+Other dots and blocks on the map
+mean different things:
+
+White dots indicate your units.
+
+Brown dots are enemies you can
+see. Units "see" a certain distance
+into the wilderness.
+
+Flashing red and white dots
+mean combat is occurring
+between your units and enemies.
+
+Yellow dots indicate at least one
+of your units is infected with
+disease.
+
+The large red square is the
+location of your main castle.
+
+Small red squares are Keep loca-
+tions and monster strongholds.
+At first, the only ones on the map
+are your own. Later, as your units
+explore and build towers to better
+survey the land, red squares
+indicating enemy strongholds
+will appear.
+
+Brown lines are where you have
+placed a wall.
+
+
+CHARACTER CREATION
+
+Once you decide on the best spot
+for your main castle, go to that
+location and click on the button
+labeled Create baron or baroness. This
+button is just outside the bottom-
+left corner of the large window.
+
+
+Attributes
+First you roll up your leader's
+attributes - Strength, Intelligence,
+Wisdom, Dexterity, Constitution,
+and Charisma. Units have the same
+attributes as their leader. The
+maximum (best) attribute rating in
+any category is 18. Press the "REROLL"
+button as many times as you like to
+regenerate a new set of attributes.
+
+Character attributes affect game
+play as follows:
+
+Strength: Units with high Strength
+do greater damage to opponents
+in combat.
+
+Intelligence: High Intelligence is
+useful for mages and elves in
+casting spells.
+
+Wisdom: Aids clerics in casting
+clerical spells. High Wisdom also
+gives a bonus for defending
+against spell-casting monsters.
+
+Dexterity: Higher Dexterity units
+attack first.
+
+Constitution: High Constitution
+gives units extra hit points when
+they advance levels.
+
+Charisma: Higher Charisma units
+attract followers more quickly.
+
+--Page 4--
+--Page 5--
+
+Hit Points
+
+Hit points (HP) are the amount
+of damage that a character can
+take before dying. For example,
+your fighter may have 12 HP.  A
+hobgoblin hits him for 4 HP worth
+of damage. Now the fighter has
+only 8 HP remaining between him
+and death.
+
+
+Experience Points / Levels
+
+Characters can go up in "level"
+from level one (rank amateur) to
+36 (supreme expert) based on
+experience. The higher level a
+character is, the better spells he
+can cast, the more HP he has, etc.
+Experience is gained by defeating
+monsters or by building places to
+study in the stronghold, such as
+Magic Schools or Thieves' Guilds.
+
+
+Races & Classes
+
+To choose a class for your char-
+acter, press one of the labeled
+buttons on the right. Not all
+classes are always available. Each
+character class has a primary
+attribute associated with it. If the
+displayed attributes are too low,
+you may not be able to select
+a certain character class. To
+generate a new set of attributes,
+press "REROLL".
+
+Unless otherwise noted, a race or
+class sees up to five blocks around
+itself on the overhead map.
+
+
+Fighters
+Fighters are humans whose main
+skill is prowess at arms. A leader
+who is a fighter attracts two types
+of units: archers and fighters. The
+difference is whether the unit
+specializes with the sword or the
+longbow. Fighters are average at
+everything else: they farm and
+mine well enough. Their primary
+attribute is Strength.
+
+
+Dwarves
+Dwarves are sturdy, short demi-
+humans with great combat abili-
+ties. Dwarves are better at finding
+minerals than any other character
+race or class, but dwarves are
+the worst at cultivating trees. High-
+level dwarves take only half-
+damage from magical attacks.
+Their primary attributes are
+Strength and Constitution.
+
+
+Mages
+Mages are humans who specialize
+in magic. They have little or no
+weapon ability or battle prowess.
+As mages gain experience levels,
+however, they gain powerful magic
+spells that can destroy monsters
+that would defeat almost any other
+class or race. Their primary
+attribute is Intelligence.
+
+
+Elves
+Elves are graceful, lean demi-
+humans. They have some of the
+abilities of both fighters and
+mages - they are adept with the
+
+--Page 5--
+--Page 6--
+
+longbow and cast limited magical
+spells. Elves are better than any
+other race or class at cultivating
+trees, but worst at finding valuable
+minerals in rocks. High-level elves
+take only half-damage from dragon
+breath. Their primary attributes are
+Intelligence and Strength.
+
+
+Thieves
+Thieves are humans who special-
+ize in sneaking, spying, and recon-
+naissance. They make excellent
+scouts, as they can see 15 blocks
+around themselves on the over-
+head map. Their primary attribute
+is Dexterity.
+
+
+Halflings
+Halflings are short demihumans
+with many abilities similar to
+human thieves. Halflings are
+better at farming than any other
+class or race. They see up to
+eight blocks around themselves
+on the overhead map. High-level
+halflings take only half-damage
+from magical attacks or dragon
+breath. Their primary attributes are
+Strength and Dexterity.
+
+
+Clerics
+Clerics are humans who devote
+their lives to great and worthy
+causes. Clerics cast spells in
+combat, and are also adept at
+hand-to-hand fighting. Their
+primary attribute is Wisdom.
+
+
+Alignment
+
+Character alignment determines
+the victory conditions of the game.
+
+The goal of the LAWFUL baron is to
+advance through the nine
+promotion levels to the rank of
+Emperor or Empress.
+
+The CHAOTIC baron must destroy
+all enemy strongholds to win.
+
+The NEUTRAL baron must fulfill
+both the LAWFUL and CHAOTIC
+victory conditions.
+
+At all costs, defend your
+main castle. If it is des-
+troyed by opponents, you
+lose the game.
+
+
+Promotions
+
+A Baron is promoted if he achieves
+any of the following goals:
+
+* Rises to a 55% popularity
+  level (requirement increases
+  with each level) with 50
+  buildings per level
+
+* Destroys the first (and only
+  the first) low-intelligence
+  enemy stronghold
+
+* Destroys the first (and only
+  the first) medium-intelligence
+  enemy stronghold
+
+* Destroys any high-intelligence
+  enemy stronghold
+
+--Page 6--
+--Page 7--
+
+The possible promotions are:
+
+                1. Baron/Baroness
+                2. Viscount/Viscountess
+                3. Count/Countess
+                4. Marquis/Marquise
+                5. Duke/Duchess
+                6. Archduke/Archduchess
+                7. Prince/Princess
+                8. King/Queen
+                9. Emperor/Empress
+
+
+Name Your Character
+
+Type in the name of your
+character when prompted. The
+name can be almost any length,
+but we suggest using six or less
+characters. Longer names are
+automatically abbreviated in many
+of the game screens.
+
+
+Place Your Castle
+
+After you have created your leader,
+it is time to place your main
+castle. Click on the "PLACE" button.
+
+Sometimes water in the block or
+steep terrain prevent the place-
+ment of a main castle. If this
+happens, move to another block.
+The terrain description next to the
+"PLACE" button will indicate legal
+castle locations.
+
+Construction starts immediately;
+your loyal subjects begin to
+populate the land. Important: once
+you place your main castle, enemy
+strongholds appear on the map.
+
+
+Create Party Members
+
+While construction of your main
+castle is underway, explore more
+land nearby. There can be as
+many as four other members in
+your party. Rather than castles,
+these characters build 'keeps.'
+Keeps become the central points
+of their own neighborhoods in
+the stronghold.
+
+Keeps have to be built within a
+certain radius from the main
+castle. The further spaced apart
+they are, the harder it is for the
+different neighborhoods to defend
+one another in the event of a
+monster attack.
+
+Find good locations for these
+keeps quickly, create the other
+members of your party, and
+get them started building. The
+monster hordes are growing!
+Try to create a balanced party.
+Each of the character classes
+has advantages and disadvan-
+tages, but a mixture of classes
+will best be able to explore,
+build, grow, fight, and conquer.
+
+--Page 7--
+--Page 8--
+
+CONSTRUCTING BUILDINGS
+
+As you move the cursor around the
+postcard view, it changes shape:
+sometimes it's an eye, and some-
+times a shovel. The eye indicates
+that you can look at a unit -- see
+"Viewing Units" on page 15.
+
+The shovel indicates a possible
+location where you may place
+buildings. Refer to the building
+card for information about the
+various buildings, their cost,
+income they might provide, size,
+and so on.
+
+Note: You must have a unit
+present to use the shovel.
+
+To begin construction, click on an
+empty spot of land. A message will
+appear underneath the postcard
+window, and a menu beneath the
+overhead view. Clicking on
+different scenery allows you to do
+the functions described in the
+following sections.
+
+
+Undeveloped Land
+
+If the spot is vacant, the message
+will read something like this:
+"Fighter House: provides more
+housing. It will cost Anthony the
+Fighter 10 of 96 gold. Fund is 26
+gold." This means that a Fighter
+House is the next building you will
+build if you click on the "PLACE"
+button. The structure will provide
+more housing. Anthony the Fighter
+
+is the leader who will pay for the
+house, and whose people will get
+the housing. The building costs 10
+of the 96 gold pieces Anthony has
+in his coffers. The Fund is dis-
+cussed later in "The Common
+Fund" on page 10.
+
+If you click on the "PLACE" button,
+Anthony's people will start con-
+structing a Fighter House. It will
+be built at the location you clicked
+on, and cost Anthony 10 GP. When
+the house is finished, Anthony's
+people will inhabit it.
+
+To build a different building, click
+on the "CHANGE BUILDING" button. A
+list of buildings, with the least
+expensive building at the top,
+appears. Select one of those to
+see its cost and benefits. To begin
+construction, click on "PLACE".
+
+If you change your mind and do
+not want to build a building, click
+"DONE" or the right mouse button.
+
+Each block of the map is made
+up of four squares of land -- the
+far left, the middle left, middle
+right, and far right. Each is a
+potential spot for a building.
+Some may be covered with
+water, and therefore be unavail-
+able for building. Some steep
+slopes can only have farms or
+walls built on them.
+
+--Page 8--
+--Page 9--
+
+Some wide buildings require two
+squares of land. If you intend to
+build a wide structure, be sure the
+square to the left or to the right of
+the one you clicked on is empty so
+the structure will fit. Refer to the
+building list to see how wide the
+various buildings are.
+
+
+Trees, Rocks
+and Swamps
+
+Not all undeveloped land is clear
+and ready for construction. You
+will also find trees, rocks, and
+swamps. When you click on one of
+these, a different message and set
+of buttons will appear:
+
+Trees
+Trees can provide food and
+income, but you must "claim"
+them first. When you click on a
+tree, the message tells you the
+harvest value of the tree and asks
+if you wish to claim it. To have
+Anthony claim the tree, click on
+the "CLAIM" button. Construction
+begins. When it is finished,
+Anthony owns the tree, and the
+food and income it generates goes
+into his granaries and coffers.
+
+If you do not want the tree, click
+on the "CHOP DOWN" button. Your
+people will remove it, allowing
+construction in that square.
+
+To leave the tree alone, select "DONE".
+
+Elves are best at cultivating trees;
+they can get more food and
+income from them than other
+character classes.
+
+
+Rocks
+Within some rocks are veins of
+gems, iron, or gold. When you
+click on a rock, the message
+reads, "Search this location for
+minerals? Active party is Anthony."
+To command Anthony's people to
+excavate the rock, click on the
+"EXCAVATE" button. If they find
+minerals they will start building a
+mine. If not, they will haul away
+the rock, leaving the space clear
+for construction.
+
+To clear the land directly, click
+the "REMOVE" button. The people
+will take the rock away without
+searching for minerals.
+
+Click on "DONE" to leave the
+rock alone.
+
+Dwarves are best at locating min-
+erals in rocks; the chance that
+they will find one is greater than
+that of the other character classes.
+
+--Page 9--
+--Page 10--
+
+Swamps
+Swamps can get in the way of
+construction. Clicking on one of
+these brings up two buttons: "FILL IN"
+and DONE. To command the active
+party member's people to fill the
+swamp with dirt, select "FILL IN". This
+takes a while because filling a
+swamp is time-consuming. When they
+are done, you will have a
+clear location ready for con-
+struction. Click on "DONE" to leave
+the swamp there.
+
+
+Construction in Progress
+
+To check the progress of the
+construction of a building, click
+on it with the shovel cursor. You
+will see a message like this:
+"Marketplace: 18% complete.
+Owned by Anthony. Active party
+is Anthony the Fighter." The
+structure is 18% finished, and
+Anthony is the owner.
+
+To the right "SUSPEND" and "DONE"
+buttons will appear. If you want
+to halt construction, click on
+"SUSPEND". This will stop construc-
+tion, and the gold you spent on
+the building will be lost.
+
+Click on "DONE" to continue
+construction.
+
+The owner of a building may or
+may not be the same as the
+"active party," and it is
+important to understand the
+difference. The owner owns the
+building: he or she receives the
+benefits from it, and pays any
+maintenance costs. The active
+party is the one who will take
+the next construction action; he
+or she will build the next
+building, even though other
+structures on the screen may be
+owned by someone else.
+
+
+Automatic Expansion
+
+As more units join your strong-
+hold, they will move out into
+untamed land. Houses will spring
+up. Each of your five leaders
+recruits followers, and they need
+places to live, so they build. To
+disable automatic expansion,
+toggle the Auto Build option on the
+Leader screen.
+
+
+The Common Fund
+
+Some buildings generate income.
+10% of this income is taken by the
+leader as a tithe to be held in
+reserve for use in times of crisis.
+Marketplaces allow leaders to use
+this common fund. Each market
+provides access to 10% of the
+fund. For example, if the total fund
+
+--Page 10--
+--Page 11--
+
+is 200 GP, three marketplaces
+would allow Anthony the Fighter to
+use up to 30% of the 200, or 60
+GP. So, if the Fighter House
+information says, "It will cost
+Anthony the Fighter 10 of 5 gold.
+Fund is 60 gold," Anthony can
+afford to construct the house,
+because he can use his 5
+remaining gold pieces, plus
+another 5 GP of the 60 available to
+him from the fund. This applies to
+upgrades and repairs as well.
+
+
+COMPLETED BUILDINGS
+
+You must have a unit on the same
+block as a building to interact with
+it. Click the shovel icon on a
+building to display information
+about it. A message like this will
+appear: "Fighter House (8/8),
+owned by Anthony. Active party is
+Anthony the Fighter. Upgrade costs
+150 of 926 gold. Fund is 212."
+
+The name of the building is first.
+Next comes the condition of the
+building. Perfect condition is 8;
+the number to the left is the
+current condition. "8/8" means the
+building is in perfect condition.
+After that is the owner. The
+upgrade cost is next, followed by
+the total number of gold pieces
+you own. The Fund number is the
+number of gold pieces available to
+you through the common Fund.
+
+In addition to this information,
+a column of option buttons
+will appear on the right side of
+the screen:
+
+
+Information
+Clicking on the "INFORMATION" button
+gives you additional information
+about the building - specifically,
+how much gold a building gener-
+ates or costs and if it provides
+any housing or grain storage. Click
+on the "INFORMATION" button again
+to display the condition/owner/
+upgrade information.
+
+
+Repair
+If a building is abandoned, combat
+takes place in the block, or the
+owner of a building runs out of
+money, its condition degrades. The
+building will look spotty and run-
+down. When the condition reaches
+O, the structure collapses. Note:
+keeps and castles only collapse if
+enemy units share the block with
+them for a prolonged amount of
+time, regardless of condition.
+
+Buildings degrade at different
+rates. Some, such as large towers, last a
+long time; while others, like market-
+places, collapse almost imme-
+diately when left alone or fought
+over. The higher a structure's
+durability, the longer it lasts. Refer
+to the building card for each
+buiiding's durability.
+
+--Page 11--
+--Page 12--
+
+To repair a building, click on the
+"REPAIR" button. If you can afford the
+repair, it takes place instantly.
+
+
+Upgrade
+Most buildings can be upgraded.
+An upgrade is an expansion or
+fortification made to a building
+to make it more useful or valu-
+able. Buildings which can be
+improved may be upgraded twice.
+Buildings must be condition 8/8
+for an upgrade to be possible. If
+the condition is less than 8, the
+"upgrade" option is replaced
+with "repair."
+
+To upgrade a building, click on the
+"UPGRADE" button. If you can afford
+it, construction on your upgrade
+will begin.
+
+
+Salvage
+Click on "SALVAGE" to destroy a
+building. You will receive a small
+amount of money. You may also
+use "SALVAGE" to destroy captured
+enemy buildings, though it may be
+smarter to take ownership of them
+instead (see Change Owner.)
+
+
+Demolish
+You may not Salvage an enemy
+stronghold. To destroy it (and
+stop it from generating any
+more monsters!) choose the
+"DEMOLISH" option.
+
+
+Change Active Party
+When you click on a building, the
+active party is set to the owner of
+the building. If you want to change
+the party, click on "CHANGE PARTY". A
+list of possible parties will appear.
+Click on the one you want. You may
+only change to a party which has a
+unit on the block. In other words,
+you may only change parties to
+Anthony the Fighter if one of
+Anthony's fighters is on the screen.
+
+Change parties if you want a
+different party to undertake the
+construction, demolition, upgrade,
+or repair you are planning.
+
+
+Change Owner
+Transfers ownership of the build-
+ing from one leader to another.
+Sometimes a building would better
+serve a party member other than
+the owner. For example, an impov-
+erished leader may need the
+income a rich leader's mine
+generates. To switch ownership,
+first change parties to the owner-
+to-be, then click on "NEW OWNER". You
+may only change to a party which
+has a unit on the block.
+
+
+Done
+When you click on a building the
+game pauses while you decide what
+to do. Click on "DONE" to resume play.
+
+--Page 12--
+--Page 13--
+
+CONTROLLING THE GAME
+
+
+Pyramids
+Pyramids are located to the right
+of the screen, one for the Baron
+and one each for the other
+leaders. Use these to tell units
+what combination of the three
+main actions they should pursue
+on each block.
+
+Setting a pyramid changes the
+priorities of the units only in the
+block you are currently viewing. To
+change the priority settings
+somewhere else, go to that block
+and set the pyramid there.
+
+To change a pyramid, click on it. A
+large version of it will appear below
+the small window. Next click on
+the large pyramid, and drag the
+apex around. To increase the area
+of the pyramid for one of the
+actions, you must move the apex
+AWAY from the label. For example,
+to tell the people to build more,
+drag the apex UP the screen; the
+dark red area will get bigger.
+
+
+Recruit
+The yellow portion of the pyramid
+represents the amount of recruit-
+ing you want the units on the
+screen to do. The more yellow in
+the pyramid, the more recruiting
+the units will perform. Recruiting
+attracts new, first level units to the
+stronghold, and increases the size
+of existing units.
+
+
+Train
+The light red part inside the pyra-
+mid is for training. A high per-
+centage of light red means more
+training will occur, and existing
+units will increase in level more
+quickly. Higher level units are
+more powerful and better in com-
+bat: they have more hit points and
+better magic spells.
+
+
+Build
+If you want the people to finish
+buildings faster, increase the
+dark red or "build" portion of the
+pyramid. It is a good idea to use
+maximum "build" in the beginning
+of the game, so your people will
+complete their castles quickly and
+get off to a good start. Be sure to
+change the pyramid when con-
+struction is complete. A setting of
+100% building will do no recruiting
+or training.
+
+If a pyramid is set to a combina-
+tion which includes 0% building,
+construction of buildings will
+NEVER be completed.
+
+Once construction is underway,
+only the units on the screen will
+help to complete it. So, if a build-
+ing is being built for Anthony the
+Fighter, Seline the Mage will work
+on it if some of her mages are on
+the screen. To complete a build-
+ing fastest, for each leaders units
+represented on the screen, set
+the pyramid to maximum build.
+
+--Page 13--
+--Page 14--
+
+Setting Multiple Pyramids Simultaneously
+
+Occasionally, you will want to set
+several of a leader's pyramids to
+the same position at once. To do
+this, follow these steps:
+
+1. Make sure the overhead view is
+   in the large window.
+
+2. Click on the small leader
+   pyramid you want to set.
+
+3. Adjust the large pyramid to the
+   position that you want.
+
+4. Click on the small leader
+   pyramid again.
+
+5. Now enclose the units whose
+   pyramids you want to set. Click
+   on a point above and to the left
+   of the units. Move the mouse; it
+   will create a rectangle around the
+   units. When you have enclosed
+   the ones you want, click again.
+   All pyramids of the leader you
+   selected will be set to the same
+   position within the rectangle.
+
+
+Moving Units
+
+At the bottom of each pyramid is a
+horizontal "magnet" bar. Use this
+to attract additional units to a map
+block. Go to the block you want to
+attract units to. Select the pyramid
+for the leader's units you want to
+attract, then click on the magnet.
+The further toward the right end of
+the magnet you click, the more
+
+units you attract. The further left,
+the fewer. A message will tell you
+how many of this leader's units
+can be attracted and the number
+you are attracting. If no units are
+available, the message will read,
+"attracting 0 of a possible 0 units."
+
+To move a single, specific unit,
+ready the unit, then increase a
+magnet. The last unit readied is
+the first to be attracted.
+
+
+Main Menu Button
+
+In the bottom-left corner of the
+screen is a square button. Click
+here to return to the main menu.
+
+After you place your main castle
+and all Four keeps, it is a good
+idea to save your game, just in
+case things go poorly and you
+want to try again.
+
+
+Speeding up Time
+
+As time passes in STRONGHOLD,
+game events occur. Game events
+include city growth, unit move-
+ment and enemy movement. To
+accelerate the passage of time,
+press the space bar. A message
+will say, "Time passes    " You will
+see the white and brown dots
+move around more actively on the
+overhead map, and buildings will
+be completed sooner.
+
+--Page 14--
+--Page 15--
+
+You may not accelerate the pas-
+sage of time while watching
+combat; the battle will continue
+until someone wins. However, you
+may view a different location, then
+press the space bar. Time will
+pass, and the game will resolve
+the combat.
+
+
+Pausing the Game
+
+Above the pyramids is a button
+labeled "PAUSE". Click here to switch
+off normal stronghold develop-
+ment. This "turns off" the pas-
+sage of time; game events do
+not occur when the pause button
+is depressed. Buildings under
+construction will never be com-
+pleted; units will not move from
+block to block; enemies will stay
+put. Pyramid and magnet settings
+will not take effect until the game
+is resumed, but you may change
+them. You may also place,
+upgrade, repair, and demolish
+buildings. Click on the "RESUME"
+button when you are ready for
+activity to continue.
+
+You may not pause while watching
+combat. If you view a combat
+while paused, the game will
+automatically "resume" until the
+combat is finished or until you
+change locations.
+
+
+VIEWING UNITS
+
+The cursor becomes an eye when
+it is over people on the postcard
+view. Click on people to get infor-
+mation about their units, to hear
+them describe the living condi-
+tions in the neighborhood, to
+adjust their combat readiness,
+and to view their leader.
+
+Each person on the screen
+represents a unit of several
+individuals. Each of the members
+of the unit is the same class and
+level. The on-screen represen-
+tation of the unit changes as the
+unit goes up in level. For example,
+a unit of first-level mages wear
+grey robes, but the robes change
+to purple when the unit goes up
+a few levels.
+
+When you click on a person, a
+portrait appears, along with
+information about that unit. The
+portrait changes as the unit goes up
+in levels, showing the better armor,
+weapons, etc. the unit receives as it
+gains experience.
+
+The first line of information is the
+character class. Below that is
+something like, "Unit of 6', telling
+the number of individuals
+composing the unit. The next
+line tells you which party member is
+the leader of the unit: for example,
+it might say "Loyal to Anthony."
+
+--Page 15--
+--Page 16--
+
+When you click on the "LEADER"
+button (see below), the informa-
+tion you get will be about Anthony.
+
+Next is the level of the unit, and
+the experience points (EXP). The
+number on the !eft is the EXP
+accumulated so far; on the fight is
+the number needed to reach the
+next level. For example, 100/4,000
+means the characters have 100
+EXP and need to accumulate 4,000
+to go up to the next level.
+
+Hit points are next. On the left is
+the number remaining; on the
+right is the maximum. "5/12"
+means the unit has 5 hits
+remaining out of a possible 12.
+Each member of the unit has the
+same number of HP but only one
+at a time takes damage in combat.
+When that member is defeated,
+the number of members in the
+unit decreases by one, and the
+next member will receive the
+combat damage.
+
+Next is AC, or Armor Class. This
+indicates the quality of the armor
+the unit is wearing. The lower the
+number, the better. AC 10 is
+pitiful, AC 1 is excellent.
+
+The status of the unit's weapons is
+last. Each character class/race is
+armed with a different kind of
+weapon. It might read: "Sword."
+This means the members of the unit
+are using standard-issue swords.
+
+You might see "Damaged Sword."
+This means their weapons have
+worn down and are in need of
+repair. Build a metalwork shop to
+fix the damage. If you build a
+swordmaker's shop, +1 weapons
+will begin to appear throughout
+your city. A weapons forge creates
++2 weaponry.
+
+Next is a description of the living
+conditions in the neighborhood.
+Here you can find out how well
+things are going and what problems
+you need to address. In general,
+the people are concerned with
+having enough food, housing, and
+income to live.
+
+If more than one unit is on screen,
+a "NEXT" or "PREVIOUS" button will appear
+to the fight. Click on one of these
+to see another unit. Using these
+buttons, you may cycle through all
+the units (and, during combat, the
+monsters) in the postcard view.
+
+
+Ready-Home-Unassigned
+
+At the bottom of the portrait
+screen are three buttons: "READY",
+"HOME", and "UNASSIGNED". These refer
+to the combat status of the unit.
+
+Ready
+Ready means the unit is prepared
+for combat. Readied units will be
+the first attracted by magnets.
+
+--Page 16--
+--Page 17--
+
+Home
+Home sets the unit on 'sentry duty'
+on a block. The unit will not budge
+from that block for any reason
+as long as it is 'homed' here. As
+they explore the wilderness, units
+will move into new territory. When
+they arrive at unoccupied blocks,
+one unit will home itself auto-
+matically on each block. Homed
+units cannot be attracted away
+by magnets.
+
+Unassigned
+Unassigned units are "not ready"
+and "not home." These are surplus
+units, free to be called away with
+magnets. They are next in line for
+duty behind readied units.
+
+For example, you have four
+readied, five homed, and three
+unassigned fighter units. You
+wish to attack a block, so you
+increase the magnet there. The
+message reads, "Attracting 5 of
+a possible 7 fighter units." The
+four readied units and one of the
+unassigned units go to the block.
+The total available number of
+fighter units is seven, not twelve,
+because only readied and un-
+assigned units can be attracted.
+Homed units stay home.
+
+
+VIEWING THE LEADER
+
+One of the buttons on the portrait
+screen is "LEADER". Click here for
+information about the party
+member leader of this unit. You
+can also click on the leader's
+name on the main screen.
+
+Along the top of the screen is the
+name, alignment, and character
+class of the leader. Also the charact-
+er attributes: Strength, Intelligence,
+Wisdom, Dexterity, Constitution,
+and Charisma. These attributes are
+translated directly to the leader's
+units - the attributes of every unit
+under the leader will be the same as
+the attributes of the leader.
+
+The body of the screen contains
+population, housing, food, food
+storage, gold, income, fund, and
+popularity information:
+
+
+Population-Food-Housing
+
+Leaders are responsible for
+feeding and housing their people,
+and food and housing are the
+biggest concerns of the people.
+Their complaints or compliments
+on the portrait screen usually refer
+to these basic needs.
+
+To see if a leader is providing
+enough food, compare population
+to food production. If population
+is greater than food production,
+people are going hungry. Stored
+food can alleviate this problem for
+a while. Surplus food is placed
+
+--Page 17--
+--Page 18--
+
+into storage to be used when
+needed. People will not starve
+until all stored food is exhausted.
+
+"Food stored" is the amount of
+food in storage. One unit of stored
+food will feed one population unit
+for one turn. "Food storage" is
+the maximum amount of food the
+leader can store.
+
+Granaries not only store food,
+but also distribute the surplus
+to starving leaders.
+
+To check on housing, compare
+population to housing. If popula-
+tion exceeds housing, some
+people will have no place to live.
+If your people run short of hous-
+ing, city growth stops.
+
+In general, to maintain steady city
+growth, leaders must provide
+more food and housing than the
+people need. This will encourage
+them to have children and to
+recruit more people.
+
+To stay in touch with the needs of
+your people, compare population
+to food and to housing often for
+each leader. If you are aware of
+how each party member is doing
+you will be able to maintain
+constant growth and happiness
+for all of the people in the city.
+
+
+Gold & Income
+
+Some buildings produce income.
+After 10% of this income is put
+into the common Fund, the
+remainder is credited to the
+leader. GOLD is the amount of
+money accumulated so far.
+INCOME is the number of gold
+pieces produced each turn.
+
+Some buildings cost money to
+maintain. This cost is subtracted
+from the income each turn. If a
+leader's expenses exceed the
+revenues, income will be a
+negative number. A negative
+income will drain a leader's gold
+until it reaches O, then buildings
+which require money to maintain
+will start to degrade.
+
+
+Fund Access
+
+Refers to the amount of money
+a leader may draw out of the
+common fund at any one time.
+For each marketplace the
+leader owns, 10% of the fund is avail-
+able. COMMON FUND is the total
+amount of money in the fund.
+
+
+Popularity
+
+Popularity is determined by the
+morale of the people in the
+stronghold. A popular Baron is
+one who feeds and houses the
+population well, and one who
+makes sure there is enough
+money to go around.
+
+--Page 18--
+--Page 19--
+
+Near the center of the leader
+screen is a popularity chart.
+
+Remember: the chart refers to
+the Baron's popularity, not the
+popularity of the leader you
+are viewing.
+
+As a city grows, the Baron will be
+promoted if the popularity is high
+enough for the given city size
+shown. For example:
+
+
+                        POPULARITY         CITY BLOCK
+-------------------------------------------------------
+Current                    48%                 26
+To Promote                 55%                 50
+
+
+This means that to get promoted,
+the Baron must attain 55%
+popularity (currently it is 48%) and
+the city must reach a size of 50
+blocks (right now, it's 26).
+
+Increasing city size and popularity
+go hand in hand. The more food
+and housing the people have,
+the easier it will be for them to
+expand, and the more popular
+the Baron will be.
+
+
+Census
+
+Click on the "CENSUS" button to see
+a breakdown of this leader's popu-
+lation by experience level. For
+each level, characters are listed
+by the number of units and the
+total number of people in those
+units. Press the corresponding
+buttons to see the placement of
+the units on the overhead map.
+Click on the overhead map to
+move to a new location.
+
+
+Property
+
+Click on the "PROPERTY" button to
+get a count of all the buildings a
+leader's people have constructed.
+The buildings are listed by type and
+by number of upgrades. Numbers
+in parenthesis are buildings under
+construction. To see where each
+of a certain building is located,
+click on the appropriate button
+on the right. The overhead map will
+replace the building list, and the
+locations of the building you
+selected will be highlighted in red.
+Click on the overhead map to
+move to a new location.
+
+
+Baron
+
+One of the party members is the
+"leader of leaders., When the
+game begins, this is the Baron or
+Baroness. As time passes, he or
+she is the one who is promoted.
+Clicking on the "BARON" button when
+viewing a leader, or clicking on one
+of the Baron's people brings up a
+slightly different leader screen.
+
+--Page 19--
+--Page 20--
+
+The population, food, housing,
+gold, and popularity information
+works the same way it does for a
+lesser leader. All the numbers
+refer to the Baron's people, not to
+the entire city population.
+
+Remember that the "CENSUS" and
+"PROPERTY" buttons refer to the
+Baron's people and buildings, not
+to the entire population and city.
+
+
+Total Census
+
+Lists the experience levels of all
+the people of the city combined.
+You may click a button to the right
+to see the location of all the units
+of every type.
+
+
+All Property
+
+Displays a list of all the buildings
+of the city. Here, too, you may
+click on a button to the right
+to see the locations of all the
+buildings of this type.
+
+
+Next Leader
+
+Click on the "NEXT LEADER" button to
+view the information of another
+leader. Notice that the yellow
+rectangle on the overhead map in
+the upper-right corner moves from
+castle to castle as you go from
+leader to leader.
+
+
+COMBAT
+
+When dots on the overhead view
+flash red and white, combat is taking
+place. Combat occurs between your
+units and their enemies when they
+both occupy the same block of the
+map. Monsters do not fight each
+other. You may watch the combat
+take place in the postcard view, or
+ignore it and find out the results
+later as they are printed in the text
+area of the screen.
+
+To attack an enemy, go to it in the
+postcard view, then turn up the
+magnets. The readied units will be
+the first to attack, followed by the
+unassigned. To attack with a single,
+specific unit, ready the unit, then
+increase a magnet. The last unit
+readied is the first to be attracted.
+
+Combat continues in a block until
+one side is defeated. Units cannot
+be attracted away from combat
+with magnets.
+
+
+Combat Thermometer
+
+Near the bottom right corner of the
+large window is a narrow vertical
+bar. This is the "combat thermo-
+meter." It indicates how well the
+combat is going. White is for your
+forces; red is the enemy's color.
+If the white portion of the thermo-
+meter grows during the battle, your
+side is winning. If red starts to
+dominate, the enemy is defeating
+your forces. When not in combat,
+this thermometer is replaced by an
+hourglass indicating how far along
+you are in the current season.
+
+--Page 20--
+--Page 21--
+
+Spellcasting
+
+The mages, elves, and clerics control
+their own spellcasting. You may not
+tell them which spells to memorize
+or to cast. During combat, they will
+attempt to use the best spells they
+can, so higher level spellcasters will
+be more powerful. Elves are smart --
+they'll either cast spells or use their
+bows depending on which will be
+the most effective in the situation.
+
+
+Spells
+
+Below are lists of spells your
+mages and clerics learn at each
+experience level. Note that low-
+level spells, such as magic missile,
+grow more powerful as the unit
+goes up in level. Elves cast from
+the mage spell list, but learn the
+spells at a slower rate.
+
+
+Mage Spells
+-------------------------------------------------------
+Level 1:     charm person, magic missile, sleep
+Level 2:     web
+Level 3:     fireball, hold person, lightning bolt
+Level 4:     charm monsters
+Level 6:     death spell, disintegrate, flesh to stone
+Level 8:     mass charm
+
+
+Cleric Spells
+-------------------------------------------------------
+Level 1:     cure light wounds
+Level 2:     hold person
+Level 3:     cure disease
+Level 4:     cure serious wounds
+Level 5:     cure critical wounds, finger of death
+Level 6:     cure all
+
+--Page 21--
+--Page 22--
+
+OPPONENTS
+
+Opponents in STRONGHOLD are ranked by intelligence. The higher intelli-
+gence the opponent, the more aggressive it is. High intelligence oppo-
+nents are the most likely to launch campaigns against your stronghold.
+
+Humanoid opponents (kobolds, hobgoblins, evil mages, etc.) build strong-
+holds of their own. When you attack their castles, you may also claim
+ownership of their buildings to reap the benefits without the building cost.
+
+A list of all possible opponents you may encounter in STRONGHOLD follows.
+
+
+BLAST SPORE
+
+Low intelligence.
+A blast spore is an aggressive fungus that shoots
+spores at enemies, sometimes causing Blast Spore
+Disease. A diseased unit must find its way to a level
+six (or higher) cleric or any block with a temple to
+be cured. If the unit is not cured, it will die and new
+blast spores appear. Blast spores explode when
+killed, damaging all nearby creatures.
+
+
+BLUE DRAGON
+
+High intelligence.
+Blue dragons are very dangerous, intelligent,
+huge-winged lizards. Blue dragons have
+lightning breath. 0nly very high-level units
+should attempt attacking a blue dragon lair.
+
+
+CARRION CRAWLER
+
+Low intelligence.
+The carrion crawler is a 9' long worm capable of
+inflicting paralysis with its touch. The paralysis
+wears off after a few turns.
+
+
+COCKATRICE
+
+Low intelligence.
+The cockatrice is a monster with the tail of a
+snake and the head and wings of a rooster. Its
+touch turns characters into stone. A stoned
+character separates from the rest of its unit and is
+frozen in place forever.
+
+
+DIRE WOLF
+
+Low intelligence.
+Dire wolves are larger and more ferocious than
+normal wolves, and hunt in large packs.
+
+
+EVIL CLERIC, THIEF, FIGHTER, MAGE
+
+High intelligence.
+Evil clerics, thieves, fighters, and mages are
+hostile groups of humans out to claim land as their own.
+
+
+FIRE GIANT
+
+High intelligence.
+Fire giants are huge human0ids with red skin.
+They are immune to all forms of fire.
+
+
+GIANT ANT
+
+Low intelligence.
+Giant black ants are extremely protective of
+their territory.
+
+
+GIANT BAT
+
+Low intelligence.
+Giant bats are large, flying mammals. They
+generally only attack if attacked first.
+
+--Page 22--
+--Page 23--
+
+GIANT SCORPION
+
+Low intelligence.
+The giant scorpion looks like a regular scorpion
+but it is the size of a full-grown man. It is capable
+of inflicting a deadly poison, and only very
+fortunate characters escape instant death when
+poisoned by a giant scorpion.
+
+
+GIANT TOAD
+
+Low intelligence.
+Giant toads are capable of pulling halflings,
+elves and dwarves into their mouths with
+their tongues.
+
+
+GOBLIN
+
+High intelligence.
+Goblins are small, ugly humanoids.
+
+
+GRIFFON
+
+Low intelligence.
+The grifion is a monster with the body and
+hindquarters of a lion; and the head, wings,
+and front claws of an eagle. It is a dangerous
+flying monster.
+
+
+HOBGOBLIN
+
+High intelligence.
+Hobgoblins are larger, tougher relatives of
+goblins. They attack with long spears.
+
+
+HARPY
+
+Medium Intelligence.
+Harpies have the lower body of an eagle and the
+upper body of a wild woman. Their enchanted
+songs can charm a character during combat.
+Charmed characters turn against their fellows,
+fighting on the side of the monsters until the spell
+wears off or they are damaged.
+
+
+KOBOLD
+
+High intelligence.
+Kobolds are small, dog-like humanoids.
+
+
+LESSER PHOENIX
+
+Medium intelligence.
+The lesser phoenix is a magical creature that
+appears as a large, red eagle surrounded by
+flames. It can only be hit with +2 weapons.
+They are immune to "charm", "hold", and all
+fire-based spells.
+
+
+MANSCORPION
+
+Medium intelligence.
+As the name states, this creature is a combination
+of man and (giant) scorpion. It uses a longbow for
+ranged combat. Like the giant scorpion, the
+manscorpion is capable of inflicting a deadly
+poison. 0nly very fortunate characters escape
+instant death when poisoned.
+
+
+MEDUSA
+
+High intelligence.
+Medusae look like human females but have
+green snakes instead of hair. The gaze of a
+medusa can turn characters into stone. A stoned
+character separates from the rest of its unit and is
+frozen in place forever.
+
+
+MINDARK
+
+Very high intelligence.
+Your nemesis, an evil mage named Mindark, is
+obsessed with your destruction. Mindark only
+appears in Hostile or Agressive worlds.
+
+--Page 23--
+--Page 24--
+
+MINOTAUR
+
+Medium intelligence.
+A minotaur is a large, humanold creature with the
+head of a bull. It is extremely tough, and does
+extra damage with every hit.
+
+
+OBSIDIAN STATUE
+
+Medium intelligence.
+This creature is an enchanted animated statue
+made of obsidian. It is immune to non-magical
+weapons and "sleep", "charm" and "hold" spells.
+
+
+ORC
+
+Medium intelligence.
+0rcs are humanoids that look like a combination
+of animal and man.
+
+
+PURPLE WORM
+
+Low intelligence.
+Purple worms are huge, slimy worms that live
+beneath the ground. They only surface to attack.
+Combat with purple worms is extremely
+dangerous because you never know where
+they will attack from next.
+
+
+RED DRAGON
+
+High intelligence.
+The red dragon is a very dangerous, intelligent,
+huge-winged lizard. Red dragons have flame
+breath. Only very high-level units should attempt
+attacking a red dragon lair.
+
+
+SKELETON
+
+Low intelligence.
+Skeletons are animated undead humans. They
+are immune to "sleep", "charm" and "hold" spells.
+
+
+STONE GIANT
+
+High intelligence.
+Stone giants are huge humaneiris with rock-like
+skin. They throw boulders as missile weapons,
+and use stalactites as clubs.
+
+
+TROLL
+
+Medium intelligence.
+Trolls are tall, carnivorous humanoids. They
+have the power of regeneration, meaning they
+can heal themselves even as combat progresses.
+
+
+VAMPIRE
+
+High intelligence.
+Vampires are powedul undead creatures immune to
+non-magical weapons, and "sleep", "charm" and "hold"
+spells. They have the power of regeneration, so
+they too can heal themselves in small amounts as
+combat progresses. Their attack can drain two
+levels from their victim, and they can also cast
+"charm" spells.
+
+
+WIGHT
+
+Medium intelligence.
+Wights are undead spirits immune to non-magical
+weapons and "sleep", "charm", and "hold" spells. Their
+attack can drain one level from their victim.
+
+
+WOOD GOLEM
+
+Low intelligence.
+Wood golems are wooden constructs animated
+by magic. They are immune to all missiles,
+"magic missiles", non-magical weapons, and
+"sleep", "charm", and "hold" spells. They are
+especially vulnerable to "fireballs".
+
+--Page 24--
+--Page 25--
+
+GAME PLAYING HINTS
+
+Placement is everything. Take the time to find a strategic location for
+your stronghold. Keep an eye on the terrain. Mountains and hills are
+good for mining and towers, but are bad for farming. Green is best for
+farming, and placing farms adjacent to water doubles their output.
+When the game begins, do not worry about enemies massing before you
+place your main castle. Enemies do not start their own construction and
+expansion until after you place the castle. After that point, quickly find
+good locations for your keeps. Remember, enemies are expanding now.
+
+Create a balanced party. The most powerful strongholds have fighters
+for combat, mages for attacking hard-to-hit monsters, clerics for healing,
+and thieves for spying. They might also include some of each of the
+various races -- elves who reap extra benefits from trees and attack as
+archers and spell casters; dwarves who are better at locating minerals
+and attack as fighters; and halflings who farm better and see farther
+than humans.
+
+Make good use of pyramids. When building something, set build to
+maximum. They will finish much sooner. When the block is filled, or when
+construction has finished, reset the pyramids to recruit or train, or a
+combination of both. Remember: a pyramid set on 0% building results in
+no constrtiction in that area. The same applies to training and recruiting.
+
+Pay attention to trees. Units in new blocks will not claim or chop
+down trees automatically. You must decide what to do with them.
+Claiming a few trees generates immediate income and food at no
+
+--Page 25--
+--Page 26--
+
+expense. Chopping trees down will clear new land for development.
+Either way, don't just leave them there. Unclaimed trees take up space
+your people could use more profitably.
+
+Mine every rock you can. Mines are a good way to generate income,
+and you can start one at no cost. Keep an eye on them; mines eventually
+run dry. When this happens, replace them with other buildings.
+
+Fill in swamps. They do not benefit your stronghold in any way, and
+they take up valuable land and take some time to remove. Fill swamps
+in as soon as possible, and use the land for buildings.
+
+Keep an eye on expanding units. As your stronghold grows, units will
+push out into unexplored territory. They will immediately start housing
+construction. When this happens, check their leaders. Maybe they have
+enough housing already. If that is true, get them started on farms or
+other buildings they might need.
+
+Watch out for stagnating party members. For units to recruit new
+members, they must have surplus housing and food. Populations will
+not grow if there is nothing to feed new people or nowhere for addi-
+tional people to live. Units will build housing themselves, but you must
+tell them to start farms.
+
+Build markets. Marketplaces not only increase the production of your
+farms, but also allow your leaders access to the common fund. The
+more markets you build the better your economy will run. You may
+build a maximum of ten markets.
+
+Plan for winter. Farm production of food and gold drops to 25% of
+normal during the winter months. People will starve if they run out of
+food, so be sure that their houses, keeps, and granaries can store
+enough to get them through the winter. The granaries should fill during
+autumn, when the harvest comes in, and farm production goes up
+to 125% of normal.
+
+Upgrade buildings. Upgraded buildings bring great benefits. Larger
+houses and keeps hold more people, store more food. Upgraded farms
+produce more food per unit area; bigger granaries will help the people
+get through winter.
+
+Build beneficial buildings. The various training halls help your units
+become more powerful. Weapons forges repair damaged swords and
+create magic weapons. Inns house many people and bring income to the
+stronghold. Walls keep enemies out; bridges let units cross water to attack.
+Refer to the building card for descriptions of all the beneficial buildings.
+
+--Page 26--
+--Page 27--
+
+Plan for wide buildings. Some buildings require two squares. If you
+intend to construct a wide building (such as an inn or a social hall), be
+sure to leave enough space for the building.
+
+Build towers. Thieves see fifteen blocks out into the wilderness, but
+towers have a viewing range of at least twenty. Build towers on hills or
+mountains to increase this range. When your people can see an enemy
+stronghold, it appears as a small red square on the map.
+
+Unattended buildings will degrade. To keep buildings in top condi-
+tion at least one unit must be on the screen with the buildings at all
+times. Buildings also degrade if combat occurs on the screen. If a
+building is in less than perfect condition when you click on it, "repair"
+will replace "upgrade" in the menu to the right. Repair a building to
+restore its condition to 8.
+
+Leaders own buildings, units do not. A leader reaps the benefits
+from a building, and also must pay the maintenance cost. But the leader
+does not have to have one of his own units on the screen to keep a
+building in top condition; any units can do that - as long as the owner-
+leader has the money. So a building may degrade, even though units are
+on the screen if the owner of the building runs out of money.
+
+Attack with armies. Battles are won by overwhelming your enemies.
+Superior numbers can overcome more powerful monsters. When you go on
+the offensive, attract a big party of units to a block, and when they have all
+arrived and have defeated all nearby enemies, move on. Try to avoid
+sending an army on a long, non-stop trip. If the destination is far away, units
+may adventure away from the pack, thereby thinning your fighting force.
+
+Defend bridges. If you build a bridge to cross water, be sure to station a
+unit there for maintenance, and a few more for defense of the structure.
+
+Watch your income. It is easy to get caught up in building and expanding,
+then suddenly find out you are out of money, and your buildings are
+deteriorating. Build enough farms to generate a steady income. Have elves
+claim and upgrade trees. They are as good as farms, but cost nothing to
+build. Keep an eye on mines; they run dry over time, and the income they
+generate dries up as well. Build inns when you can. Don't build large,
+expensive-to-maintain buildings too quickly. It is possible to have a
+negative income; the maintenance cost of buildings might exceed the
+leader's income. If this happens, destroy or change ownership of some of
+the expensive buildings, change ownership of income-producing buildings
+(such as mines) to the leader who needs the money, or claim trees and
+mine rocks. Trees and rocks are free, and generate money quickly.
+
+--Page 27--
+--Credits--
+
+CREDITS
+
+STRONGHOLD Developed by Stormfront Studios, Inc.
+
+
+Stormfront Studios, Inc.
+
+
+                Game Design     Mark Buchignani, David Bunnett
+                                Don Duglow, Chris Green
+                                Cathryn Mataga
+
+                Programming     Cathryn Mataga
+
+        Character Animation     Crispy Green
+
+                   Graphics     Kenn Berry. Delphine Louie,
+                                David Bunnett, Kim Moriki,
+                                Marina Goldberg, AI Roughton,
+                                Chris Green, Arturo Sinclair,
+                                John Keester. William M. Sullivan
+                                David Clemons
+
+           Opening Sequence     Arturo Sinclair. David Clemons
+
+           Project Director     Don Duglow
+
+               Art Director     David Bunnett
+
+         Technical Director     Mark Buchignani
+
+           Original Music &
+              Sound Effects     Steven Scherer
+
+         Resource Archivist     Sean Carson
+
+     Additional Game Design     Mark Manyen, Hudson Piehl
+
+
+Strategic Simulations, Inc.
+
+
+          Rule Book Writers     Stormfront Studios: Mark Buchignani,
+                                SSI: Rhonda Van
+
+          Rule Book Editors     Eileen Matsumi, Andre Vrignaud,
+                                Al Brown
+
+                   Producer     Bret Berry
+
+         Associate Producer     Rhonda Van
+
+                    Testers     Brian Lowe, Matt Vella,
+                                Tommy Petrovic, Tom MacDevitt,
+                                Jeff Shotwell
+
+               Test Support     Kym Goyer
+
+     Graphic Design and DTP     LOUIS SAEKOW DESIGN:
+                                David Boudreau, Leedara Sears
+
+                   Printing     A&a Printers and Lithographers
+
+              Real Printing    Paul A. Weier, perl stud
+                               John Barton, the Eye-Candy Man
+
+--Credits--
+--Warranty--
+
+STRATEGIC SIMULATIONS, INC. LIMITED WARRANTY
+Strategic Simulations, Inc. ("SSI") warrants that the diskette(s) on which the
+enclosed program is recorded will be free from defects in materials and
+workmanship for a period of 30 days from the date of purchase. If within 30
+days of purchase the diskette(s) prove defective in any way, you may return
+the diskette(s) to Strategic Simulations, Inc., 675 Almanor Avenue, Suite 201,
+Sunnyvale, CA 94086-2901 and SSI will replace the diskette(s) free of charge.
+In addition, if the diskette(s) prove defective at any time after the first 30
+days, return the diskette(s) to SSI and SSI will replace the diskette(s) for a
+charge of $10.00 (each disk) plus $4.00 for shipping and handling. California
+residents, add applicable sales tax.
+
+SSI MAKES NO WARRANTIES, EITHER EXPRESS OR IMPLIED, WITH RESPECT
+TO THE SOFTWARE PROGRAM RECORDED ON THE DISKETTE OR THE GAME
+DESCRIBED IN THIS RULE BOOK, THEIR QUALITY, PERFORMANCE,
+MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE. THE
+PROGRAM AND GAME ARE SOLD "AS IS." THE ENTIRE RISK AS TO THEIR
+QUALITY AND PERFORMANCE IS WITH THE BUYER. IN NO EVENT WILL SSI
+BE LIABLE FOR DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES RESULTING FROM ANY DEFECT IN THE PROGRAM OR GAME EVEN
+IF SSI HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. (SOME
+STATES DO NOT ALLOW THE EXCLUSION OR LIMITATION OF IMPLIED
+WARRANTIES OR LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL
+DAMAGES, SO THE ABOVE LIMITATION OR EXCLUSION MAY NOT APPLY TO YOU.)
+
+The enclosed software program and this rule book are copyrighted. All rights
+are reserved. This rule book may not be copied, photographed, reproduced, or
+translated or reduced to any electrical medium or machine-readable form, in
+whole or in part, without prior written consent from SSI. The program
+accompanying this rule book may be copied, by the original purchaser only, as
+necessary for use on the computer for which it was purchased. Any persons
+reproducing any portion of this book for any reason, in any media, shall be
+guilty of copyright violation and subject to the appropriate civil or criminal
+action at the discretion of the copyright holder(s).
+
+ADVANCED DUNGEONS & DRAGONS, AD&D and the TSR logo are trademarks owned by and
+used under license from TSR, Inc., Lake Geneva WI, USA. All TSR characters,
+character names, and the distinctive likenesses thereof are trademarks owned
+by and used under license from TSR, Inc.
+
+Copyright 1993 TSR, Inc. Copyright 1993 Strategic Simulations, Inc. All Rights
+Reserved.
+
+
+WHAT TO DO IF YOU HAVE A DEFECTIVE DISK
+Each of our games undergoes extensive playtesting prior to its release.
+Through this process we hope to uncover and correct any errors in programming.
+However, due to the complex nature of our simulations, some program errors may
+go undetected until after publication. In addition to errors in the program,
+there are occasionally problems with the disk itself. We experience the
+industry standard of approximately a 3 to 5% failure rate of duplicated disks.
+Before assuming that a disk is defective, make sure to check your disk drive.
+Up to 95% of the disks returned to us as defective will run fine on our
+computer systems. Often the problem is with a disk drive that needs servicing
+for alignment, speed, or cleaning.
+
+Should you have a defective disk, please return the disk only (keep all other
+parts of the game) to our Customer Support Department, along with a note
+describing the problem you have encountered. A replacement disk will be
+provided upon our receipt of the defective disk.
+
+Should you uncover an error in the program, return both your game disk and any
+"save game" disks to our Customer Support Department. Please enclose a
+description of what was taking place in the game when the error occurred. Upon
+correction of the program error, we will return an updated disk to you.
+
+--Warranty--
+
+
+
+
+
+
+

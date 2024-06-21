@@ -1,0 +1,205 @@
+Segmented Addressing:
+____________________________________
+
+
+The seg:reg pair could be converted to a linear address by:
+  linear = ((seg<<4) + off) & 0xFFFFF
+
+By default the memory addressing is done mod 0x100000 (& 0xFFFFF).
+That limits the memory amount to 1Mb.
+
+DOS location in memory on the program startup:
+____________________________________
+
+DOS versions before 5.0 (when DOS in UMB or HMA was introduced), DOS used to live in the lower memory area, directly after the interrupt vector table and BIOS data area (typically at 0:0600h) with a sequence of (I'm using the original IBM file names, they obviously vary greatly between vendors)
+* DOS interface to ROM-BIOS (IBMBIO.COM)
+* Main portion of DOS (IBMDOS.COM)
+* Resident portion of the command processor (COMMAND.COM)
+
+The transient portion of COMMAND.COM is normally located in the upper end of the memory map and may be overwritten when a program is loaded and restored afterwards.
+
+Later, (5 and onwards) parts of DOS, command processor, and drivers could be moved to the UMB or HMA area, with smaller parts remaining in lower memory.
+
+When executing a .COM (or .EXE or any other program, for that matter) program, DOS allocates code and data segments somewhere in free memory and loads CS/DS with that segment addresses. .COM programs thus start in fact at CS:0100h (with CS being an arbitrary value determined by DOS depending on the memory usage), so, approximately at flat addresses beyond 64k, depending on the DOS version and loaded drivers.
+
+Memory map just before the OS starts:
+
+Unusable in real mode:
+0x00000000:0x000003FF    1K          Real Mode IVT (Interrupt Vector Table)
+0x00000400:0x000004FF    256B        BDA (BIOS data area)
+
+Usable memory:
+0x00000500:0x00007BFF    29.75K      Conventional memory
+0x00007C00:0x00007DFF    512B        Your OS BootSector
+0x00007E00:0x0007FFFF    480.5K      Conventional memory
+0x00080000:0x0009FFFF    128K        Partially used by the EBDA (Extended BDA)
+
+Upper Memory Blocks:
+0x000A0000:0x000BFFFF    128K        Video display memory (hardware mapped)
+
+ROM and hardware mapped / Shadow RAM:
+0x000C0000:0x000C7FFF    32 K        Video BIOS
+0x000C8000:0x000EFFFF    160 K       BIOS Expansions (can be reclaimed)
+0x000F0000:0x000FFFFF    64 K        Motherboard BIOS 
+
+Command `MEM /C` will show the modules loaded into conventional memory
+The command `MEM /D` will shoudl the detailed map of the conventional memory
+
+
+
+Classic x86 boot sequence
+____________________________________
+
+A bootloader runs under certain conditions that the programmer must appreciate in order to make a successful bootloader. The following pertains to bootloaders initiated by the PC BIOS:
+
+1. The first sector of a drive contains its boot loader.
+2. One sector is 512 bytes — the last two bytes of which must be 0xAA55 (i.e. 0x55 followed by 0xAA), or else the BIOS will treat the drive as unbootable.
+3. If everything is in order, said first sector will be placed at RAM address 0000:7C00, and the BIOS's role is over as it transfers control to 0000:7C00 (that is, it JMPs to that address).
+4. The DL register will contain the drive number that is being booted from, useful if you want to read more data from elsewhere on the drive.
+4. The BIOS leaves behind a lot of code, both to handle hardware interrupts (such as a keypress) and to provide services to the bootloader and OS (such as keyboard input, disk read, and writing to the screen). You must understand the purpose of the Interrupt Vector Table (IVT), and be careful not to interfere with the parts of the BIOS that you depend on. Most operating systems replace the BIOS code with their own code, but the boot loader can't use anything but its own code and what the BIOS provides. Useful BIOS services include int 10h (for displaying text/graphics), int 13h (disk functions) and int 16h (keyboard input).
+5. This means that any code or data that the boot loader needs must either be included in the first sector (be careful not to accidentally execute data) or manually loaded from another sector of the disk to somewhere in RAM. Because the OS is not running yet, most of the RAM will be unused. However, you must take care not to interfere with the RAM that is required by the BIOS interrupt handlers and services mentioned above.
+6. The OS code itself (or the next bootloader) will need to be loaded into RAM as well.
+7. The BIOS places the stack pointer 512 bytes beyond the end of the boot sector, meaning that the stack cannot exceed 512 bytes. It may be necessary to move the stack to a larger area.
+8. There are some conventions that need to be respected if the disk is to be readable under mainstream operating systems. For instance you may wish to include a BIOS Parameter Block on a floppy disk to render the disk readable under most PC operating systems.
+
+
+MX executables:
+____________________________________
+
+https://wiki.osdev.org/MZ
+
+The MZ file contains relocation information, which allows segments to be loaded at arbitrary memory addresses, and it supports executables larger than 64k.
+
+EXE files normally have separate segments for the code, data, and stack.
+Program execution begins at address 0 of the code segment,
+as opposed to 0x100 in COM files.
+
+The SP register is set to whatever value is contained in the header information (thus if the header specifies a 512 byte stack, the stack pointer is set to 200h). It is possible to not use a separate stack segment and simply use the code segment for the stack if desired. 
+
+When a DOS program starts:
+* CS: Points to the start of the code segment of the loaded program.
+* DS: Initially points to the PSP segment.
+      The PSP is usually loaded at offset 0x0000 of the segment
+      that follows the MCB (Memory Control Block).
+* ES: Set to the same value as DS, hence it initially points to the PSP.
+* SS: Set to the PSP segment
+* SP: Set to 0xFFFE, giving the program a stack starting at PSP:0xFFFE.
+
+The MZ header itself
+typedef struct _IMAGE_DOS_HEADER {  // DOS .EXE header
+    USHORT e_magic;         // Magic number
+    USHORT e_cblp;          // Bytes on last page of file
+    USHORT e_cp;            // Pages in file
+    USHORT e_crlc;          // Relocations
+    USHORT e_cparhdr;       // Size of header in paragraphs
+    USHORT e_minalloc;      // Minimum extra paragraphs needed
+    USHORT e_maxalloc;      // Maximum extra paragraphs needed
+    USHORT e_ss;            // Initial (relative) SS value
+    USHORT e_sp;            // Initial SP value
+    USHORT e_csum;          // Checksum
+                            // When added to the sum of all other words in
+                            // the file, the result should be zero. 
+    USHORT e_ip;            // Initial IP value
+    USHORT e_cs;            // Initial (relative) CS value
+    USHORT e_lfarlc;        // File address of relocation table
+    USHORT e_ovno;          // Overlay number
+
+    // The following are PE fields from WinNT.h 
+    USHORT e_res[4];        // Reserved words
+    USHORT e_oemid;         // OEM identifier (for e_oeminfo)
+    USHORT e_oeminfo;       // OEM information; e_oemid specific
+    USHORT e_res2[10];      // Reserved words
+    LONG   e_lfanew;        // File address of new exe header
+  } IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
+
+A paragraph is 16 bytes in size. A page (or block) is 512 bytes long.
+
+If both the e_maxalloc is 0, MS-DOS will attempt to load the executable
+as high as possible in memory. Otherwise, the image will be loaded just
+above the 256-byte PSP structure, in low memory.
+The initial DS value points to the start of that PSP.
+
+After loading the executable into memory, the program loader goes through every entry in relocation table. For each relocation entry, the loader adds the start segment address into word value pointed to by the segment:offset pair. So, for example, a relocation entry 0001:001A will make the loader add start segment address to the value at offset 1*0x10+0x1A=0x2A within the program data.
+
+Each pointer in the relocation table looks as such: 
+typedef struct {
+  uint16_t ofs;  // Offset of the relocation within provided segment.
+  uint16_t seg;  // Segment of the relocation, relative to the load segment address.
+} fat_t;
+
+These are relative to the start of MZ Header.
+
+Initial Program State:
+* ES and DS registers both point to the segment containing the PSP structure.
+* CS equals value specified in the header, relocated by adding the start segment address to it.
+* IP equals value specified in the header. Note, that unlike in COM executables, MZ programs don't start at offset 0x100.
+* SS equals value specified in the header, relocated, just like CS.
+* SP equals value specified in the header.
+* AL is 0x00 if the first FCB in the PSP has a valid drive identifier, 0xFF otherwise.
+* AH is the same as AL, but for the second FCB in the PSP.
+* All other registers may, or may not be set to 0. You should consider them undefined. 
+
+OMF format
+____________________________________
+
+Original Intel object format, before x86 world adopted the Unix COFF
+
+https://www.metagraphics.com/metawindow/faq/mwfaq030.htm
+
+
+PSP: Program Segment Prefix
+____________________________________
+
+https://en.wikipedia.org/wiki/Program_Segment_Prefix
+
+PSP is s 256 byte structure preceeding the executable code of the COM file.
+That is why all assembler COM programs had
+  ORG 100h
+at the beginning.
+
+
+Among everything else, PSP contained
+* command line arguments
+* environment variables, set by the parent process (say COMMAND.COM)
+
+
+typedef struct {
+    word    cpm_call0;           /*00 CP/M-80-like termination (int 20h)    */
+    segment himem;               /*02 memory above the relocated EXE        */
+    byte    reserved1;           /*04 reserved                              */
+    byte    cpm_call5[5];        /*05 far call to DOS function dispatcher   */
+    void    (far *termhndlr)();  /*0A parent's terminate handler            */
+    void    (far *breakhndlr)(); /*0E parent's crtl/break handler           */
+    void    (far *crithndlr)();  /*12 parent's critical error handler       */
+    segment parentpsp;           /*16 parent's PSP                          */
+    byte    handles[20];         /*18 Job File Table (FF=available)         */
+    segment environment;         /*2C segment with environment vars         */
+    byte    reserved2[4];        /*2E SS:SP on entry to last INT 21h call   */
+    word    nhandles;            /*32 Job File Table                        */
+    dword   phandles;            /*34 Job File Table address                */
+    byte    previous_psp[4];     /*38 Pointer to previous PSP (use by SHARE)*/
+    word    int21;               /*3C int 21h DOS call                      */
+    byte    farret;              /*3E retf                                  */
+    byte    reserved4;           /*3F reserved                              */
+    word    dosver;              /*40 DOS version to return                 */
+    byte    reserved5[14];       /*42 reserved                              */
+    byte    unixret[3];          /*50 Unix-like far call entry into DOS     */
+    byte    reserved6[2];        /*53 reserved                              */
+    byte    efcb1[2];            /*55 used to extend fcb1                   */
+    byte    fcb1[16];            /*5C 1st CP/M-style FCB                    */
+    byte    fcb2[16];            /*6C 2nd CP/M-style FCB                    */
+    byte    extra[4];            /*7C overflow from FCBs                    */
+    byte    cmdlen;              /*80 length of command line parameters     */
+    byte    cmdline[127];        /*81 command line parameters               */
+} dos_psp_t;
+
+The segment address of the PSP is passed in the DS register when the program is executed. It can also be determined later by using Int 21h function 51h or Int 21h function 62h. Either function will return the PSP address in register BX.
+
+The PSP segment address is generally the segment address at which the program is loaded plus 0x10 (16 bytes) to skip the PSP. The initial setup ensures that both DS and ES point to the PSP, allowing the program to access command-line parameters and other PSP data easily.
+
+
+DTA: Disk Transfer Area
+____________________________________
+The area many DOS API calls use to interchange data with user's program.
+DOS supplies a default DTA of 128 bytes at offset 80h in the Program Segment Prefix (PSP).
+

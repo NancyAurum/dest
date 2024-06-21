@@ -1,0 +1,229 @@
+IBM and Compatibles CD-ROM Version Data Card
+
+FANTASY FEST!
+
+Dungeons&Dragons STRONGHOLD
+
+READ ME FIRST!
+
+Hi!  We know you're anxious to begin, but before you do, please be sure that
+you have the following minimum system requirements:
+
+STRONGHOLD
+
+2 megabytes of RAM
+MS-DOS 5.0 or 6.0
+VGA graphics and a color monitor
+A hard drive with 6 MB free
+A 100% Microsoft Compatible Mouse
+
+The minimum amount of RAM required to play each game fully featured is:
+
+Stronghold
+585,000 BYTES OF FREE BASE RAM
+1,000,000 BYTES OF FREE EMS/XMS
+
+Note: hard drive size and total system memory available have no
+bearing on free RAM.  Follow the directions below to determine if you
+have enough available memory to run the game.
+
+To Check Your Free Base RAM
+Type MEM from within the DOS directory.  The free base RAM is listed as
+"LARGEST EXECUTABLE PROGRAM SIZE."  Compare the listed amount of free memory
+required by the game.  Also listed is "FREE EXTENDED MEMORY" (or free XMS).
+If your amount is lower than the game requires, follow the instructions
+for making a "boot disk" given under the "Memory" seciton of this data
+card, or free up additional memory (see the Memory Management section
+of your DOS manual) before continuing.
+
+Your Game Box Should Contain: one CD-ROM disk, four rule books, two data cards,
+and one building card.
+
+INSTALLING THE GAMES
+The games cannot be played from the CD, and must be installed to your hard
+drive before you can begin play.
+
+     1.  To install the game place the CD in your drive.  Be sure this drive is
+     the active drive.  For example, to make drive D the active drive, type
+     D: and then press Enter.
+     
+     2.  Type INSTALL and press Enter.
+     
+     3.  Follow all on-screen prompts.
+     
+     CONFIGURING THE SOUND FOR STRONGHOLD
+     
+     The first time you type STRONG to start the game, the game prompts you
+     for your sound card settings.  Valid selections are: Roland, Soundblaster
+     Pro I, II, Soundblaster Regular, Adlib, Pro Audio Spectrum, PC Speaker,
+     and Off.  If you wish to reconfigure the sound setup after installation,
+     you may do so anytime you start the game again.
+     
+     If you experience problems during installation, please refer to the
+     "Troubleshooting" section.  Additional information regarding memory,
+     sound, video, and mouse setup can be found there.
+     
+STARTING THE GAMES
+     1.  Boot your system normally with MS-DOS 5.0 or greater.
+     2.  Be sure that the hard disk containing the game is the active drive.
+     3.  Change the current directory to the game's directory.  For example, to
+     change to the default directory for Stronghold type CD\STRONG and press
+     Enter.
+     4.  Type STRONG and press Enter to start Stronghold.
+     
+For complete and specific "how to play" information, please refer to the
+manual.  Any notes regarding changes to the game made after the rule book was
+printed, or any rules errata can be found in the errata sections that follow.
+
+COPY PROTECTION
+     Fro Stronghold you must count section headings when you cound words.
+     
+GAME NOTES AND RULE BOOK ERRATA FOR STRONGHOLD
+
+MOUSE CONTROL
+Left-click the mouse to perfrom actions.  Right-click to automatically exit
+out of any menu or indicate you are DONE with a menu.
+
+GAME NOTES AND RULE BOOK ERRATA FOR STRONGHOLD (continued)
+KEYBOARD CONTROL
+     Note these are shortcut keys only.  A mouse is requried to play STRONGHOLD
+     G          Show compass
+     O          Create a leader (before all 5 are created), or view a leader
+                when on screen with his keep
+     V          Toggle view between postcard and overhead
+     B or L     Set pyramid to 100% build
+     T          Set pyramid to 100% train
+     R          Set pyramid to 100% recruit
+     C          Center pyramid
+     < or -     Decrease magnet by one
+     > or +     Increase magnet by one
+     Enter			Cycles through available pyramids
+     Tab        Selects a pyramid
+     ESC or F1  View options screen
+     F5 - F8    Selects first, second, third, or fourth visible building
+     1 - 5      Selects one of the five leaders listed on right side of screen
+     Arrow Keys Mouve around map
+     P          Pause on/off
+     Control-S  Sound effects on/off
+     Control-M  Music on/off
+     
+WHILE VIEWING A UNIT
+     H          Homes the unit
+     R          Readies the unit
+     U          Unassigns the unit
+     
+STARTING VALUES
+     The Peaceful, Agressive, and Hostile worlds have different starting values
+     for initial gold, gold storage, and auto-build status.  They also have
+     different morale requirements for promotions.  These falues are:
+     
+                 initial gold   gold storage   auto-build   morale%
+     Peaceful    500            4000           ON           55, 57, 59,61,63,
+                                                            64,65,66,67
+     Aggressive  300            3000           OFF          start at 55,
+                                                            advance by 2's
+     
+     Hostile     100            2000           OFF          start at 55,
+                                                            advance by 3's
+                                                            
+RULEBOOK CORRECTIONS
+     Buildings are not damaged by combat in their block.  Buildings are only
+     damaged by being abandoned or by having monsters and no friendly units in
+     their block.
+     
+     There is a limit to the total number of units (friendly and enemy) in the
+     world.  If you can't generate new units, kill some monsters to free up
+     unit slots.
+     
+     WARNING: DO NOT exceed 30 monsters total in a custom world.
+     
+     Mouse Movement:  The mouse is active throughout the game, and may be used
+     for all input except to answer the copy protection question or to enter an
+     amount of money.
+     
+     To move in 3D mode with a mouse, click the mouse cursor at the edge of
+     the display window in the direction you want to move.  To move forward,
+     click at the top of the window.  To turn around, click at the bottom.  To
+     turn right or left, click on the appropriate side.  To move in
+     area/wilderness mode, click the location you want to enter and the party
+     goes in that direction.
+     
+     To use the mouse for combat targeting and movement, click the mouse cursor
+     over the target square and th cursor moves to the target.  If the target
+     is off the screen, first select an intermediate square near the edge of
+     the screen.  Clicking a mouse button on the edge of the window scrolls the
+     viewing area in the direction of the selected edge.
+     
+     The mouse pointer changes according to use.  The different formats are:
+
+         Sword: select an option or any entry from a vertical list.
+         Arrow: show direction for movement/attack in combat, movement, or
+         turning in the 3D movde.
+         Crosshairs: Select targets during combat.
+         Shield: used when the mouse is not active.
+         
+     Keyboard Commands:
+     
+         Esc: acts as an Exit from any menu.  When moving in combat, it "takes
+         back" the move.  The function does not erase any damage taken during
+         the move.
+         Alt/Q: sets all characters to QUICK (computer control).
+         Space: returns characters to normal control from QUICK.
+         Alt/M: toggles spells on/off for characters set to QUICK.
+         Alt/S: toggles sound on/off (may be used any time).
+         Alt/T: toggles music on/off (may be used any time).
+         Hint: if you find combat too easy or difficult, use the LEVEL option
+         to alter your difficulty level.
+         
+    Vault: To deposit items into the Vault, view a character's items, highlight
+    the desired item, and use the DEPOSIT command.  To deposit specific amount
+    of money, view the character, highlight the appropriate denomination, and
+    use the DEPOSIT command.  To deposit all of the party's money, choose the
+    POOL command.  NOTE: When transferring characters, the vault will not
+    transfer.  To transfer vault items, give the items to the characters you
+    are transferring.
+    
+    Spell Memorization:  To rememorize spells in Camp, select REST, then rest
+    for the alloted time.  If you wish to change the selection of spells to be
+    memorized, choose the MEMORIZE option and do not keep the spells ready for
+    rememorization.  Follow the Designer's Guide instructions for memorizing
+    spells.
+    
+DESIGNER'S GUIDE NOTES
+
+    You can bring up a pull-down menu with the keyboard while editing a design
+    by holding down the Alt key and typing the first letter of the menu; for
+    example, typing Alt-M will bring up the map menu.  A choice within a
+    pull-down menu may be selected while the menu is displayed by typeing the
+    first letter of the choice or by using the up and down arrow keys to scroll
+    through the menu.
+    
+    By holding down the Alt key while drawing a wall with the mouse in AREA
+    view, you can constrain the wall to follow a straight line.  This allows
+    you to sketch out rooms and corridors without leaving extraneous walls
+    behind where the mouse strayed off the exact line of a wall. 
+    
+    The shift key may be used in conjunction with the mouse for erasing
+    existing map features.
+    
+PREGENERATED CITY
+
+    Stronghold comes with a pregenerated city-in-progress in case you want a
+    quick start for the game, or if you are a beginner and want a head start
+    towards a successful city.  To load the pregenerated city, press the button
+    labeled First City after choosing the New Game option in the opening menu.
+    
+HELP BUTTON
+
+    The HELP button in the unit and leader screens brings up a menu of help
+    topics.  If you are struck, try reading through these suggestions, as well
+    as the playing tips at the end of the rule book.
+    
+    
+SSI Strategic Simulations, Inc.
+
+ADVANCED DUNGEONS & DRAGONS, DUNGEONS & DRAGONS, and UNLIMITED ADVENTURES are
+trademarks owned by and used under license from TSR, Inc., Lake Geneva, WI,
+USA.  All TSR characters, character names, and the distinctive likenesses
+thereof are trademarks owned by and used under license from TSR, Inc. (c) 1994
+TSR, Inc. (c) 1994 Strategic Simulations, Inc.  All Rights Reserved.

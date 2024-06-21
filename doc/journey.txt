@@ -1,0 +1,1831 @@
+Want to teach myself some Ghidra.
+
+As a test specimen, I decided on https://www.mobygames.com/game/482/stronghold/
+
+There are several reasons.
+1. The game is 16 bit and I never did any segmented 16 bit x86,
+   while Ghidra has limited support for decompiling real 16bit x86.
+2. The game likely has some interesting coding, since it has a 3d view
+   and processes multiple entities at once.
+3. Stronghold is the early example of Dungeon Keeper / Majesty style games.
+   The only game predating it is Populous.
+   So there is some historical value in it.
+4. The lead programmer is a trans girl Cathryn Mataga!
+
+
+The disassembling of any code base is a methodical process, which begins
+with the following steps:
+0. Researching what versions are available and picking either the one
+   with more debug information or the one which will be easier to emulate
+   and decompile.
+   It also makes sense to research the other products the programmers behind
+   the disassembled code made at around the same time, since high chances
+   they re-used some custom code.
+1. Informing oneself about the CPU and OS, which run the code being decompiled.
+2. Deciding on the disassembler/decompiler to use.
+3. Determining the compiler used.
+4. Procuring a function signature database to quickly get over
+   all the standard runtime code.
+5. Enumerating the OS syscalls.
+6. Locating the actual main() function, as opposed to the start().
+
+
+
+Stronghold comes in 2 flavors
+________________________________________________
+
+In addition to English, german, spanish, french and Japanese versions.
+
+The german, spanish and french versions don't appear to be of any importance
+for reversing the game, the Japanese one was released for two somewhat different
+x86 based computers with MSDOS: FM Towns and PC-98.
+
+In Japanese it is called "ストロングホールド ~皇帝の要塞~".
+But it can be found in abandonware sites by googling:
+* "Stronghold: Koutei no Yousai"
+* "Stronghold: Emperor no Yousai"
+
+The Japanese executable differs drastically from the English version.
+In fact it even has a different name (ST.EXE).
+The Japanese version comes with a 3d animated intro STRONG.FLI,
+has General MIDI music and unique error strings like:
+  "Error %d %d.  (Give Sato & Miwa Both numbers.)"
+
+These are missing in the STRONG.EXE.
+
+Still the Japanese version has no additional symbol information,
+so I decided to go with the English version, since it is the most common
+and easier to emulate. The Japanese version can be used for reference
+after enough progress has been made on the English version.
+
+There were also two different DOS CD releases,
+* German version by Softgold
+* 1995 English version
+  Part of the "Unlimited Fantasy' a 5-CD set from Slash Corp.
+
+The English CD version STRONG.EXE is identical to the floppy one.
+I couldn't obtain the German CD one.
+
+All versions, including the Japanese, appear to be using the same
+version of either Borland C++ or Turbo C++ compiler.
+
+There are several other games by Stormfront Studios:
+* Tony La Russa Baseball II could be reusing some code, like animation timing
+  yet the engine is not 3d and the custom file extensions are different.
+  The compiler used is the same Borland C++ and the MAIN.EXE has similar size.
+  It has no debug data present.
+* Eagle Eye Mysteries isn't promising since it had a different programmer
+  and the engine EAKIDS.EXE made by Electronic Arts is completely different,
+  and it was compiled with MSC.
+  The EAKIDS.EXE has debug info though, that means the original source code
+  can be fully recovered.
+  The game also uses LBM graphics, just like STRONG.EXE, but that was just
+  a popular format back in the day.
+  The engine's driver, EEM.EXE, is compiled using Borland C++,
+  but it doesn't appear to share any code with STRONG.EXE 
+* Neverwinter Nights, Treasures of the Savage Frontier, etc...
+  These have the same programmer but use a Gold Box engine.
+* Rebel Space had only a screenshot preserved:
+  https://www.vintagecomputing.com/wp-content/images/prodigy/screenshots/prodigy_rebel_space_large.png
+  Apparently that was a early EVA Online like game
+
+None of these specimens are of any help to our endeavor.
+We can use them to produce a function signature database by detecting
+the C runtime library part, but instead we will try to obtain
+the original compiler used to build the STRONG.EXE and use its library.
+
+
+16bit x86 DOS computing environment
+________________________________________________
+
+Proper decompilation requires near expert knowledge of the system's quirks.
+And 16bit x86 DOS is probably the baroquest and the hardest to grasp
+system around. Still studying this sour subject will help understanding
+modern x86.
+
+To better grasp what we are getting into, let's start by looking at
+the official Stronghold system requirements:
+https://www.mobygames.com/game/482/stronghold/specs/
+
+Minimum OS Class Required: PC/MS-DOS 5.0
+Minimum CPU Class Required: Intel i386
+Minimum RAM Required: 2 MB
+Video Modes Supported: VGA
+Notes: 	
+  505,000 Bytes of free base RAM
+  1,000,000 Bytes of free EMS/XMS
+
+The i386 CPU requirement could mean one of the two things:
+1. The i286 16MHz speed is not enough to run the program,
+   which is still 16bit.
+2. The program is actually 32bit, in that case the progam will be using
+   32-bit runtime, called VCPI or DPMI, which is basically a mini 32bit OS.
+ 
+Since there are no references to VCPI or DPMI in the executable or manual,
+we can conclude the program is 16bit and needs i386 for more speed.
+Reviews at the time of release indeed said it needs min 33MHz.
+In 1993, 32bit had just begun gaining momentum and programs were 16bit.
+But wait a second!!! What are these "base RAM" and "EMS/XMS"?
+To answer this question we have to understand how the orginal i8086 CPU worked.
+
+The main thing about 16bit x86 is its use of two registers to access memory.
+One register is called a segment register, and the other is an offset inside
+that segment. The x86 had 4 dedicated registers, holding the segment addresses.
+These are CS, DS, SS, ES. By convention CS points to code, DS to data,
+SS to stack and ES points at some array, we worked with at the time.
+
+We can imagine a segment being a pointer to a C-struct, which is 16byte aligned
+has arrays as members (i.e. functions in the CS segment or global vars in DS).
+To get the linear address of the referenced memory, we do
+    linear = ((seg<<4) + off) & 0xFFFFF
+
+That `& 0xFFFFF` (mod 0x100000) is here for a not so good reason.
+
+The very first x86 CPU (i8086) had an architectural memory limit of 1**20 (1MB),
+due to the address bus connecting CPU to memory controller having 20 pins.
+When anything above 1MB got accesses, 8086 instead of segfaulting or returning
+zeroes just `mod 0x100000` the address, since that required less transistors.
+As usual the quirk was declared to be a feature, instead of undefined behavior.
+So people began depending on it.
+
+In fact, Intel never planned to support more than 1MB, since x86 was made
+for microcontroller market, so x86 becoming a standard for workstations due to
+Microsoft's marketing came as a surprise to the engineers, due to workstation
+use demanding larger and larger amounts of memory. Additional complication
+came from the fact that memory above 640KB (0xA0000–0xFFFFF) was reserved for
+hardware use, like BIOSes and IO buffer areas for various devices.
+That memory was named the upper memory blocks (UMBs), each 64KB in size.
+The 640KB below UMBs were called "conventional memory" or "base memory".
+The entire 384KB area of these UMB was called upper memory area (UMA).
+
+In particular the 64KB area at 0xA0000 was reserved for graphics output,
+and that gave the classic DOS 320x200 limit to graphics resolution.
+
+Since the large portion of UMBs was unused, people invaded it to use for their
+own needs, like moving there daemon services, which were named
+terminate-and-stay-resident (TSR), because they operated by listening
+to interrupts which back in the day were a primitive version of
+interprocess communication.
+
+So the need came to extend the CPU, and Intel engineers decided to include
+an additional pin, called A20, which specified if address pin 20 is active.
+The quirk is that it only controlled the activity of pin 20, not any pins above
+it. So when the A20 was disabled, the memory had a "striped" look, where
+every odd megabyte mapped onto the megabyte preceding it. I.e.
+[0x000000:0x0FFFFF] accessible
+[0x100000:0x1FFFFF] maps to [0x000000:0x0FFFFF]
+[0x200000:0x2FFFFF] accessible
+[0x300000:0x3FFFFF] maps to [0x200000:0x2FFFFF]
+etc...
+
+Sweet? Unfortunately that is the core of the i286 system running our STRONG.EXE,
+which uses 2MB RAM so we have to understand it to get our project anywhere.
+
+Now accessing any memory above 1MB with a 16bit segment model, required
+Intel to introduce an additional quirk - The Segment Descriptor Tables.
+One had to initialize translation tables and feed them to the CPU.
+These tables specified the 24-bits addresses for 16bit segment registers,
+extending the addressable memory to the whooping 16 MB.
+That memory above 1MB was called "Extended Memory" or "High Memory".
+Additionally a chunk of 0x10000-16 bytes, called high memory area (HMA),
+was located at 0x100000. It was accessible, by setting the segment
+register to 0xFFFF and enable A20.
+
+Now, instead of addresses, the segment registers hold the 13bit index of
+an 8-byte entry inside the descriptor table, plus a bit indicating
+if the userspace or OS-space tables are used (LDT/GDT) and also 2bit privilege.
+The i286 descriptor table was composed of the following entries:
+  typedef struct {
+    uint8_t   address[3]; //linear 24bit base address, enough to cover 16MB
+    uint16_t  size; // Basically size_in_bytes-1 
+                    // i.e. size of 0 means only the first byte is accessible
+    uint8_t   type; // code/data/system
+    uint16_t  reserved1;
+    uint16_t  reserved2;
+  } i286_segment_descriptor_t;
+
+To access the 16MB with these descriptors, developers used a special API, called
+eXtended Memory Specification (XMS), which was implemented by a driver or
+by a BIOS int 15h service 87h, called "Move Block":
+http://vitaly_filatov.tripod.com/ng/asm/asm_026.14.html
+Which basically mapped a chunk of memory from the above 1MB under it.
+
+It did some black magic, including entering the so-called "protected mode",
+where the segment registers hold LDT/GDT indices, instead of raw addresses.
+Inside the protected mode, BIOS did the bank switching, and used "SOFT RESET" to
+return into the direct memory access mode (called real mode on x86).
+
+That BIOS service call was available only on the pre i386 systems.
+While the i386 systems emulated it by means of HIMEM.SYS driver,
+which did the usual 32bit switching:
+http://info.wsisiz.edu.pl/~bse26236/batutil/help/HIMEM_S.HTM
+Note the
+   /INT15=xxxx
+      Allocates the amount of extended memory (in kilobytes) to be reserved
+      for the Interrupt 15h interface. Some older applications use the
+      Interrupt 15h interface to allocate extended memory rather than using
+      the XMS (eXtended-Memory Specification) method provided by HIMEM.
+
+THe entire process is described here:
+https://medium.com/@wolfcod/a-journey-into-himem-sys-de2ece29c0c8
+  To switch back to real mode from protected mode on 80286 first, it's necessary
+  to store at address 0040:0067 the return address of your code in
+  protected mode and from protected mode you can reset the CPU, but before doing
+  this it's necessary to write on CMOS memory a code (typically 05 or 0A) to
+  signal to the POST bios code to switch back. Without this magic value,
+  the POST procedure will continue the execution of standard BIOS code with
+  a complete bootstrap of the operating system.
+
+Before the segment descriptor table, the i8086 memory expansion boards supported
+the so-called bank switching, following the Expanded Memory Specification (EMS).
+EMS implied that an UMB at 0xD0000 or 0xE0000 was broken into 4 16KB banks,
+each of which could be switched to point into the memory above 1MB.
+To support bank switching, a divice driver, called expanded memory manager,
+or EMMXXXX0, was installed, as part of say HT12MM.SYS for HT12 chipset.
+
+
+
+The programs using EMS had to check for this EMMXXXX0 driver. 
+So the presence of string "EMMXXXX0" anywhere in the specimen data indicates
+it uses bank switching to access anything above 1MB.
+In later systems expanded memory was emulated in software through
+the XMS driver, which did the bank switching through segment descriptor tables.
+The emulators were QRAM or USE!UMBS.SYS, which used the "shadow ram" feature of
+i286 motherboards to perform the mapping:
+https://retrocmp.de/hardware/rampage-286/use!umbs.txt
+https://retrocmp.de/hardware/rampage-286/quarterdeck-qram.pdf
+
+Some purely software drivers were called "LIMulators". On i286 these LIMulators,
+like EMM286.EXE, had limitations, like no mirroring/aliasing:
+https://www.pcorner.com/list/UTILITY/EMM286.ZIP/EMM286.TXT/
+On the 32bit systems the EMM386 emulated EMS through the HIMEM.SYS API,
+which had no such issues due to the use of proper MMU.
+And the use of XMS/EMS precluded the use of 32bit code, which could access
+entire 4GB of memory at once.
+
+The machines without 2MB could still run EMS software. The MEMSIM32 LIMulator
+swapped the banks to/from HDD, instead of expanded memory.
+
+
+The memory availability can be checked by the DOS MEM command.
+
+All these technologies require maintaining a list of segments or bank tables.
+To properly decompile STRONG.EXE we will have to recover these tables buried
+somewhere in the startup sequence the exe file code, since MZ exe format
+supports only the pre i286 relocations. The C compiler vendors had to introduce
+their custom formats to support the memory sizes above 1MB.
+Given the officially stated EMS/XMS requirement, we have to deal with all that.
+
+To summarize: typical 1993 i286 DOS systems had about 2MB of memory,
+and accessing memory above 1MB is done through the EMS API.
+
+Being so quirky and old, 16bit x86 has a rather limited support from the tools
+used to statically analyze the code. For example, many contemporary utilities
+will fail to open OMF object files and libraries, which were used by x86
+tools before the Windows NT popularized COFF.
+
+
+Picking a decompiler
+________________________________________________
+
+Decompiling a program requires several stages:
+* Recovering the control flow graph the machine code.
+* Recovering functions and data references.
+* Recovering data structures.
+* Running the decompiler to produce C/C++ code of functions of interest.
+* Using the feedback from the decompiler to recover more of the above.
+* Refactoring said the decompiled code, compiling it and plugging in
+  function by function into a running program, either emulated or recompiled,
+  which allows easier inserting C/C++ code.
+
+All of these stages require using a builtin address space manager, coupled with
+disassembler and hex editor. So while there are separate decompilers,
+like e2c,DCC, Bumerang, it is necessary to have everything united into
+a holistic development environment.
+
+In general, decompilation is as old as the computing itself:
+* https://www.program-transformation.org/Transform/HistoryOfDecompilation1.html
+* https://www.program-transformation.org/Transform/HistoryOfDecompilation2.html
+
+
+
+But for 16 bit DOS, we have three IDE options, each with its own drawbacks
+* IDA Pro:
+  * While very popular, it is also very expensive and requires obtaining
+    a pirated copy, which is usually outdated, incomplete and has viruses.
+  * Closed source and has limited ways to modify the tool to suit your needs.
+    Outside of decompiling the decompiler itself.
+    So if it fails to decompile your code, you have no way to fix it.
+  * Doesn't spport decompiling 16 bit x86, outside of connecting to
+    an external decompiler, like DCC or Ghidra.
+* Ghidra ( https://ghidra-sre.org/ ):
+  * Very popular and well documented.
+  * Open source (MIT license), so can be modified to do anything you want.
+    Being a US government project made to analyze malware and vulnerabilities,
+    its ability to decompile DOS games is a fortunate byproduct.
+    The code consists of boilerplate rich Java, with all the crazy OOP patterns
+    you can imagine used for the simplest of tasks.
+  * It has become standard.
+    Plan to work with others on a paid project - you do better know it.
+  * Has advanced features, like a machine learning plugin.
+    Should be possible to connect it with LLM to get quick insight on the code.
+  * Comes with enterprise integration and automation, like headless mode,
+    to process large loads of code without a human being to drive it.
+  * It supports decompiling 16bit x86!!!
+* Reko (  https://github.com/uxmal/reko ):
+  * A C# challenger to Ghidra, with a bit cleaner code, without most of the
+    Java bullshit.
+  * Cleaner IDA-inspired UI and much better Windows support than Ghidra,
+    because of C#.
+  * Super lightweight (20MB distribution completely with IDE).
+  * Astonishingly good code analysis for 16bit DOS executables.
+    It was able to locate main() in STRONG.EXE without any help
+    But it struggles with further stages of decompilation, such as
+    dataflow analysis, so I couldn't see the decompiled code for most functions.
+    Yet for 32bit code, like say binkw32.dll, it does a good job.
+  * Doesn't allow stack variables and arguments layout editing.
+  * Not a full featured IDE, and offers now way to rename data areas,
+    supply types, introduce imaginary segments, external data or code.
+    But Reko does offer some Python scripting support, which I haven't
+    researched in depth. Maybe you can implement some of these features?
+    I.e. recovering strings.
+  * Supports decompiling 16bit x86 and loading OMF files.
+    It even supports some packers.
+    Moreover, it claims that:
+    "16-bit real mode" is "The first architecture targeted by Reko"
+    https://github.com/uxmal/reko/wiki/Supported-binaries
+    I.e. the authors made it to analyze DOS executables.
+* Radare2+RetDec+Iaito ( https://github.com/radareorg/iaito/ )
+  * Another full featured disassembly IDE, which consists of several
+    subprojects, each of which consists of separate utilities.
+    People love and fork it, so there will always be some active fork like Rizin
+  * Written in plain C, with a few Python scripts to glue everything together.
+    Think command line utilities, servers and different GUIs to drive them.
+  * Apparently the most flexible and professional toolkit, and it expects
+    the user to know exactly what they are doing.
+    Will take the most time to set up, but can be made to do anything you want.
+  * Support for 16bit DOS executables is left as an exercise to the reader,
+    but given the flexibility of the framework, you can easily insert
+    any other decompiler.
+
+These are listed in order of historical appearance.
+
+I decided on Ghidra, since it is mature, has all the features needed to reverse
+the 16bit x86 code, and if some features are missing, I can implement them
+with a plugin or an extension. Ghidra also produces the best C code out of them
+all. Ghidra is also an opportunity to study the stupid modern Java practices,
+since I never did any JVM programming. Ghidra also has MIT license, if whatever
+you contribute to it will automatically have more value to the society than
+the Reko's or Radare2's GPL.
+
+
+Beside IDA, Ghidra, Reko and Radare2, there are standalone and CLI decompilers.
+These include e2c, DCC, Boomerang, RetDec, REC Studio, mips2c, m2c, ExeToC...
+Some of them can be used with IDA. Others are useful in their context.
+For example, mips2c/m2c is specially geared towards recovering
+the exact original C source code, when it is required for historical accuracy. 
+
+Apparently none of the tools support decompiling EMS/XMS code properly,
+which will be a big issue.
+
+
+
+Deducing the compiler.
+________________________________________________
+
+Ghidra failed to determine the compiler used to compile strong.exe.
+
+So I loaded the executable into IDA, and then checked Option->Compiler
+
+IDA determined it as Borland C++ with a small model (near code, near data).
+
+Both as we find later were wrong.
+Yet FLIRT signatures for "TCC/TCC++/BCC++ 16 bit DOS" worked and
+about 1/8 of the functions got recognized.
+
+Feeding STRONG.EXE to string exposes:
+   "Borland C++ - Copyright 1991 Borland Intl"
+
+Apparently IDA also used this string to determine the compiler.
+The other ways to detect the compiler are
+* Trying function signatures for the runtimes of different compilers against
+  the studied code.
+* Code and data generation and layout idioms specific to that compiler.
+* Decompiling a small routine and then compiling it with a suspected compiler.
+
+
+To pinpoint the exact compiler used, we obtain every 1993 BCC/TCC version, and 
+check their c0*.obj against the entry point of the strong.exe.
+
+Borland compilers are available at:
+  https://winworldpc.com/product/borland-c/20
+  https://winworldpc.com/product/turbo-c/1x
+  https://winworldpc.com/product/borland-turbo-c/1x
+
+First thing we check is what copyright strings these compilers leave.
+
+Turbo C++ 1.01 spits into exe files
+  "Turbo C++ - Copyright 1990 Borland Intl."
+
+While Turbo C++ 3.0, Borland C++ 3.0 and 3.1 leave
+  "Borland C++ - Copyright 1991 Borland Intl"
+
+That excludes Turbo C++ 1.01.
+
+Luckily Borland C++ 3.0 and 3.1 come with source code for the runtime.
+Although the Turbo versions are missing it.
+
+The startup code is located in c0.asm under LIB/STARTUP.
+
+Reading c0.asm we see that every Borland C++ executable contains
+the exact memory model used at around seg000:0262.
+
+The strong.exe has model=0xC004
+
+To interpret it we will need constants from STARTUP/RULES.ASI:
+#define FCODE 0x8000  /*far code*/
+#define FDATA 0x4000  /*far data*/
+
+Lower bits determine the model type
+#define TINY    0
+#define SMALL   1
+#define MEDIUM  2
+#define COMPACT 3
+#define LARGE   4
+#define HUGE    5
+
+Given that, we can concluded that the model is FCODE|FDATA|LARGE.
+
+Yet the asm code and the resulting obj files in Borland C++ 3.1 differ from
+the strong.exe.
+
+After SaveVectors call, strong.exe has LES, Borland C++ 3.1 always has
+  mov     ax, _envseg@
+  mov     es, ax
+
+The only compilers doing "LES DI,_envseg@" are Borland Turbo C++ 1.01 and 3.0,
+as well as Borland C++ 3.0.
+
+Now we have deduced with 100% certainty that either Borland C++ 3.0
+or Turbo C++ 3.0 was used to compile strong.exe.
+And for Borland the default calling convention is __cdecl, so we set the
+  Edit -> Options -> Decompiler -> Prototype Evaluation
+to be __cdecl16far.
+
+Arguments to __cdecl16far functions start at SS:[BP+4], since the return is
+a far pointer, which gets popped by RETF (return from a far function).
+
+While Turbo C++ and Borland C++ 3.0 compiler executables are different,
+the startup code and the functions in CL.LIB appear to have exactly
+the same machine code with both compilers. The executable size difference could
+be due to the Turbo C++ has two features cut, since the compiler is missing
+the following option, which were in earlier released Borland C++ 3.0:
+  -Hxxx   Use pre-compiled headers
+  -Wxxx   Create Windows application
+
+Both were intended to support Windows code, which had huge headers.
+
+Therefore determining the exact compiler is impossible.
+The Borland C++ 3.0 comes with the source code for the C runtime
+library, which we will be using for reference.
+The C0.ASM there has the following comment
+  "Turbo C++ Run Time Library"
+So Turbo C++ 3.0 is probably the same compiler as Borland C++ 3.0.
+Just with the Windows support cut out.
+
+Further work would be comparing both TCC and BCC against each other,
+and checking if any of the differences are inside of the code generator.
+And if there are any, then deducing which variant was most likely used
+from the generator choices. But that would be going too far off our way,
+just to establish some minor historical certainty.
+
+
+Strong.exe was also compiled with __NOFLOAT__, since MINSTACK is 128.
+Apparently 16 bit x86 already supported floating point numbers.
+
+Borland's C/C++ had one unusual feature: it allowed mixing C and x86 asm
+statements together, where the asm statements could reference C variables.
+It did some magic behind the scenes to allow that to working seamlessly,
+compared to say GCC. Best of example of such code is VRAM.CAS
+So back in the day C was truly a portable assembler.
+This feature can be useful for partially decompiling the code.
+
+Note that, Borland C++ runtime also includes a few functions with `pascal`
+calling convention, which is basically cdecl but with arguments in reverse.
+Why? No idea, I was never a fan of Pascal anyway.
+
+
+
+Signatures Database
+________________________________________________
+
+Since the compiler is known, we need a way to determine all the statically
+linked functions belonging to its standard library. Since that significantly
+reduces the amount of work and allows us to go directly to the main().
+
+While IDA includes sig/pc/bc31rtd.sig, Ghidra doesn't support the *.sig files.
+Instead Ghidra has its own *.fidb signature libraries.
+The only included *.fidb are the signatures for vs20XX.
+
+For Borland C++, there are
+https://github.com/moralrecordings/ghidra-fidb-dos-win16
+
+but these don't appear to work with my Ghidra version.
+The *.java code there used to generate *.fidb doesn't work with
+the latest Ghidra (in addition to the Python script requiring Linux),
+since the headless script for some reason fails to import the OMF *.lib files.
+Modifying it I was able to produce the *.fids, but they failed to work either,
+just like the premade ones.
+
+What actually works is just using the UI
+* File -> Open File System -> pick one of the *.lib files.
+* Select all the imported *.obj files and dragging them into code browser,
+  which makes "Analisis -> Analyze All Open" possible.
+* Finally, Tool -> Function ID -> Create new empty FidDb
+  and Tool -> Function ID -> Populate FidDb from programs
+
+Among the recognized functions, we see a few related to the overlay feature.
+The STRONG.EXE also includes strings "EMMXXXX0" and "Runtime overlay error".
+That means the code was compiled with the -Yo flag, in addition to -ml.
+This spells additional difficulties for us, since the same area of memory can
+hold different code and data at different times (i.e. bank switching).
+And the compiler generated these overlays accesses all over the code.
+Basically it is a poor man's virtual memory paging.
+
+The code handling the runtime part of overlays is called overlay manager.
+Its compiled code resides in OVERLAY.LIB, which comes without any source code.
+Beside EMS, OVERLAY.LIB includes functions to work with XMS.
+But that is of no value to us, since the STRONG.EXE speaks with it through API.
+More on overlays is on page 357 of Borland C++ 3.1 Programmer's Guide
+Borland Open Architecture Handbook 1.0 includes info on debugging them:
+http://annex.retroarchive.org/cdrom/psl-v3n8//PRGMMING/DOS/GEN_TUTR/BC4BOA.ZIP
+
+The overlay function prototypes are located in DOS.H
+extern  unsigned    _Cdecl  _ovrbuffer;
+int cdecl far _OvrInitEms( unsigned __emsHandle, unsigned __emsFirst,
+                           unsigned __emsPages );
+int cdecl far _OvrInitExt( unsigned long __extStart,
+                           unsigned long __extLength );
+
+The _ovrbuffer is initialized to the size_of_the_largest_overlay*2.
+
+The idea apparently was to use two overlays, where code running in one overlay
+could load another overlay and jumps into it. Compiler generated such loads
+behind the scenes. These overlays can reside either in extended memory or on
+disk.
+
+
+Some people already made a feature request on github for it:
+https://github.com/NationalSecurityAgency/ghidra/issues/5543
+
+While googling a decompilation of OVERLAY.LIB, I stumbled upon:
+https://borland.public.cpp.borlandcpp.narkive.com/9hI7JTC4/platform-dos-overlay
+<i>>All the software I own is legitimate. I don't know any real programmer that
+would knowingly purchase pirated/illegal software. We all know how much work
+goes into getting something that works, is good looking and marketable.</i>
+
+Toxic American morality: deny everything, pretend to be overly pious,
+all while daily shoplifting and watching gigabytes of CP.
+
+
+
+The C library part of STRONG.EXE also has a string COMPAQ, but that comes
+from CRTINIT.OBJ, which checks for COMPAQ to implement some hacks.
+CRT stands for cathode-ray-tube, not C Run-Time. And its source is CRTINIT.CAS.
+
+
+DOS syscalls
+________________________________________________
+
+DOS uses int 21h to invoke the OS code. The AH is set to the function index.
+
+Ghidra doesn't support the DOS int 21h or syscalls recognition at all,
+but it provides a general mechanism for documenting and decompiling syscall.
+
+That is done through the creation of separate "imaginary" address space
+for mapping function indexes to actual functions.
+
+To create one for DOS we can do
+  Window -> Memory Map -> Add new block
+Name it say DOS21, make it overlay block at 0x0 of size 0x100
+
+Then we just methodically add DOS syscall labels, turning each one into
+a function by selecting the appropriate byte with mouse drag rect.
+Then turn all int 21h into a CALL_OVERRIDE_UNCONDITIONAL onto the operand.
+
+The swi(0x21) will remain cluttering the decompiled code,
+but after it a proper function call will be present.
+
+It is also possible to populate the DOS21:: segment from a txt file.
+That is done with Data/ImportSymbolsScript.py
+Which takes a text file with entries like
+  DOS_GetDTAAddress   DOS21::2f   f
+  DOS_GetDOSVersion   DOS21::30   f
+
+Where DOS21::2f is the function id and `f` means we are making a function map.
+That is what I actually did.
+
+
+
+
+Locating the main()
+________________________________________________
+
+With standard library functions and syscalls being recognized and decompiled,
+we are ready for going into the program's code. That involves locating
+the main function. Of course we can cheat by using Reko for that, but doing
+it manually for once has some educational value.
+
+During the compilation the main() routine is referenced from the startup file.
+Luckily we have access to the compiler's startup files and we know which exact
+one to use (C0L.OBJ for the large model). So we can just open the C0L.OBJ,
+which invokes the analyze dialogue. After that we go to the main symbol
+and see where it is referenced from... but is not referenced from anywhere!!!
+
+Absence of known calls to main() is due to Ghidras analyzer being very
+conservative and ignoring the TEXT section (since no symbols export it
+from the OBJ file). We have to initiate the disassembly manually.
+The start of the TEXT section is basically our entry routine for the strong.exe.
+Borland C++ entry is called start() (or startx() if you consider it also
+including the cleanup code).
+
+After the disassembly, we clearly see that the main() routine is referenced
+directly at the end of the entry() code. Therefore we just open our strong.exe
+disassembly, and go to the entry. That unknown FUN_ there will be the 
+strong.exe's main().
+
+Note though that Borland's main also includes environment argument:
+  int main(int argc, char **argv, char **envp)
+
+Strong.exe's main doesn't use envp, and the start() pops it for us,
+because in the cdecl calling convention caller is responsible for popping
+the passed args from stack, because that simplifies the implementation variable 
+argument functions, like `printf`.
+
+
+
+Conclusion
+________________________________________________
+
+Moving from IDA to Ghidra feels like moving from 3ds max to Blender.
+Everything is obscure and clunky. For example, in IDA creating new *.sig
+was just a matter of running plb and sigmake, which unfortunately are part of
+FLAIR, which most pirated IDA distributions miss.
+
+But IDA costs several thousand USD and by buying it you support Russians.
+So I doubt any person ever purchased IDA legally, outside of pirating
+the versions their employers purchased.
+
+Radare2 appears to be a viable alternative to Ghidra, but it is more difficult
+to set up, and will be an overkill for a small simple project. After all,
+nothing stops you from using Reko to locate your main()
+
+
+
+Future work
+________________________________________________
+
+Next step would be preparing the game for complete decompilation.
+That requires recovering the overlays table, which will require a Ghidra script.
+The static analysis alone isn't enough to decompile larger programs, where
+while we slowly replace every function one by one with its decompiled version.
+That requires comparative dynamic analysis, where we run original and decompiled
+versions side by side, comparing control and data flow traces.
+In addition, we need a flexible way to hook recompiled code over the original.
+Both goals achieved by modifying existing emulator with breakpoints, which
+can redirect execution towards our decompiled code, , which can as well be
+compiled by the host C compiler (or whatever language you like).
+
+Given my previous experience modifying DOSBox analysis, when I dumped
+the sprites from Whizz game, hooking the decompiled code shouldn't be
+too hard - just set breakpoint on execute and make DOSBox call decompiled code.
+The hardest task is actually compiling the DOSBox on Windows, since it requires
+a Unix userspace (to run ./configure scripts), while I only have the simplified
+w64devkit. MinGW apparently provides it together with a mount command:
+  https://www.dosbox.com/wiki/Building_DOSBox_with_MinGW
+
+And if one building against Cygwin, SDL2 could then expect actual XWindows
+for output. Still DOSBox is an easy route compared to actually emulating DOS.
+
+To be continued...
+
+
+
+Ghidra Issues
+________________________________________________
+<pre>
+<a href="http://lj.rossia.org/users/nancygold/163930.html"> Last part</a> ended with installing Ghidra and planning to recover overlays.
+But the Borland overlay format is not well documented.
+The easiest way to approach it is to look inside the Overlay Manager code.
+
+The overlay manager gets initialized by the C0.ASM's StartExit routine,
+which gets called just before the main(). StartExit seems like a nice place
+to test the decompiler and get accustomed to its quirks.
+
+The good thing is that decompiler does work out of the box.
+The bad things is that most of the variables it generates can't be renamed
+for some obscure reason. I.e. doing `RMB -> "Rename Variable` doesn't work.
+
+Most pointer variables can be renamed if we first do "Adjust Pointer Offset",
+which brings in the "Create Relative Pointer" dialog.
+There we set the pointer's type, typename and offset.
+Now "Rename Variable" will suddenly work.
+In a few other cases you can make it work, by introducing
+the explicit write references onto the CF flag.
+
+Yet in most cases Ghidra will just add your name under the function variables:
+  undefined1    HASH:5f05ba6...     VariableName
+while the decompiled name won't change.
+Well, `undefined1` is type, but what is `HASH:5f05ba6...`?
+What is going on?!! How do we get custom names?!!!
+
+Ghidra's decompiler has rather obscure conventions.
+When Ghidra users and developers want to introduce some abstract entity,
+they create address space for the entities of such type.
+We did that already for the DOS 21h syscalls map.
+Same happened with the temporary decompiler variables, which never existed in
+the original machine code. They are placed into the `HASH:` address space,
+when user tries to rename them.
+
+Unfortunately after doing the decompilation, Ghidra doesn't use the names
+user supplied for these `HASH:` variables. And searcinh Internet for a solution
+doesn't seem to help. There was a fixed issue at the Ghidra's github:
+https://github.com/NationalSecurityAgency/ghidra/issues/193
+But the latest github checkout of Ghidra still fails to use user supplied names.
+So the only option is modifying the Ghildra's source code.
+
+Compiling Ghidra
+________________________________________________
+The first step would be actually compiling the Ghidra from sources.
+Following the guide, https://daniao.ws/notes/quick-tips/build-ghidra
+We install Visual Studio, git and gradle.
+Then issue the following commands:
+  git clone https://github.com/NationalSecurityAgency/ghidra.git
+  gradle --init-script gradle/support/fetchDependencies.gradle init
+  gradle buildGhidra -x ip -x createJavadocs -x createJsondocs -x zipJavadocs -x sleighCompile
+
+Surprisingly the github checkout of Ghidra builds and runs on Windows.
+Even the C++ decompiler part doesn't give errors.
+The results ends up in build/dist/ghidra_11.2_DEV_20240602_win_x86_64.zip
+Out of the box. Without issues.
+Unless you follow the guide recommending the so called "docker container".
+
+Apparently if Ghidra fails to run after build,
+then "running `gradle clean`, might get it to work."
+The DevGuide.md guide also says that Linux build fails on non-English locales
+
+  There is a known issue in Gradle that can prevent it from discovering
+  native toolchains on Linux if a non-English system locale is being used.
+  As a workaround, set the following environment variable prior to running
+  your Gradle task: LC_MESSAGES=en_US.UTF-8"
+
+Luckily we are blessed with Windows 11!
+
+The second step is actually getting to the place, where decompilation happens.
+Ghidra is written in Java. There are far worse languages now, like Rust and Go.
+Still Java involves organizing program as a thousands of *.java files,
+each holding a single class. Navigating this mess involves special software.
+
+The problem of searching specific code in a large code base can be approached
+from several direction:
+1. Starting from the main() and studying the general project's structure.
+   As well as accustoming with the frameworks used.
+   Then leveraging that knowledge navigating towards the most promising path.
+2. Using debugger or just grep to search for the keywords of interest.
+That applies to working with Ghidra's source, just as well as to working with
+the decompiled code.
+
+Since I have no time and my task encompases only a tiny poriton of Ghidra,
+I used the grep approach, looking for the the decompiler's window tile text
+   "Decompile:"
+which instantly got me to the
+Features\Decompiler\src\main\java\ghidra\app\plugin\core\decompile\DecompilerProvider.java
+
+There we must note that Java uses the keyword `super` to call parent methods:
+  super(arg0, arg1, .... argN); //ivnoke parent's constructor
+  super.methodName();           //invoke parent's method
+
+
+The decompiler itself is under Ghidra\Features\Decompiler\src\decompile\cpp
+Notice how the Ghidra IDE and the Ghidra's decompiler are two separate programs.
+The IDE is written in Java, while the decompiler is pure C/C++.
+Java code starts the decompiler as a daemon process and then feeds it XML data
+for the function to be decompiled.
+
+C/C++ decompiler source is easier to read due to the header files exposing
+all the structures, separately from code.
+Looking at varmap.h/NameRecommend, the original idea was apparently for
+the C/C++ decompiler to query the Java process for user names and apply them,
+but that never happens. And fortunately it is not our task to investigate why.
+
+That out of the way, we broke into private DecompilerProvider::updateTitle(),
+Which in that file gets called from the public decompileDataChanged().
+Now we have to check all the places decompileDataChanged gets called from,
+hoping to get a better vantage point, showing us way towards the decompiler's
+C/C++ process communication code.
+
+Going through the myriads of Java files is tedious and annoying exercise,
+asking for a proper navigation framework, made specially for Java.
+
+The best Java editor appears to be IntelliJ IDEA, it even comes with bytecode
+decompiler, so you can go inside the compiled Java *.class files.
+It is also the easiest, just works without all the open source / linux bullshit.
+Just like IDA Pro, IntelliJ IDEA is expensive and made by Russians,
+so it is okay to pirate it.
+
+Unfortunately Ghidra's README.md states the following:
+
+  To develop the Ghidra tool itself, it is highly recommended to use Eclipse,
+  which the Ghidra  development process has been highly customized for.
+
+So to avoid any additional issues we have to stick with Ghidra practices,
+and use Eclipse. Eclipse was also highly recommeded to me by the members of
+the so called open source community over the IntelliJ IDEA.
+
+Eclipse while at first installing perfectly and starting up, after
+being closed and restarted again, came up with an obscure error:
+
+  Incompatible JVM. Version 1.8.0_401 of the JVM is not suitable for
+  this product. Version: 17 or greater is required
+
+
+Apparently in 2024 Eclipse is unable to locate the JVM on its own.
+The only solution is to add in front of -vmargs in eclipse.ini the lines:
+  -vm
+  C:\Program Files\Java\jdk-17\bin\javaw.exe
+
+Still a mystery why Eclipse was able to start the first time on its own,
+but we are up to a rough start.
+
+Next, since the Ghidra uses Swing while we explore the code base from a UI call,
+we can try compile a SwingHello.java program, which will allow us to
+quickly familarize ourselves with how Java projects function.
+So lets create a new Eclipse project and...
+
+Importing a premade file into an Eclipse project is already a difficult task.
+One has to manually copy the files int the src/ folder of the project,
+using the file manager (not Eclipse). Then left-clicking the src/ folder
+inside the Eclipse's file browser and picking "Refresh".
+That will produce "(default package)" folder, holding refreshed SwingHello.java.
+
+Additionally Eclipse immediately tried to parse SwingHello.java, reporting that
+  The package java.awt is not accessible
+  The package javax.swing is not accessible
+  Syntax error on token "module", interface expected | module-info.java
+
+Well, folks, last time I checked Java was in 2004, and apparently it haven't got
+any easier. Modern times require modern solutions.
+So I asked ChatGPT. And ChatGPT said that I need javaSE-1.7,
+which was the last JDK version to provide AWT and Swing by default.
+
+Luckily the new JDK still includes Swing, which is buried deep inside
+
+  Project -> Properties - Java Build Path -> Libraries
+  -> Add Library - JRE System Library -> Execution Environment 
+
+That fixes `The package ... is not accessible` errors, but the
+
+  Syntax error on token "module", interface expected | module-info.java
+
+Hasn't gone anywhere.
+
+ChatGPT said that is because "you are using a modular JDK (Java 9 and above)"
+Apparently one could also explicitly specify the `java.desktop` module somehow,
+since the `import javax.swing` directive doesn't auto enable it.
+That module-info.java is something Eclipse have created for the project,
+just to make you confused. So I just commented out the
+
+  module swing {
+  }
+
+trash, and the SwingHello.java finally compiled and ran!
+Yes! That is what it takes to do HelloWorld.java in 2024.
+So yeah. Java universe definitely got more "special" since 2004.
+
+Unsurprisingly Eclipse has many other issues, like tabs instead of spaces, or
+inability to properly rebuild the project if some file changes,
+now way to copy filesystem's *.java path or go to a specific filepath,
+coupled with a cryptic UI (i.e. Bookmarks are burried deep under several menus).
+
+And Java still fails to overload `==` for strings, and has no alternative to
+the C99 #define, so no way you can do
+  #include "common.h"
+  #define PS public static
+  #define Str String[]
+
+Yet the decision was to use Ghidra's IDE, so we have to deal with imperfections.
+Otherwise we have more luck adapting Ghidra's decompiler (which is C++)
+to work as a plugin with the pirated IDA Pro SDK.
+
+
+Anyway, since Eclipse is ready, when can run:
+
+  gradle buildGhidra prepdev eclipse buildNatives
+
+After that we import the Ghidra projects into Eclipse:
+* Right click on the projects view
+* *File* -> *Import...*
+* *General* | *Existing Projects into Workspace*
+* Select root directory to be your downloaded or cloned ghidra source repository
+* Check *Search for nested projects*
+* Click *Finish*
+
+Now we left click the ___root folder and pick Run As, and pick Ghidra.
+After that F11 or Ctrl-F11 could be used to run it quicker.
+
+
+Navigating The Code
+________________________________________________
+Finally we are prepared to fiddle with the Ghidra's code. 
+So in DecompilerProvider.java we rename "Decompile: " to "Our Decompile: "
+Press F11 and see what we expect to see.
+
+Next is locating the decompiler's return code.
+The point of interest in DecompilerProvider.java is:
+
+  private void doRefresh(boolean optionsChanged) {
+    ...
+    controller.setOptions(decompilerOptions);
+    if (currentLocation != null) {
+      controller.refreshDisplay(program, currentLocation, null);
+    }
+
+To find the refreshDisplay function, we must
+* place the editing cursor on the name
+* press Ctrl-G (Go to declaration)
+* press enter.
+Or through RMB -> Declartions -> Workspace.
+There is also Ctrl-Shift-G to locate the uses.
+A tad easier than using grep or ctags, which just grind through the OOP mess.
+
+In addition to Ctrl-G, we will need bookmarks.
+To set a book mark one either RMBs left of the line number, or Edit->Bookmark.
+Accessing the set bookmarks is harder. One has to open the Bookmarks view:
+  Windows -> Show View -> Other -> General -> Bookmarks
+Just like Ctrl-G, bookmarks are mandatory when working with Java projects,
+which tends to have millions SLOC of boilerplate in thousandos of files.
+
+
+Anyway, now we are inside
+  Ghidra/Features/Decompiler/src/main/java/ghidra/app/decompiler/component/DecompilerController.java
+
+Which does:
+  clearCache();
+  decompilerMgr.decompile(program, location, null, debugFile, true);
+
+Again, we place cursor on `decompile` and press Ctrl-G, getting to
+   new DecompileRunnable(program, location, debugFile, viewerPosition, this);
+
+one more Ctrl-G and we are inside DecompileRunnable.java, seeing
+  public void monitoredRun(TaskMonitor monitor) {
+    ...
+    decompilerManager.decompile(program, functionToDecompile, debugFile, monitor);
+    ...
+    
+Another Ctrl-G leads use to Decompiler.java and its's
+    return ifc.decompileFunction(function, timeout, monitor);
+
+Next Ctrl-G got us to
+  Ghidra\Features\Decompiler\src\main\java\ghidra\app\decompiler\DecompInterface.java
+
+We are finally at the place where Java code communicates with the C++'s
+DecompileProcess. The DecompileCallback is used by the C++ code
+to query information from the Ghidra's database. 
+But we are interested in
+  decompileFunction(Function func, int timeoutSecs, TaskMonitor monitor) {
+    ...
+    new DecompileResults(...);
+
+DecompileResults calls the `decodeStream(Decoder decoder)`, which
+uses `ClangMarkup.buildClangTree(decoder, hfunc)` to parse the XML results
+of the decompilation into the docroot variable.
+
+The docroot variable has all the raw decompiled names as text tokens.
+We can dump them to the stdout using Ghidra's
+
+  Msg.info(this, "Hello, " + "World!");` to printf.
+
+But the `System.out.printf("Hello %s!%n", "World")` works okay too.
+
+
+To rename these "unique" local variables we need to compare hashes.
+So we do similar, searching for &quot;Rename Local Variable&quot; title,
+and then Ctrl-G'ing from it towards the place where it is saved.
+That gets us to the:
+
+  HighFunctionDBUtil.updateDBVariable(...)
+
+which basically does:
+
+  tmpHigh = highSymbol.getHighVariable();
+  DynamicEntry entry = DynamicEntry.build(tmpHigh.getRepresentative());
+	storage = entry.getStorage();
+  var = createLocalVariable(function, dataType, storage, pcAddr, source);
+
+The DynamicEntry.build basically remaps the variable's storage from
+the decompilers unique: space the IDE's HASH:, which we see the listing.
+
+
+Modifying The Code
+________________________________________________
+Now we have to dig into the parsed DecompileResults's docroot,
+replacing the variable names using getText and setText.
+
+  public class HighSymbol {
+    public void setName(String n) { name = n; }
+    ...
+
+  public class DecompileResults {
+  ...
+  private void decodeStream(Decoder decoder) {
+    ...
+    decoder.closeElement(docel);
+    renameUniqs();
+  }
+
+	public void renameUniqs() {
+		//System.out.printf("Decompiled HighSymbols for %s:%n", function.getName());
+		LocalSymbolMap lsm = getHighFunction().getLocalSymbolMap();
+		java.util.HashMap<String,String> renameMap = new java.util.HashMap<String,String>();
+		for (HighSymbol highSymbol : lsm.getNameToSymbolMap().values()) {
+			VariableStorage storage = highSymbol.getStorage();
+			if (!storage.isUniqueStorage()) continue; //skip non unique: variables
+
+			//unique variables have to be converted to HASH: storage, so we can compare them
+			//with the user named hashes.
+			HighVariable tmpHigh = highSymbol.getHighVariable();
+			if (!storage.isHashStorage() && tmpHigh != null && tmpHigh.requiresDynamicStorage()) {
+				DynamicEntry entry = DynamicEntry.build(tmpHigh.getRepresentative());
+				storage = entry.getStorage();
+			}
+			String hash = storage.getFirstVarnode().getAddress().toString(true);
+			//System.out.printf("  * %s %s%n", highSymbol.getName(), hash);
+			for (ghidra.program.model.listing.Variable var : getFunction().getLocalVariables()) {
+				if (!var.isUniqueVariable()) continue;
+				String hash2 = var.getFirstStorageVarnode().getAddress().toString(true);
+				if (hash.equals(hash2)) {
+					//System.out.printf("    %s is %s%n", highSymbol.getName(), var.getName());
+					renameMap.put(highSymbol.getName(), var.getName());
+					highSymbol.setName(var.getName());
+				}
+			}
+		}
+		if (renameMap.size() == 0) return;
+		
+		List<ClangNode> alltoks = new ArrayList<>();
+		docroot.flatten(alltoks);
+		if (alltoks.isEmpty()) return;
+
+		for (int i = 0; i < alltoks.size(); ++i) {
+			ClangToken token = (ClangToken) alltoks.get(i);
+			String tokenText = token.getText();
+			//System.out.printf("  %d:'%s'%n", token.isVariableRef()?1:0, tokenText);
+			String renamed = renameMap.get(tokenText);
+			if (renamed != null) token.setText(renamed);
+		}
+	}
+
+
+
+Now Rename Variable works as expected.
+But we are still far from doing the actually fun stuff.
+The way is blocked by our first end level boss - the Borland overlay manager.
+
+To be continued...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The Borland Overlay Manager
+________________________________________________
+
+Before proceeding to overlays, we need to undestand how DOS MZ executables work.
+So to run an executable, DOS first reads the following header:
+
+  typedef struct {
+    uint16_t magic;    /*00 Magic number MZ_MAGIC */
+    uint16_t cblp;     /*02 Bytes of last page */
+                       /*   If it is 4, it should be treated as 0,
+                            since pre-1.10 versions of the MS linker
+                            set it that way. */
+    uint16_t cp;       /*04 Pages in file */
+    uint16_t crlc;     /*06 Number of relocation entries */
+    uint16_t cparhdr;  /*08 Size of header in paragraphs */
+    uint16_t minalloc; /*0A Minimum extra paragraphs needed */
+    uint16_t maxalloc; /*0C Maximum extra paragraphs needed */
+                       /*   if 0 DOS loads as high as possible, else above PSP*/
+                       /*   The maximum allocation is set to FFFFh by default.*/
+    uint16_t ss;       /*0E Initial (relative) SS value */
+    uint16_t sp;       /*10 Initial SP value */
+    uint16_t csum;     /*12 Checksum */
+    uint16_t ip;       /*14 Initial IP value */
+    uint16_t cs;       /*16 Initial (relative) CS value */
+    uint16_t lfarlc;   /*18 File address of relocation table */
+    uint16_t ovno;     /*1A Microsoft Overlay number
+                            MS LINK can create single EXE containing multiple
+                            overlays (up to 63) which are simply numbered in
+                            sequence.
+                            The 0 one is loaded by DOS
+                            Each overlay within the file is essentially an
+                            EXE file with it's own MZ header.*/
+  } PACKED mz_hdr_t;
+
+DOS checks the `magic` to be "MZ" and calculates the size of
+the initial part of the executable to load:
+
+  load_sz = (mz_hdr_t.cp-1)*512 + mz_hdr_t.cblp
+
+Checks if it has load_sz of conventional memory to load the exe.
+And then DOS loads the first load_sz bytes of exe, either above the PSP,
+or, if maxalloc is 0, at the top of conventional memory.
+The load_sz includes the header too.
+Everything after these load_sz bytes is ignored, so in fact you can store
+there your program's static or even dynamic data.
+
+Lets assume DOS loaded the executable at the start_ofs.
+
+Once that initial part of .EXE is in memory, DOS goes to the mz_hdr_t.lfarlc.
+There it goes through the array of
+
+  typedef struct { /* segment:offset pair address */
+    uint16_t ofs; //offset from the start of segment
+    uint16_t seg; //segment part of the address
+  } PACKED far_t;
+
+These pointers are the so called relocation table (also called `fixup` table).
+They point at the uint16_t segments, inside the compiled code and data.
+DOS adds to each such relative segment the value of the address of the segment
+containing `start_ofs + mz_hdr_t.cparhdr*16`. That address corresponds to the
+Ghidra's 0x10000, which is just above the imagined interrupts table,
+bios data area and DOS. Yes, DOS was below 64K, but it also kept the resident
+part of COMMAND.COM in the highers conventional memory area or in high memory.
+
+After that DOS does relocates the SS and CS segments, from the header,
+sets DS,ES to the start of PSP, and jumps to the mz_hdr_t.ip, which corresponds
+to the C0.ASM's STARTX procedure. STARTX initializes the runtime, like the file
+IO system, argc/argv, environment, C++ constructors and the overlay manager.
+DOS discards the original mz_hdr_t and relocation table after processing.
+
+Note also, that the segments, both in the relocation table far_t pointers,
+and at the locations pointed by these pointers roughly correspond to the
+OBJ files used to produce the executable. But the compiler doesn't respect the
+16-bit segment alignment, when joining functions from multiple object files,
+so these segments may precede their code or data. In case of STRONG.EXE that
+happens with the main() routine, whose segment in relocation table points
+a few bytes before it. The only way to determine actual segment starts is
+by doing disassembly analysis, like Ghidra does, creating the list of
+memory blocks in the Memory Map. 
+
+Unfortunately Ghidra misses the PSP segment (256 bytes before the seg 0 in the
+relocation table), as well as the SS segment. We have to create these manually.
+Given the 0x10000 default Ghidra's load address, the PSP should reside at
+0x0FF00. Everything below 0x0FF00 we can use to load our own stuff in Ghidra.
+For example, I use it to create fake structures overriding the data segment
+analysis and decompilation.
+
+
+Ok. Lets proceed with decompiling the STARTX() procedure at 0x10000.
+Note: if you follow the C0.ASM, it has a lot of IFDEFs, among them is
+
+  __BOSS__
+
+That stands for `Borland Operating System Services`, a i286 protected mode
+DOS extender. Obviously never defined, since it was slower than overlays.
+Same way _DSSTACK_ isn't defined, while LDATA is defined.
+Note also that compiler adds '_' to all C symbols it compiles,
+while the ASM symbols start with __ underscores or no underscore,
+to avoid conflicts with the C symbols.
+To make it easier to follow, I've edited that c0.asm, evaluating the IFDEFs
+to match the STRONG.EXE startup code, adding a few more annotations:
+https://github.com/NancyAurum/devroomm/blob/main/src/c0.asm
+
+I've also decompiled the STARTX code into c0.c, so the general working will be
+more clear. Note that the DOS_* and BIOS_* functions should ideally be macros,
+since they get invoked when the stack isn't initialized properly yet:
+https://github.com/NancyAurum/devroomm/blob/main/src/c0.c
+
+In a nutshell, the STARTX() does the following:
+* Saves the relocated address of the _DATA/DGROUP segment inside the CS,
+  so that the MZ relocation table wont get overbloated.
+  In large models DGROUP is just all global data.
+* Saves segment of psp->hiseg, basically the `(start_ofs + loaded_sz + 15)/16`
+* Saves _psp->envseg (pointer to the environment).
+* Saves DOS version
+* Save several interrupt handlers, becasue signal() can clobber them.
+* Installs default divide by zero handler.
+* Counts number of environment variables.
+* Checks if the user requested _stklen (stack length) is large enough (>256B)
+  to run the C runtime library procedures. Checks if it is small enough
+  to fit inside the available conventional memory.
+* Initializes malloc and sbrk variables, and frees unused memory.
+* Resets the uninitialized data area (BSS) to 0.
+* Save the motherboard's real-time clock value of the program's start.
+  It is then used by C's standard library's clock() function
+  The default RTC resolution is 32768 kHz. I.e. it is a millisecond clock.
+* Together with clock ticks, the BIOS_ReadRTC call returns the is_midnight flag.
+  Which indicates whether the current time has just transitioned past midnight. 
+  This flag is particularly used by system routines that need to perform
+  specific actions at the start of a new day, such as updating the system date.
+  So we are obliged to save it to the BIOS Data Area (BDA) at 40:70.
+* Calls StartExit(), which runs the initialization routines, like
+  the overlay manager preparation, opens stdin/stdout, creates argv and envp,
+  then runs the constructors for the global objects.
+  The argv generation code is actually really involved, since DOS executables
+  handle the '*' wildcards themselves, as opposed to shell like bash doing that.
+  The argv code also does the '\' escapes.
+* Calls main().
+* Calls exit() with the value returned by main.
+  exit() runs class destructors, flushes I/O buffers, closes streams and files.
+  Then exit() exits to DOS with the value returned by main().
+
+Note that the default _stklen value 0x1000 is defined in CLIB/STKLEN.C.
+STRONG.EXE's _stklen is 0x1400, meaning that the developers modified it.
+So either the games uses highly recursive code or allocates large local buffers.
+But how could they modify at compiler time a global variable, like
+_nfile or _stklen, set inside one of the compiled C standard library's OBJs?
+
+Well, Borland C++ 3.0 allowed statements like
+
+    extern unsigned _stklen = 54321U;
+
+which redefined the value of an external variable.
+Kind of an compile-time inter-obj configuration API.
+Obviously linker support required too.
+
+Nowadays we init stack through some code like:
+
+    gcc -Wl,--stack,54321 -o myprogram myprogram.c
+
+because the stack initialization is now handled by the operating systems,
+during the executable file load.
+
+But what if you actually need to user-side configure library extern variables?
+Well, good luck writing your own compiler and linker, since elegant and useful
+features tend to be removed from the modern languages. So while some compilers
+do support it, it is non-standard and requires obscure tricks, like the GCC's
+
+  unsigned int _stklen __attribute__((weak)) = 54321;
+
+
+It is also interesting to see how sbrk() is the C standard library procedure,
+while in the original Unix it was part of the kernel. BC++ sbrk works similarly
+to how Unix on PDP-11 operated. Like x86, PDP-11 had segmented memory, and
+the PDP-11 segments had sizes. The CPU did bounds checking for memory accesses,
+resulting in "segmentation fault" outside of the size allocated for program.
+The sbrk() changed the program's segment size, so malloc() had more workspace.
+Unforunately x86 never supported segments bounds checking, instead they came
+with the far less efficient page table based MMU-gliness, which can slow down
+some applications by a factor for 10.
+
+Anyway, we have to move on to actually fun things and decompile game's main().
+Well, if only everything was that easy... all functions called inside main()
+have `int 0x3f` as their first and only instruction, which the confused
+Ghidra sometimes incorrectly splits among several invalid instructions.
+Around it we see a lot of other `int 0x3f`, each followed by 2 of what appears
+to be an offset and additional byte, which is always 0. Yet the CD,3F (int 0x3f)
+at the start of the segment is somewhat different, followed by 0x0000,
+instead of an offset, and some additional data fields, ending in streak of 00h.
+Apparently a header of sorts, of size 32 bytes and a runtime working area.
+
+Normally DOS doesn't install any `int 0x3f` handler, so it must be some
+code inside StartExit. Normally we also never see many functions
+using interrupts, outside of the debugger inserted break points.
+So it must be the code compiler produced for the overlay manager.
+In other words, the main() is completely closed to us, since code it calls
+wasn't even loaded by Ghidra from the STRONG.EXE. It seems we have no option
+but to face this level's boss - Broland Overlay Manager.
+
+The initialization of the OvrMan can only happen inside the StartExit routine.
+Trying to decompile StartExit, we notice that Ghidra doesn't fully support
+the 16bit seg:offset pointers. That is actually a widely requested feature:
+https://github.com/NationalSecurityAgency/ghidra/discussions/2584
+
+Ghidra's developers say the support requires improving the entire framework:
+  
+  The definition is incomplete but is limited by GHIDRA's current capabilities.
+
+For now we can work around that by manually specifying the segments
+for the references to known addresses. Tedious, but better than nothing.
+In addition we will use the Data Type Manager to define far_t structure
+
+  typedef {
+    uint16_t off;
+    uint16_t seg;
+  } far_t;
+
+we will use that struct as a type for all far pointers we encounter.
+For example, strlen will be decompiled as
+
+  size_t __cdecl16far strlen(far_t str)
+
+
+which is a bit clearer than the
+
+   size_t __cdecl16far strlen(uint16_t str_ofs, uint16_t str_seg)
+
+In addition we will encounter statements like
+
+  CONCAT12(x,y) // takes one byte from x and two byte from y and combine them.
+  CONCAT11(0x3f,in_AL); //decompiled `mov AH,0x3F`: (0x3F<<8) | in_AL
+
+or 
+
+  // return NULL
+  result._0_2_ = 0;
+  result._2_2_ = 0;
+
+
+That `._O_L_` is the Ghidras way of saying L bytes at offset O bytes inside
+the value. In that case LO and HI words of the result. That means Ghidra failed
+to decompile the int32_t operations properly.
+
+To make everything clear, lets translate the StartExit() to C99, since
+the term "decompile" would be inappropriate for the code which was never
+compiled.
+
+  #define SE_NEAR 0
+  #define SE_FAR  1
+  #define SE_OVER 0xFF
+  typedef struct { // Borland Startup Entry
+    uint8_t calltype;  //SE_NEAR,SE_FAR,SE_OVER
+    uint8_t priority;  //lower priority entires run first on startup
+                       //and last on shutdown
+    far_t proc;        //procedure
+  } PACKED brl_se_t;
+
+  void near StartExit(borland_SE* se_start, borland_SE* se_end) {
+    int doing_init = se_start == InitStart;
+    while (1) {
+      borland_SE *cur_se = se_end;
+      uint8_t cur_priority = doing_init ? 0xff : 0;
+
+      for (borland_SE *se = se_start; se != se_end; se++) {
+        if (se->calltype == SE_OVER) continue;
+        bool better = doing_init ? (se->priority <= cur_priority)
+                                 : (se->priority >= cur_priority);
+        if (better) {
+          cur_priority = se->priority;
+          cur_se = se;
+        }
+      }
+
+      // till we process all entries in order of priority
+      if (cur_se == se_end) break;
+
+      uint8_t calltype = cur_se->calltype;
+      cur_se->calltype = SE_OVER; // mark as processed
+
+      if (calltype == SE_NEAR) NEAR_FN(cur_se->proc)();
+      else FAR_FN(cur_se->proc)();
+    }
+    return;
+  }
+
+So the routine is used for both initialization and deintialization.
+And during initialization the lowest priority entries are first to run.
+
+STARTX() call it like that StartExit(InitStart, InitEnd).
+The InitStart and InitEnd are labels for a section dynamically formed by
+LINK.EXE from all the `_INIT_		SEGMENT WORD PUBLIC 'INITDATA'` segments.
+For example in SETARGV.ASM we have:
+  
+  _INIT_		SEGMENT WORD PUBLIC 'INITDATA'
+      db      0                       ;near call
+      db      16                      ;priority 16
+      dw      offset __setargv
+      dw      ?
+  _INIT_		ENDS
+
+For C code Borland C++ 3.0 also supports the
+
+  #pragma startup <function_name> <priority>
+
+For example,
+
+  #pragma startup _c0crtinit 16
+
+Neat?
+
+We don't have source code for the Borland's Overlay Manager, but it is the same. 
+So if your FIDB are correctly made, going to InitStart[] you should see
+something like:
+
+  brl_se_t InitStart[] = { //start of the _INIT_ segment
+    //these are the startup entries present in STRONG.EXE
+    {SE_FAR , 1,&_OvrPrepare},  //init overlay manager
+    {SE_NEAR, 2,&_setupio},     //init I/O
+    {SE_NEAR,16,&_c0crtinit},   //init textmode video
+    {SE_NEAR,16,&_setargv},     //init argv and envp vectors
+  };
+
+First in table _OvrPrepare the has the lowest priority, so runs first.
+The _OvrPrepare gets linked from the OVRUSER.OBJ in OVERLAY.LIB.
+There is no source code for the OVERLAY.LIB, but fortunately *.OBJ files
+hold the symbol names for the symbols they reference in other OBJs.
+The Ghidra does expose the _INIT_ section near end of its list of memory blocks.
+The _INIT_ section for OVERLAY.LIB has that _OvrPrepare entry.
+
+Running strings on OVERLAY.LIB, we see that it has additional compiler
+information, which Ghidra happily ignores. So dumping it could help us
+understanding the original overlay project's organization. Ghidra also doesn't
+allow saving the imported OBJ files, so we need a way to extract *.OBJ files
+from the OVERLAY.LIB.
+
+The OMF LIB files are the simple uncompressed archives. Despite the formats
+simplicity and historically wide use, there are no modern Windows software
+to work with it. So we will need the LIB.EXE from one of the old MSC or
+MASM distributions. I used the LIB.EXE v3.20.010 circa 1992.
+Obviously it needs a DOSBox to run it.
+
+LIB.EXE has a really old style IBMish command argument format, where arguments
+are separated by `,`. And there is no option to extract everything at once.
+First we have to list the files in archive by doing:
+
+  lib OVERLAY.LIB,listfile;
+
+That produces a file called LISTFILE, which we have to filter for the OBJ names.
+
+  cat LISTFILE | grep '^[^ ]' | grep -v '\.\.' | grep -o '^[A-Za-z_.]*' \
+      | sort | sed 's/\(.*\)/lib OVERLAY.LIB *\1;/' | unix2dos >unpack.bat
+
+That produces the unpack.bat, which will invoke LIB.EXE for each OBJ file.
+
+Next step is dumping the database tables from the extracted OBJ files.
+Again, there is no established modern solution to do that, despite
+the historical significance of the OMF files.
+
+Luckily there is a basic python script, dumping the OMF info
+https://github.com/JohnVillalovos/omf_parser_py
+
+The script's author apparently cared only about the Novell NetWare history,
+so we have to replace the
+  with open("numon.obj", "rb") as in_file:
+
+with
+  with open(sys.argv[1], "rb") as in_file:
+
+Now we can run say `obj-decoder.py OVRMAN.OBJ`, listing all the entries ignored
+by Ghidra. In particular from `CMT_LANGUAGE_TRANS` we learn that the OBJ was
+complied with `Turbo Assembler  Version 1.01`.
+
+Unfortunately the the Python script doesn't properly dump the CMT_DEPENDENCY,
+which has the following format:
+
+  typedef struct {
+    uint8_t cmt_class; //0xE9 for CMT_DEPENDENCY
+    uint16_t dos_date; //date that dependency file was modified
+    uint16_t dos_time; //time that dependency file was modified
+    uint8_t fnlen;
+    char filename[fnlen];
+  } omf_comment;
+
+
+For our archological study we want it in a nice human readable form.
+To do that we need to mod the __str__ method of the ComentRecord class:
+
+    def __str__(self, **kwargs):
+        extra = " comment_type: 0x{:02X},".format(self.comment_type)
+        if self.comment_class == 0xE9 and len(self._payload)>6:
+            p = self._payload
+            fnlen = p[6]
+            filename = p[7:7+fnlen]
+            date = p[2] + p[3]*256
+            time = p[4] + p[5]*256
+            year = (time>>9)+1980
+            month = (time>>5)&0xf
+            day = time&0x1f;
+            hour = (time>>11) & 0x1f;
+            minute = (time>>5) & 0x3f;
+            second = (time&0x1f) * 2
+            extra += f" date: {year}:{month:02}:{day:02}"
+            extra += f"  {hour:02}:{minute:02}:{second:02},"
+            extra += f" file: {filename},"
+            return super().__str__(extra=extra)
+        ...
+
+We will also have to modify the parse_object_module and create_record,
+so it will skip the LIDATA records, instead of giving errors.
+
+Now we can list every dependency for every Borland C++ 3.0 OVERLAY.LIB OBJ file:
+
+  for obj in obj/*.OBJ; do
+    echo "${obj}:"
+    python obj-decoder.py obj/OVRMAN.OBJ                  \
+           | grep -o 'date: .* data'                      \
+           | sed "s/', data//" | sed "s/, file: b'/   /"  \
+           | sed 's/date: /  /' | sed 's/\\\\/\\/g'
+    echo ""
+  done
+
+  obj/OVRBUFF.OBJ:
+    1989:11:22  02:27:44   ..\YALBUFF.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+
+  obj/OVRDAT.OBJ:
+    1990:05:21  02:37:42   ..\YOMDAT.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:10:04  02:26:08   ..\yominc\SEGMENT.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+    1990:04:09  02:36:18   ..\yominc\YALTA.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:11:08  02:27:16   ..\yominc\OVERLAY.AI
+
+  obj/OVRDATA.OBJ:
+    1990:09:06  02:41:12   ..\YALTADAT.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:10:04  02:26:08   ..\yominc\SEGMENT.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+    1990:04:09  02:36:18   ..\yominc\YALTA.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:11:08  02:27:16   ..\yominc\OVERLAY.AI
+
+  obj/OVRDETEC.OBJ:
+    1991:05:14  02:53:28   ..\YOMDETEC.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1990:08:30  02:40:60   ..\yominc\YOM.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:10:04  02:26:08   ..\yominc\SEGMENT.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+    1990:04:09  02:36:18   ..\yominc\YALTA.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:11:08  02:27:16   ..\yominc\OVERLAY.AI
+
+  obj/OVRHALT.OBJ:
+    1990:09:06  02:41:12   ..\YHALT.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+
+  obj/OVRHP.OBJ:
+    1991:04:12  02:52:24   ..\YOMHP.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+
+  obj/OVRMAN.OBJ:
+    1991:03:18  02:51:36   ..\YALTA.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1990:08:30  02:40:60   ..\yominc\YOM.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:10:04  02:26:08   ..\yominc\SEGMENT.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+    1990:04:09  02:36:18   ..\yominc\YALTA.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:11:08  02:27:16   ..\yominc\OVERLAY.AI
+
+  obj/OVRSWAP.OBJ:
+    1990:09:06  02:41:12   ..\YALTAMEM.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1990:08:30  02:40:60   ..\yominc\YOM.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:10:04  02:26:08   ..\yominc\SEGMENT.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+    1990:04:09  02:36:18   ..\yominc\YALTA.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:11:08  02:27:16   ..\yominc\OVERLAY.AI
+
+  obj/OVRUSER.OBJ:
+    1990:09:07  02:41:14   ..\YALTUSER.ASM
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:10:04  02:26:08   ..\yominc\SEGMENT.AI
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+    1990:04:09  02:36:18   ..\yominc\YALTA.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+    1989:11:08  02:27:16   ..\yominc\OVERLAY.AI
+
+  obj/SETJMP.OBJ:
+    1990:09:10  02:41:20   ..\YOMJMP.ASM
+    1989:07:07  02:23:14   ..\yominc\RULES.AI
+    1991:02:19  02:50:38   ..\yominc\YVERSION.AI
+
+The first dependency line is the original .ASM file, the *.AI are the
+assembly include files, similar to the C/C++ *.h files.
+Note that the DOS file times are in local time, not the UTC/GMT time.
+Borland developers surely had an extended work day...
+
+Anyway, they had a build folder inside the overlay sources folder,
+where they ran TASM.EXE to produce the OBJ files.
+"om" there stands for the overlay manager, but what is "y"?
+Yet another overlay manager? Because Borland alone had two previous managers.
+The dependency YVERSION.AI appears up to 3 times per OBJ, apparently because
+it was also included by the other included files.
+I.e. YALTA.AI and YOM.AI also include YVERSION.AI, in addition to every ASM
+including it as first line (except YOMJMP.ASM, where it came after RULES.AI).
+
+Given that OVERLAY.LIB was compiled from pure *.ASM by late night programmers,
+we should expect weird code, with a few `push cs`/`pop ds`, `mov BP,0`,
+and the returns with a carry flag acrosz multiple procedures,
+with total absence of any good conventions, like the stack frames or standard
+library calls. So lets first gather a bit more information about our specimen.
+
+Googling the history of overlay managers for DOS, we discover that
+there were actually multiple overlay libraries, including several for Borland
+products. Most work through an overlay stack, pushing a popping overlays,
+as the calls progress, except the Borland C++ one, which is called VROOMM.
+The VROOMM stands for 'Virtual Run-time Object-Oriented Memory Manager'.
+As the name suggests, it was made to support object-oriented code, and therefore
+has more fine grained linking scheme.
+
+Still we check the other overlay implemenations. One of them is OVERMGR.TPU
+by Turbopower Software. The OVERMGR.TPU copy was preserved at a Russian site:
+https://pascal.sources.ru/comm/pibter41.htm
+But it doesn't share code with the OVERLAY.LIB we are dealing with.
+
+Another implementation comes with Borland Pascal as OVERLAY.OBJ, which, while
+much smaller, has API similar to the Bolrand C++ 3.0 one. Checking the dates...
+
+obj/OVEREMS.OBJ:
+  1991:07:25  02:55:50   ovr\overems.ASM
+  1992:08:13  03:08:26   \bp7\com\SE.ASM
+
+obj/OVERLAY.OBJ:
+  1990:12:12  02:44:24   ovr\overlay.ASM
+  1992:08:13  03:08:26   \bp7\com\SE.ASM
+
+we see that it was made after the Borland C++ one. So it could be a simplified
+version, in the same vein how Borland Pascal was always inferior to Borland C++.
+We also notice the `\bp7\com\SE.ASM` include, which surprisingly comes with
+the standard library in `\RTL\INC\SE.ASM`. Among other definitions it has:
+
+  ; Overlay header record
+  ovSignature     equ     (word ptr 0)
+  ovSaveReturn    equ     (word ptr 2)
+  ovFilePos       equ     (dword ptr 4)
+  ovCodeSize      equ     (word ptr 8)
+  ovFixupSize     equ     (word ptr 10)
+  ovJumpCount     equ     (word ptr 12)
+  ovLink          equ     (word ptr 14)
+  ovSegment       equ     (word ptr 16)
+  ovRetryCount    equ     (word ptr 18)
+  ovNext          equ     (word ptr 20)
+  ovEmsPage       equ     (word ptr 22)
+  ovEmsOffset     equ     (word ptr 24)
+  ovUserData      equ     (byte ptr 26)
+  ovVectors       equ     (byte ptr 32)
+  ovRecSize       equ     32
+
+Wait a second! That appears to match the structure we seen at the start of
+these `int 0x3f` segments!!! And the value at ovJumpCount correspons
+to the number of these 5 byte entries, main() calls to. We are up to something!
+That is apparently the so called trampoline/veneer stubs table.
+These are created by compilers to approach distant code, such as the DLL one,
+or well, in OS kernel syscall dispatchers. In our case, code is the dynamically
+linked overlay residing on disk. So triggering these ints leads to
+the actual function's code being loaded and the cotrol transfered to it.
+
+Still we need a clarification how exactly that happens, so we can properly load
+the STRONG.EXE into Ghidra. But now we are ready to challenge
+the OvrMan and proceed towards decompiling _OvrPrepare.
+
+_OvrPrepare begins with the
+
+  MOV AX,offset _OVRDATA_ ;;in STRONG.EXE, _OVRDATA_=0x225d
+  MOV DS,AX
+
+meaning it uses a personal data segment, not the usual DGROUP, the rest of
+standard library uses. It also resides in a different code segment: 1403. 
+
+To decompile the code, we have to manually introduce and override the segment
+refernces, because Ghidra is bad at 16bit x86 and assigns all references to DS,
+while also ignoring the instructions like `pop ES`. I.e. we have to do
+`Set Register Values` starting from the `MOV DI,0x6` in the code like following:
+
+  assume ES = 0x1403
+    MOV   DI, 0x6   ;; DI obviously points inside the CS segment
+    push  CS
+    pop   ES
+    ...             ;; do comparison here
+  assume ES = <previous value>
+
+Aftewards we can manually override the 0x6 reference to go inside the CS:0006.
+That way the decompiler catches it correctly. In any case, we have to be
+aware that the analyzer produces incorrect references for the segmented code.
+
+
+The OvrMan code is really handcrafted and does rather complex things, like
+parsing the actual x86 instructions and garbage collecting the heap.
+After some work, we decompile the initial batch of the code, responsible for
+the loading of the overlay from file and relocating them: 
+https://github.com/NancyAurum/devroomm/blob/main/src/ovrman.c
+
+OvrPrepare calls __InitModules(), allocates large buffer of memory for storing
+the currently loaded overlays. Then it calls __OVRINIT, to initialize
+the handler for the `int 3Fh` interrupts, which Bolrand C++ 3.0 emitted instead
+of calls to the overlayed functions. OvrMan is expected to resolve these calls
+at runtime, by the means of __OvrTrapHandler at the 1403:04f1, which begins
+by checking that the frame pointer is aligned, and then proceeds by checking
+that it is the overlay header or the trampouline table call...
+
+In general we learn, that after the MZ executable, aligned to the paragraph
+is located a set of `FB` sections, and that the `OV` section contains actual
+overlay. These `FB` sections are completely ignored by DOS. That is how
+self extracting archives are implemented: they just have zip archive
+after the MZ executable, which opens itself and seeks past the MZ data.
+
+That FB/OV section duplicates the __SEGTABLE__ processed by __InitModules.
+
+All in all, we now have enough information to relocation our overlays manually,
+so they could be loaded in Ghidra, opening the main() function to us.
+Fortunatelly each overlay corresponds roughly to a single .C file, while
+also exposing all its functions. Meaning that overlays actually help us by
+preserving more information about the original code. In fact, we already
+know that STRONG.EXE was built from around 60 source files.
+
+Ghidra nicely exposes overlays as CODE_XX header+jump_table blocks.
+But they tend to end in the middle of data. Where did these segments came from?
+Well, old DOS MZ had no proper proper segment/section table.
+Instead we have the seg:ofs pairs, which point to the segment references inside
+the exectuable for the DOS MZ loader to relocate.
+Ghidra collected all these segment values, both from the relocation table,
+and from the values being relocated. Then Ghidra sorted them by their order
+in memory and tried to guess their sizes by doing disassembly analysis,
+since always start on paragraph boundary, which may contain code from
+the previous segment. But disassembly works for code, not data analyzis.
+Therefore the abrupt ends in the middle of data.
+
+The last segment is usually the stack segment. For STRONG.EXE it is 128 bytes.
+But Ghidra misdetects it as a 16 bytes, despite the fact that its size
+could be deduced from the SP field in the MZ.
+
+After stack segment comes the overlay relocations table, which has the FBOV id.
+
+To summarize, after a large model BC++ exe is loaded, the memory layout is:
+* Table of far_t interrupt pointers.
+* BDA
+* DOS kernel (back in the day entire OS kernel fit in 64K)
+* PSP (also the initial value of DS and ES)
+* C runtime segment (0x10000 in Ghidra, STARTX, stdlib, etc...).
+  The MZ header and relocation table are missing.
+* Overlay Library.
+* A few more non-overlayed OBJs (i.e. mouse and video code).
+* Segment holding main()
+* Overlay headers (bosh_t + trampouline table)
+* _DATA or DGROUP segment
+* BSS (zero-inited variables)
+* Stack segment
+* Overlay buffer (since it is allocated first)
+* User heap data.
+* Video memory stating 0xA0000
+
+And we can pretend that overlay buffer is really larger and load there
+all out overlays. Of course will prevent us from running the analyzed code in
+the builtin emulator and sampled data, but everything is made of trade offs.
+
+
+BTW, I was wrong believing that IDA Pro doesn't support Borland C++ overlays.
+It does,
+http://blog.rewolf.pl/blog/?p=1202
+
+but the IDA overlay loader is from 1994 and needs to be fixed to work with
+the modern IDA. It also doesn't fixup the function address references correctly.
+There was an IDA SDK floating around Russian torrent sites,
+and the SDK has the source code for the Borland's overlay loader.
+But I have already decided to use Ghidra, and you don' change horses on
+the river crossing.
+
+
+
+
+
+
+Loading the Overlays into Ghidra
+________________________________________________
+
+Having fed up with Java, I decided to write some C99 code, which would produce
+a tampered exe with everything pre-prelocated. Such engine could be readily
+loaded into Ghidra saving me from seeing Java ever again.
+
+That kinda worked, but with some analysis issues and all information about
+segments was lost, since Ghidra reliies on the MZ relocation table to produce
+the list of segments. And IDA Pro just couldn't handle such pre-relocated exe.
+
+Then came the realization, that instead of relocating, one can update the MZ
+relocation table and header to include the FBOVs segments, in addition to
+untrapping the trap segments. That way the resulting exe is properly loaded by
+both Ghidra and IDA, although IDA still detects it as a Borland overlayed exe
+and offers to load an external .ovr file (only Turbo Pascal 5.0 supported
+these), even though mzap erases the FBOV id after merge. Would be still nice if
+Ghidra does that properly because the FBOV __SEGTABLE__ has proper segment
+starts and ends, for both normal and overlayed segments.
+
+The resulting utility is called MZap
+https://github.com/NancyAurum/devroomm/blob/main/tools/mzap/mzap.c
+
+It is just a few lines of C99, which do basic things, but researching
+the problem took really a lot of time. The game's main() function is now lies
+open and there is apparently a lot of fun code, but I really got burned out by
+all this fighting with Ghidra and overlays. Although I learned a bit about
+pageless memory management approaches and few tricks which could be useful in
+developing Symta further. So I guess this is the last part. I don't have the
+autistic dedication required for decompiling games.
+
