@@ -1802,7 +1802,7 @@ Loading the Overlays into Ghidra
 ________________________________________________
 
 Having fed up with Java, I decided to write some C99 code, which would produce
-a tampered exe with everything pre-prelocated. Such engine could be readily
+a tampered exe with everything pre-relocated. Such engine could be readily
 loaded into Ghidra saving me from seeing Java ever again.
 
 That kinda worked, but with some analysis issues and all information about

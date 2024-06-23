@@ -16,7 +16,7 @@ uint8_t rand8() { //1000:0730
   if (c&0x100) c = (c&0xFF) + 1;
   s[0] = (c + s[5])&0xFF;
 
-  //shieft right by 8 bites
+  //shift right by 8 bytes
   src = s + 4;
   dst = s + 5;
   for (i = 5; i != 0; i = --i) *dst-- = *src--;
@@ -26,15 +26,12 @@ uint8_t rand8() { //1000:0730
 
 void srand8(uint32_t seed) { //1000:0730
   int i;
-  uint8_t *pseed;
-
-  seed ^= 0x55555555;
-  pseed = (uint8_t*)&seed;
+  uint8_t *pseed = (uint8_t*)&seed;
   s[0] = 0;
-  s[1] = pseed[0];
-  s[2] = pseed[1];
-  s[3] = pseed[2];
-  s[4] = pseed[3];
+  s[1] = pseed[0] ^ 0x55;
+  s[2] = pseed[1] ^ 0x55;
+  s[3] = pseed[2] ^ 0x55;
+  s[4] = pseed[3] ^ 0x55;
   s[5] = 0;
   for (i = 0; i < 200; i++) rand8();
   return;
