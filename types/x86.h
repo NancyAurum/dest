@@ -1,10 +1,6 @@
-#include "stdint.h"
+#include <stdint.h>
 
-struct cfax_t { /* return value in CF:AX */
-    uint16_t value;
-    uint8_t flag;
-};
-
+typedef struct far_t far_t;
 struct far_t { /* off,seg pair */
     uint16_t off;
     uint16_t seg;
@@ -20,3 +16,7 @@ struct LH { /* word hi:low pair */
     uint8_t hi;
 };
 
+struct cfax_t { /* return value in CF:AX */
+    uint16_t value;
+    uint8_t flag;
+};

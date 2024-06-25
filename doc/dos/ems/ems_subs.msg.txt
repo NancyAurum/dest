@@ -1,0 +1,328 @@
+Path: rutgers!ucsd!ames!killer!royf
+From: royf@killer.Dallas.TX.US (Roy Frederick)
+Newsgroups: comp.sys.ibm.pc
+Subject: EMS Routines for TurboC
+Date: 23 Apr 89 17:56:03 GMT
+Keywords: EMS TURBOC
+
+These EMS access routines are in the public domain - no secrets,
+copyrights, or restrictions on use.  There really isn't much to them -
+but I use them in production data collection programs that run every
+day (at least I think these are the versions I am currently using!).
+
+Three routines are included: Emstest.c, emstbl.c, emssubr.asm.  Also a
+header file etbl.h.  Emssubr.asm provides the lowest level access to
+EMS.  It is called by emstbl.c to provide access to tables of fixed
+length items with a total length limited by the amount of EMS present.
+The length of a single table item is limited to <= 16384 (EMS page
+length).  Space beyond the last item in an EMS page is wasted.
+Emstest.c demonstrates the use of emstbl.c.  The routines are set up
+for large model.
+
+C routines have 4 col tabs; ASM , 8 
+
+Etbl.h -------------------------------------------------------------
+/*
+ * Etbl.h -- Structure describing table in EMS
+ */
+
+struct etbl {
+	int e_elen;							/* Table entry length */
+	int e_ecnt;							/* Table entry count */
+	int e_efrm;							/* Frame to be used */
+	int e_ecur;							/* Last assigned entry number */
+	int e_ecpf;							/* Entry count per page */
+	int e_pgs;							/* Pages allocated */
+	int e_hand;							/* EMS Handle */
+} ;
+
+void far * far etmap(struct etbl far *, int);
+int far etinit(struct etbl far *);
+void far etclose(struct etbl far *);
+
+Emstest.c --------------------------------------------------------------------
+/*
+ * Emstest.c -- EMS Table Routines Test Pgm
+ */
+
+#include <dos.h>
+#include <mem.h>
+#include <alloc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+
+#include "etbl.h"
+
+struct etbl et1 = { 100, 1000, 1, 0, 0, 0 } ;
+
+main()
+{
+	int i;
+	int far *q;
+
+	etinit(&et1);
+
+	for (i = 1; i <= 1000; i++) {
+		q = etmap(&et1, i);
+		if (q == 0L)
+			err("Etmap failed for %d", i);
+		*q = i;
+	}
+	for (i = 1; i <= 1000; i++) {
+		q = etmap(&et1, i);
+		if (q == 0L)
+			err("Etmap failed for %d", i);
+		if (*q != i)
+			err("Data error - exp %d got %d", i, *q);
+	}
+	etclose(&et1);
+	err("Test successful");
+}
+
+err(s)
+const char *s;
+{
+	va_list argptr;
+	va_start(argptr, s);
+	fprintf(stderr, "Terminated: ");
+	vfprintf(stderr, s, argptr);
+	fprintf(stderr, "\n");
+	exit(2);
+}
+
+Emstbl.c ----------------------------------------------------------------
+/*
+ * Emstbl -- EMS Table Routines
+ */
+
+#include <dos.h>
+#include <mem.h>
+#include <alloc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+
+#include "etbl.h"
+
+static int eseg;						/* EMS Segment Address */
+
+extern int ems_err;
+
+int far etinit(e)
+struct etbl far *e;
+{
+	int i;
+
+	if (ems_verify() == 0)
+		err("No EMS driver found");
+
+	eseg = ems_getframe();
+	e->e_ecpf = 16384 / e->e_elen;
+	e->e_pgs = (e->e_ecnt + e->e_ecpf - 1) / e->e_ecpf;
+	e->e_ecnt = e->e_pgs * e->e_ecpf;
+
+	if ((e->e_hand = ems_alloc(e->e_pgs)) == 0)
+		err("Not enough EMS available");
+	for (i = 0; i < e->e_pgs; i++) {
+		if (ems_map(e->e_efrm, e->e_hand, i) == 0)
+			err("EMS_MAP failed err %02x  handle %04X  page %02X",
+				ems_err, e->e_hand, i);
+		memset(MK_FP(eseg, (e->e_efrm << 14)), 0, 16384);
+	}
+
+	e->e_ecur = 0;
+	return(0);
+}
+
+void far * far etmap(e, ndx)
+struct etbl far *e;
+int ndx;
+{
+	int i, j, pg;
+	j = ndx - 1;
+	i = j / e->e_ecpf;
+	j = j % e->e_ecpf;
+	pg = e->e_efrm;
+	if (ems_map(pg, e->e_hand, i) == 0)
+		err("EMS_MAP failed err %02x  handle %04X  page %02X",
+			ems_err, e->e_hand, i);
+	return(MK_FP((eseg + (pg << 10)), (j * e->e_elen)));
+}
+
+void far etclose(e)
+struct etbl far *e;
+{
+	ems_free(e->e_hand);
+	e->e_elen = e->e_ecur = e->e_ecnt = e->e_hand = 0;
+}
+
+
+Emssubr.asm -----------------------------------------------------------
+----assemble with TASM /W2 /MX emssubr -------------------------------
+                PAGE ,132
+                TITLE Expanded Memory Access Routines
+
+		.MODEL	LARGE,C
+
+                PUBLIC  ems_err
+                PUBLIC  ems_verify
+                PUBLIC  ems_alloc
+                PUBLIC  ems_map
+                PUBLIC  ems_free
+                PUBLIC  ems_getframe
+                PUBLIC  ems_pagecnt
+
+		LOCALS	LL
+
+                .DATA
+
+emname		db	'EMMXXXX0'	; name of ems driver
+
+ems_err		dw	0
+
+                .CODE
+
+                SUBTTL ems_verify
+                PAGE +
+
+ems_verify	PROC	uses DS SI DI
+		mov	ax, DGROUP
+		mov	ds, ax
+
+		mov	ax, 0  		; check if int vect 67 set up
+		mov	es, ax
+		mov	ax, es:[4*67h+2]
+		or	ax, ax		; segment non zero ?
+		jz	LL01		; if not
+		mov	es, ax
+
+		mov	di, 10		; offset to driver name
+		mov	si, offset emname
+		mov	cx, 8
+		cld
+		rep	cmpsb		; check driver name
+		jne	LL01
+
+		mov	ax, 1
+		jmp	short LL02
+
+LL01:		mov	ax, 0ffh	; no driver code
+		mov	[ems_err], ax
+		xor	ax, ax		; zero ret code = bad
+		
+LL02:		ret
+
+ems_verify	ENDP
+	
+
+                SUBTTL ems_alloc
+                PAGE +
+
+ems_alloc	PROC	uses DS
+		arg	pgcnt:word
+		mov	ax, DGROUP
+		mov	ds, ax
+
+                mov	bx, [pgcnt]	; get number of pages to allocate
+                mov	ah, 43H		; allocate space
+                int	67H
+                mov	byte ptr [ems_err], ah
+                or	ah, ah		; ah is zero if call succeeded
+                jnz	LL01
+		mov	ax, dx		; return handle
+                jmp	short LL02
+LL01:
+                xor	ax, ax
+LL02:
+                ret
+ems_alloc	ENDP
+
+                SUBTTL ems_map
+                PAGE +
+
+ems_map		PROC	uses DS
+		arg	phys:word,handle:word,lpage:word
+		mov	ax, DGROUP
+		mov	ds, ax
+
+		mov	ax, [phys]	; get phys page slot
+		mov	dx, [handle]	; get handle number
+		mov	bx, [lpage]	; get logical page number
+                mov	ah, 44H		; map page
+                int	67H
+                mov	byte ptr [ems_err], ah
+                or	ah, ah		; see if ok
+                jnz	LL01
+
+                mov	ax, 1
+                jmp	short LL02
+LL01:
+                xor	ax, ax
+LL02:
+                ret
+ems_map		ENDP
+                
+                SUBTTL ems_free
+                PAGE +
+
+ems_free	PROC
+		arg	handle:word
+
+                mov	dx, [handle]
+                mov	ah, 45H
+                int	67H
+		xor	ax, ax
+
+                ret
+ems_free	ENDP
+
+                SUBTTL ems_getframe
+                PAGE +
+
+ems_getframe	PROC	uses DS		; sets AX to EMS page frame
+		mov	ax, DGROUP
+		mov	ds, ax
+
+                mov	ah, 41H		; get frame seq
+                int	67H
+                mov	byte ptr [ems_err], ah
+                or	ah, ah		; ah is zero if call succeeded
+                jnz	LL01
+                mov	ax, bx		; return page frame in ax
+                jmp	short LL02
+LL01:
+                xor	ax, ax
+LL02:
+                ret
+ems_getframe	ENDP
+
+                SUBTTL ems_pagecnt
+                PAGE +
+
+ems_pagecnt	PROC	uses DS		; sets AX to EMS page frame
+		mov	ax, DGROUP
+		mov	ds, ax
+
+                mov	ah, 42H		; get ems page count
+                int	67H
+                mov	byte ptr [ems_err], ah
+                or	ah, ah		; see if ok
+                jnz	LL01
+
+                mov	ax, bx		; return page count
+                jmp	short LL02
+LL01:
+                xor	ax, ax
+LL02:
+                ret
+ems_pagecnt	ENDP
+
+                END
+-----------------------------------------------------------------------------
+
+
+Roy Frederick (royf@killer.UUCP)
+Dallas County Data Services  (214) 749-6340
+504 Records Bldg.
+Dallas, TX 75202

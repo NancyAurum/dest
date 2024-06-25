@@ -1,3 +1,17 @@
+Terminology:
+* Paragraph = 16 bytes
+* Page = 512 bytes
+* Cluster = 4096 bytes (DOS FAT12 filesystem)
+  smallest allocation size, when applied to files.
+  http://elm-chan.org/docs/fat_e.html
+
+CONCAT22(-(n != 0) - n._2_2_,-n); //long negate of DX:AX
+in listing it look like
+  4d05:2198 f7 d8           NEG        AX
+  4d05:219a f7 da           NEG        DX
+  4d05:219c 1d 00 00        SBB        AX,0x0
+
+
 `int     0x2F` -- setjmp interrupt
 `int     0x2F` -- also multiplex/XMS interrupt
 

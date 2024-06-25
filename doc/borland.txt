@@ -1,0 +1,9 @@
+_seg
+----------------------------------------
+https://stackoverflow.com/questions/67524817/meaning-of-keyword-modifier-seg-in-old-c-code
+http://www.bobeager.uk/tonyingenoso/chap2.htm
+
+
+    Another special Borland extension is the _seg pointer type. _seg pointers are a type of pointer that maps directly to a segment or selector value with an implied offset of zero. An _seg pointer is a 16 bit variable. These are primarily useful for saving space in situations where you would normally have a "far" pointer where the 16 bit offset part of the pointer is always going to be zero. Using an _seg pointer in cases like this can memory sometimes because a normal "far" pointer would be 4 bytes.
+
+    In a plain DOS program using an _seg pointer is an easy way to access a program's PSP (program segment prefix).

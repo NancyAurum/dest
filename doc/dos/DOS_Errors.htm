@@ -1,0 +1,145 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title> DOS Errors &lt;b&gt;&lt;i&gt;stderr&lt;/i&gt;&lt;/b&gt; </title>
+</head>
+<body text="#000000" link="#0000ff" vlink="#800080" bgcolor="#ffffff">
+<table>
+  <tbody><tr>
+    <td> <p><b><font size="4">UMBC</font></b><font size="4"> <font color="red"> CMSC 211 </font>  </font> </p></td>
+    <td>
+      <p align="RIGHT">
+      <a href="http://www.umbc.edu/"> UMBC </a> | 
+      <a href="http://www.cs.umbc.edu/"> CSEE </a>  
+    </p></td>
+  </tr>
+</tbody></table>
+<p></p><hr size="4"><p></p>
+<center>
+<h2> DOS Errors </h2>
+</center>
+<h3>DOS Error Codes</h3>
+Of the following error codes, only error codes 1-12 are
+returned in AX upon exit from interrupt 21 or 24;  The rest
+are obtained by issuing the "get extended error" function
+call:  see INT 21 Function 59.
+<table border="2">
+<tbody><tr><td>01 </td><td> Invalid function number </td></tr>
+<tr><td>02 </td><td> File not found </td></tr>
+<tr><td>03 </td><td> Path not found </td></tr>
+<tr><td>04 </td><td> Too many open files (no handles left) </td></tr>
+<tr><td>05 </td><td> Access denied </td></tr>
+<tr><td>06 </td><td> Invalid handle </td></tr>
+<tr><td>07 </td><td> Memory control blocks destroyed </td></tr>
+<tr><td>08 </td><td> Insufficient memory </td></tr>
+<tr><td>09 </td><td> Invalid memory block address </td></tr>
+<tr><td>0A </td><td> Invalid environment </td></tr>
+<tr><td>0B </td><td> Invalid format </td></tr>
+<tr><td>0C </td><td> Invalid access mode (open mode is invalid) </td></tr>
+<tr><td>0D </td><td> Invalid data </td></tr>
+<tr><td>0E </td><td> Reserved </td></tr>
+<tr><td>0F </td><td> Invalid drive specified </td></tr>
+<tr><td>10 </td><td> Attempt to remove current directory </td></tr>
+<tr><td>11 </td><td> Not same device </td></tr>
+<tr><td>12 </td><td> No more files </td></tr>
+<tr><td>13 </td><td> Attempt to write on a write-protected diskette </td></tr>
+<tr><td>14 </td><td> Unknown unit </td></tr>
+<tr><td>15 </td><td> Drive not ready </td></tr>
+<tr><td>16 </td><td> Unknown command </td></tr>
+<tr><td>17 </td><td> CRC error </td></tr>
+<tr><td>18 </td><td> Bad request structure length </td></tr>
+<tr><td>19 </td><td> Seek error </td></tr>
+<tr><td>1A </td><td> Unknown media type </td></tr>
+<tr><td>1B </td><td> Sector not found </td></tr>
+<tr><td>1C </td><td> Printer out of paper </td></tr>
+<tr><td>1D </td><td> Write fault </td></tr>
+<tr><td>1E </td><td> Read fault </td></tr>
+<tr><td>1F </td><td> General failure </td></tr>
+<tr><td>20 </td><td> Sharing violation </td></tr>
+<tr><td>21 </td><td> Lock violation </td></tr>
+<tr><td>22 </td><td> Invalid disk change  Invalid disk change </td></tr>
+<tr><td>23 </td><td> FCB unavailable </td></tr>
+<tr><td>24 </td><td> Sharing buffer overflow </td></tr>
+<tr><td>25 </td><td> Reserved </td></tr>
+<tr><td>26 </td><td> Unable to complete file operation (DOS 4.x) </td></tr>
+<tr><td>27-31 </td><td> Reserved </td></tr>
+<tr><td>32 </td><td> Network request not supported </td></tr>
+<tr><td>33 </td><td> Remote computer not listening </td></tr>
+<tr><td>34 </td><td> Duplicate name on network </td></tr>
+<tr><td>35 </td><td> Network name not found </td></tr>
+<tr><td>36 </td><td> Network busy </td></tr>
+<tr><td>37 </td><td> Network device no longer exists </td></tr>
+<tr><td>38 </td><td> NetBIOS command limit exceeded </td></tr>
+<tr><td>39 </td><td> Network adapter error </td></tr>
+<tr><td>3A </td><td> Incorrect network response </td></tr>
+<tr><td>3B </td><td> Unexpected network error </td></tr>
+<tr><td>3C </td><td> Incompatible remote adapter </td></tr>
+<tr><td>3D </td><td> Print queue full </td></tr>
+<tr><td>3E </td><td> No space for print file </td></tr>
+<tr><td>3F </td><td> Print file deleted </td></tr>
+<tr><td>40 </td><td> Network name deleted </td></tr>
+<tr><td>41 </td><td> Access denied </td></tr>
+<tr><td>42 </td><td> Network device type incorrect </td></tr>
+<tr><td>43 </td><td> Network name not found </td></tr>
+<tr><td>44 </td><td> Network name limit exceeded </td></tr>
+<tr><td>45 </td><td> NetBIOS session limit exceeded </td></tr>
+<tr><td>46 </td><td> Temporarily paused </td></tr>
+<tr><td>47 </td><td> Network request not accepted </td></tr>
+<tr><td>48 </td><td> Print or disk redirection is paused </td></tr>
+<tr><td>49-4F </td><td> Reserved </td></tr>
+<tr><td>50 </td><td> File already exists </td></tr>
+<tr><td>51 </td><td> Reserved </td></tr>
+<tr><td>52 </td><td> Cannot make directory entry </td></tr>
+<tr><td>53 </td><td> Fail on INT 24 </td></tr>
+<tr><td>54 </td><td> Too many redirections </td></tr>
+<tr><td>55 </td><td> Duplicate redirection </td></tr>
+<tr><td>56 </td><td> Invalid password </td></tr>
+<tr><td>57 </td><td> Invalid parameter </td></tr>
+<tr><td>58 </td><td> Network device fault </td></tr>
+<tr><td>59 </td><td> Function not supported by network (DOS 4.x) </td></tr>
+<tr><td>5A </td><td> Required system component not installed (DOS 4.x) </td></tr>
+</tbody></table>
+
+<h3>DOS Error Code/Classes</h3>
+
+<h4>Error Classes</h4>
+<table border="2">
+<tbody><tr><td> 01 </td><td> Out of resource, out of space, channel, etc </td></tr>
+<tr><td> 02 </td><td> Temporary situation, not an error, ex: file lock </td></tr>
+<tr><td> 03 </td><td> Authorization, permission denied </td></tr>
+<tr><td> 04 </td><td> Internal, system detected internal error </td></tr>
+<tr><td> 05 </td><td> Hardware failure, serious problem related to hardware </td></tr>
+<tr><td> 06 </td><td> System failure, ex: invalid configuration </td></tr>
+<tr><td> 07 </td><td> Application error, inconsi Application error, inconsistent request </td></tr>
+<tr><td> 08 </td><td> Not found, file/item not found </td></tr>
+<tr><td> 09 </td><td> Bad format, file/item in invalid format </td></tr>
+<tr><td> 0A </td><td> Locked, file/item interlocked </td></tr>
+<tr><td> 0B </td><td> Media failure, ECC/CRC error, wrong or bad disk </td></tr>
+<tr><td> 0C </td><td> Already exists, collision with existing item </td></tr>
+<tr><td> 0D </td><td> Unknown, classification doesn't exist or is inappropriate </td></tr>
+</tbody></table>
+<h3>DOS Error Code/Action Codes and Locus</h3>
+<h4>Error Action Codes  (in BL) </h4>
+<table border="2">
+<tbody><tr><td> 01 </td><td> retry, attempt a few more times and re-prompt </td></tr>
+<tr><td> 02 </td><td> delay retry, retry a few more times after a pause </td></tr>
+<tr><td> 03 </td><td> re-enter input, prompt user to re-enter input </td></tr>
+<tr><td> 04 </td><td> abort with cleanup, orderly abort and shutdown </td></tr>
+<tr><td> 05 </td><td> immediate abort, exit immediately without cleanup </td></tr>
+<tr><td> 06 </td><td> ignore error </td></tr>
+<tr><td> 07 </td><td> user intervention, retry after user fixes the problem </td></tr>
+</tbody></table>
+<h4>Error Locus (in CH) </h4>
+<table border="2">
+<tbody><tr><td> 01 </td><td> unknown </td></tr>
+<tr><td> 02 </td><td> block device </td></tr>
+<tr><td> 03 </td><td> network </td></tr>
+<tr><td> 04 </td><td> serial device </td></tr>
+<tr><td> 05 </td><td> memory </td></tr>
+</tbody></table>
+<p></p><hr size="4"><p></p>
+<p>
+<a href="http://www.umbc.edu/"> UMBC </a> |
+<a href="http://www.cs.umbc.edu/"> CSEE </a> 
+
+
+</p></body></html>
