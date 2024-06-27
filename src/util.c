@@ -102,10 +102,73 @@ nokey:
   return _AX;
 }
 
-
 //DOS_GetExtendedErrorInfo return codes, set for int 24h handler
 #define ERROR_SHARING_VIOLATION 0x20
 #define ERROR_DEV_NOT_EXIST     0x37
+
+
+#define DOS_GetExtendedErrorInfo  0x59
+#define DOS_GetInterruptHandler   0x3524
+#define DOS_SetInterruptHandler   0x2524
+
+//void (*far pfn)();
+//pfn = &ioErrorHndlr;
+
+far_t GSavedErrorHandler;
+
+uint16_t GIOErrorCode = 0x1234;
+uint8_t GIOErrorRetryCount = 1;
+
+
+extern void ioErrorHndlr();
+
+//replace critical error handler to handle our file errors
+void ioErrorHndlrInstall() {
+  //far_t hndlr;
+  //hndlr.ofs = (uint16_t)(void*)&ioErrorHndlr;
+  //hndlr.seg = (uint16_t)(void _seg*)ioErrorHndlr;
+
+  //save old handler
+  asm {
+    MOV        AX,DOS_GetInterruptHandler
+    INT        21h
+    MOV        word ptr [GSavedErrorHandler.ofs],BX
+    MOV        word ptr [GSavedErrorHandler.seg],ES
+  }
+  //GSavedErrorHandler.ofs = _BX;
+  //GSavedErrorHandler.seg = _ES;
+
+  //install our handler
+  asm {
+    PUSH      DS
+    PUSH      ES
+    MOV       DX,word ptr ioErrorHndlr
+    MOV       DS,word ptr seg ioErrorHndlr
+    //MOV       DX,word ptr [hndlr.ofs]
+    //MOV       DS,word ptr [hndlr.seg]
+    MOV       AX,DOS_SetInterruptHandler
+    INT       0x21
+    POP       ES
+    POP       DS
+  }
+  //printf("%04X:%04X\n", GSavedErrorHandler.ofs, GSavedErrorHandler.seg); for(;;);
+}
+
+int ioErrorHndlrUninstall() {
+  asm {
+    PUSH      DS
+    PUSH      ES
+    MOV       DX,word ptr [GSavedErrorHandler.ofs]
+    MOV       DS,word ptr [GSavedErrorHandler.seg]
+    MOV       AX,DOS_SetInterruptHandler
+    INT       0x21
+    POP       ES
+    POP       DS
+  }
+  return GIOErrorCode;
+}
+
+
 
 //waits when file is unlocked and opens it
 //currently ioErrorHndlrInstall and ioErrorHndlrUninstall and not decompiled
@@ -113,32 +176,57 @@ int open_wait_unlock(char *filename) {
   int handle;
   uint16_t ioerr;
   do {
-    //ioErrorHndlrInstall();
+    ioErrorHndlrInstall();
     /* O_DENYNONE = Allow concurrent access  */
-    handle = open(filename,O_RDONLY|O_DENYNONE);
-    ioerr = 0; //ioerr = ioErrorHndlrUninstall();
-    
+    handle = _open(filename,O_RDONLY|O_DENYNONE);
+    ioerr = ioErrorHndlrUninstall();
     if (handle != -1) return handle;
     /* while sharing violation error */
   } while (ioerr == ERROR_SHARING_VIOLATION);
   return -1;
 }
 
+int open_wait_unlock_and_disk(char *filename) {
+  int handle;
+  uint16_t ioerr;
+  
+  do {
+    ioErrorHndlrInstall();
+    /* O_DENYNONE = Allow concurrent access  */
+    handle = _open(filename,O_RDONLY|O_DENYNONE);
+    ioerr = ioErrorHndlrUninstall();
+    if (handle != -1) return handle;
+  } while (ioerr == ERROR_SHARING_VIOLATION || ioerr == ERROR_DEV_NOT_EXIST);
+  return -1;
+}
 
 int creat_wait_unlock(char *filename) {
   int handle;
   uint16_t ioerr;
 
   do {
-    //ioErrorHndlrInstall();
+    ioErrorHndlrInstall();
     /* mode 0 = create regular file */
-    handle = creat(filename,0); //create file with default permissions
-    ioerr = 0; //ioerr = ioErrorHndlrUninstall();
+    handle = _creat(filename,0); //create file with default permissions
+    ioerr = ioErrorHndlrUninstall();
     if (handle != -1) return handle;
   } while (ioerr == ERROR_SHARING_VIOLATION);
   return -1;
 }
 
+
+int creat_wait_unlock_and_disk(char *filename) {
+  int handle;
+  uint16_t ioerr;
+  
+  do {
+    ioErrorHndlrInstall();
+    handle = _creat(filename, 0);
+    ioerr = ioErrorHndlrUninstall();
+    if (handle != -1) return handle;
+  } while (ioerr == ERROR_SHARING_VIOLATION || ioerr == ERROR_DEV_NOT_EXIST);
+  return -1;
+}
 
 char *strip_tail_slash(char *s) {
   size_t l = strlen(s);

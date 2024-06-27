@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <stdarg.h>
+
 
 //_psp
 #include <dos.h>
@@ -38,9 +40,9 @@ void init_check_mem() {
   int32_t avail = ((int32_t)(pPSP->himem - _psp) + 1) << 4;
   avail += 0x100;  /* add psp size */
   if (avail < 585000) {
-    printf("Largest executable program size is only %s bytes.\r\n"
+    printf("Largest executable program size is only %s bytes.\n"
           , litoa10(buf,avail));
-    printf("Stronghold requires 585,000 bytes\r\n");
+    printf("Stronghold requires 585,000 bytes\n");
     exit(0x84);
   } //else print_available_memory();
 }
@@ -199,9 +201,10 @@ uint8_t vdm_query() {
 #define CRD_ADLIB_GOLD 'A'
 #define CRD_ROLAND     'B'
 
-static char GGCTemplate[] = "0\r\n";
+static char GGCTemplate[] = "0\n";
 
-bool save_audio_cfg(char sfx,char mus,char irq) {
+// creates new game.cfg
+bool create_game_cfg(char sfx,char mus,char irq) {
   byte r;
   int handle;
   size_t sz;
@@ -234,6 +237,10 @@ bool save_audio_cfg(char sfx,char mus,char irq) {
   return false;
 }
 
+uint16_t cfg_mice = 1;
+char cfg_irq = 0;
+char cfg_sfx = 0;
+char cfg_mus = 0;
 
 void init_base() {
   char irq,mus,sfx;
@@ -425,7 +432,7 @@ pick_irq:
   }
 done:
   clrscr();
-  if (save_audio_cfg(sfx,mus,irq)) return;
+  if (create_game_cfg(sfx,mus,irq)) return;
 
   exit(0x83);
 }
@@ -464,9 +471,109 @@ void init_paths(void) {
   return;
 }
 
+/*
+char *stsprintf(char *buf, char *fmt, char *arg1) {
+  vsprintf(buf,fmt,&arg1);
+  return buf;
+}
+*/
+
+char *stsprintf (char *buf,  const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  vsprintf(buf,fmt, args);
+  va_end(args);
+  return buf;
+}
+
+char GCrLf[] = {0x0D,0x0A};
+
+void error(int code) {
+  exit(code ? 0x80 : 0);
+}
+
+char read_cfg(int handle) {
+  char tmp;
+  char b;
+  
+  if (read(handle,&b,1) != 1) return 0;
+  do { //cr-lf
+    if (read(handle,&tmp,1) != 1) return 0;
+  } while (tmp != '\n');
+  return b;
+}
+
+void init_cfg_mice() {
+  cfg_mice = 1;
+}
+
+
+void init_cfg() {
+  char *cfgPath;
+  int fh;
+  char lbuf[80];
+  byte goterr;
+  uint8_t update;
+  uint16_t crlf;
+  char mice;
+  char c;
+  
+  update = 0;
+  fh = open_wait_unlock_and_disk(stsprintf(lbuf,"%sgame.cfg", GWorkDir));
+  if (fh < 0) error(0x80);
+
+  if (!(c = read_cfg(fh))) error(0x80);
+  if ((c < '1' || '9' < c) && (c < 'A' || 'B' < c)) {
+    if (c < 'a' || 'b' < c) error(0x80);
+    c = toupper(c);
+  }
+  cfg_mus = c;
+
+  if (!(c = read_cfg(fh))) error(0x80);
+  if ((c < '1' || '9' < c) && (c < 'A' || 'B' < c)) {
+    if (c < 'a' || 'b' < c) error(0x80);
+    c = toupper(c);
+  }
+  cfg_sfx = c;
+
+  if (!(c = read_cfg(fh))) error(0x80);
+  if ((c < '0' || '9' < c) && (c < 'A' || 'F' < c)) error(0x80);
+  cfg_irq = c;
+
+  mice = read_cfg(fh);
+  if (mice < '1' || '2' < mice) {
+    init_cfg_mice();
+    update = 1;
+    mice = cfg_mice ? mice = '1' : '2';
+  } else if (mice == '1') cfg_mice = 1;
+  else cfg_mice = 0;
+
+  close(fh);
+
+  if (update) {
+    fh = creat_wait_unlock_and_disk(stsprintf(lbuf,"%sgame.cfg",GWorkDir));
+    if (fh < 0) error(0x83);
+    //again, crufty code where |= is missing for two statements
+    goterr =  write(fh,&cfg_mus,1) != 1;
+    goterr |= write(fh,GCrLf   ,2) != 2;
+    goterr =  write(fh,&cfg_sfx,1) != 1;
+    goterr |= write(fh,GCrLf   ,2) != 2;
+    goterr =  write(fh,&cfg_irq,1) != 1;
+    goterr |= write(fh,GCrLf   ,2) != 2;
+    goterr |= write(fh,&mice   ,1) != 1;
+    goterr |= write(fh,GCrLf   ,2) != 2;
+    goterr |= close(fh);
+    if (goterr) error(0x80);
+    clrscr();
+  }
+  return;
+}
+
+
 void init_game() {
   //_OvrInitExt(0,0);
   //_OvrInitEms(0,0,0);
   init_base();
   init_paths();
+  init_cfg();
 }

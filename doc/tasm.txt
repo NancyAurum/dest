@@ -1,0 +1,5 @@
+By default TASM collates all symbols to uppercse.
+The /mx option makes global symbols to be case-sensisitive.
+
+Borland C++ compiler prefixes all external symbols with '_'.
+So asm has to follow the suit for the symbols usable from C++

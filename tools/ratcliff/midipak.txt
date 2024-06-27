@@ -1,0 +1,22 @@
+Midpak is a DOS program and developer suite that allows game designers to convert MIDI music into its proprietary XMI format to play during games. The system has built-in support for a wide assortment of sound card and audio devices. The program also includes an XMI and MIDI player for testing, and can also convert MIDI files to XMI. It was very popular for DOS games throughout the 1990s, which can be seen in the large number of games that used the XMI format.
+
+When you run MidPak, it wil automatically use the default drivers and instrument patches, but various drivers were made for each device. *.ADV files are drivers while *.AD or *.ADD are instrument patches. For example:
+
+SBP2FM.ADV - Sound Blaster Pro 2 driver
+SBP2FM.ADD - Sound Blaster Pro 2 instrument patches
+GENMID.ADV - General MIDI driver
+GENMID.ADD - General MIDI instruments patches
+
+How to Use Custom AdLib Midpak Sound Drivers with Midpak
+
+Most games that used Midpak for music included all sorts of drivers, and many of them even wrote custom drivers. For example, The Dark Queen of Krynn (DOS)'s music uses ADLIB.ADV, INSTR.AD, MT32MPU.ADV, PCSPKR.ADV, SBDIG.ADV, TANDY.ADV. To replay the music on a particular device, youll need to rename the drivers and instruments to Midpak's default.
+
+You may want to listen to the music only from games which use the Midpak sound engine, or maybe you want to hear what your own MIDI files would sound like if they were in one of your favorite games. For these games, you must copy the proper files from the game to the main directory. Note that most of these drivers are based on Roland MT-32 patches and may end up sounding wrong.
+
+    Backup your existing MIDPAK.AD and MIDPAK.ADV files.
+    Choose a game. Let's take Dungeon Hack (DOS) for example. Go into Dungeon Hack's directory and copy/paste the ADLIB.ADV and STDPATCH.AD files to the Midpak directory.
+    Rename ADLIB.ADV to MIDPAK.ADV and STDPATCH.AD to MIDPAK.AD.
+    Run Midpak's MENU.EXE to run the program.
+    Select the *.MID or *.XMI files you want to play.
+
+Note that some of the AdLib sound engines are made for the MT-32 since the MT-32 music files in a game can be the same used as an AdLib version (Wayne's World (DOS) for example). Therefore, most MIDI files created using computer soundcards won't sound correct. 

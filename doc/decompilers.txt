@@ -42,6 +42,13 @@ http://www.backerstreet.com/decompiler/simple_decompiler.php
   * Open source, the code is early C++, so without the later Uncle Bob nonsense.
   * Has to be run in combination with a separate disassembler, like IDA.
   * Specifically targets DOS code 16bit code.
+* Dis86 (https://github.com/xorvoid/dis86
+         https://xorvoid.com/dis86.html)
+  * Very basic CLI decompiler intended specifically for the 16bit x86
+  * Could be potentially integrated with IDA
+* DisC (http://www.debugmode.com/dcompile/disc.htm)
+  * DisC is a decompiler for the TurboC compiler.
+  * Like Dis86, produces very basic code and doesn't support proper analyzis
 * Boomerang ( https://github.com/BoomerangDecompiler/boomerang ):
   * Another classic C++ decompiler.
   * Like DCC, doesn't provide a propeg GUI of its own and needs a separate

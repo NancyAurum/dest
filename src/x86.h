@@ -8,7 +8,7 @@
 
 typedef struct far_t far_t;
 struct far_t { /* off,seg pair */
-    uint16_t off;
+    uint16_t ofs;
     uint16_t seg;
 };
 

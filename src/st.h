@@ -33,6 +33,8 @@ extern void print_available_memory();
 
 extern int open_wait_unlock(char *filename);
 extern int creat_wait_unlock(char *filename);
+extern int open_wait_unlock_and_disk(char *filename);
+extern int creat_wait_unlock_and_disk(char *filename);
 extern char *strip_tail_slash(char *s);
 extern void cd_to_path(char *path);
 
