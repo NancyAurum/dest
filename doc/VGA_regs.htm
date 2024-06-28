@@ -1,0 +1,283 @@
+<html><head>
+   <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+   <meta name="Author" content="Joshua Neal">
+   <meta name="Description" content="Pure VGA/SVGA hardware programming (registers, identification, and other low-level stuff.)">
+   <meta name="KeyWords" content="VGA SVGA hardware video programming">
+   <title>VGA/SVGA Video Programming--External Regsters</title>
+</head>
+<body>
+
+<ul>
+<center><a href="http://www.osdever.net/FreeVGA/home.htm">Home</a> <a href="http://www.osdever.net/FreeVGA/vga/vga.htm#register">Back</a>&nbsp;
+<hr width="100%"><b>Hardware Level VGA and SVGA Video Programming Information
+Page</b></center>
+
+<center>External Regsters</center>
+
+<center>
+<hr width="100%"></center>
+</ul>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The External Registers (sometimes
+called the General Registers) each have their own unique I/O location in
+the VGA, although sometimes the Read Port differs from the Write port,
+and some are Read-only.. See the <a href="http://www.osdever.net/FreeVGA/vga/vgareg.htm">Accessing the VGA
+Registers</a> section for more detals.
+<ul>
+<li>
+Port 3CCh/3C2h -- <i>Miscellaneous Output Register</i></li>
+
+<li>
+Port 3CAh/3xAh -- <i>Feature Control Register</i></li>
+
+<li>
+Port 3C2h -- <i>Input Status #0 Register</i></li>
+
+<li>
+Port 3xAh -- <i>Input Status #1 Register</i></li>
+</ul>
+&nbsp;
+<table border="" width="600" cellpading="2">
+<caption align="TOP"><a name="3CCR3C2W"></a><b>Miscellaneous Output Register
+(Read at 3CCh, Write at 3C2h)</b></caption>
+
+<tbody><tr align="CENTER" valign="CENTER">
+<td width="75">7</td>
+
+<td width="75">6</td>
+
+<td width="75">5</td>
+
+<td width="75">4</td>
+
+<td width="75">3</td>
+
+<td width="75">2</td>
+
+<td width="75">1</td>
+
+<td width="75">0</td>
+</tr>
+
+<tr align="CENTER" valign="CENTER">
+<td width="75">VSYNCP</td>
+
+<td width="75">HSYNCP</td>
+
+<td width="75">O/E Page</td>
+
+<td width="75"></td>
+
+<td colspan="2" width="150">Clock Select</td>
+
+<td width="75">RAM En.</td>
+
+<td width="75">I/OAS</td>
+</tr>
+</tbody></table>
+&nbsp;
+<ul><b>VSYNCP -- Vertical Sync Polarity<br>
+</b>"<i>Determines the polarity of the vertical sync pulse and can be used
+(with HSP) to control the vertical size of the display by utilizing the
+autosynchronization feature of VGA displays.</i>
+<br><i>&nbsp; = 0 selects a positive vertical retrace sync pulse.</i>"
+<br><b>HSYNCP -- Horizontal Sync Polarity<br>
+</b>"<i>Determines the polarity of the horizontal sync pulse.</i>
+<br><i>&nbsp; = 0 selects a positive horizontal retrace sync pulse.</i>"
+<br><b>O/E Page -- Odd/Even Page Select<br>
+</b>"<i>Selects the upper/lower 64K page of memory when the system is in
+an eve/odd mode (modes 0,1,2,3,7).</i>
+<br><i>&nbsp; = 0 selects the low page</i>
+<br><i>&nbsp; = 1 selects the high page</i>"
+<li>
+<b>Clock Select</b></li>
+
+<br>This field controls the selection of the dot clocks used in driving
+the display timing.&nbsp; The standard hardware has 2 clocks available
+to it, nominally 25 Mhz and 28 Mhz.&nbsp; It is possible that there may
+be other "external" clocks that can be selected by programming this register
+with the undefined values.&nbsp; The possible valuse of this register are:
+<ul>
+<li>
+00 -- select 25 Mhz clock (used for 320/640 pixel wide modes)</li>
+
+<li>
+01 -- select 28 Mhz clock (used for 360/720 pixel wide modes)</li>
+
+<li>
+10 -- undefined (possible external clock)</li>
+
+<li>
+11 -- undefined (possible external clock)</li>
+</ul>
+<b>RAM En. -- RAM Enable<br>
+</b>"<i>Controls system access to the display buffer.</i>
+<br><i>&nbsp; = 0 disables address decode for the display buffer from the
+system</i>
+<br><i>&nbsp; = 1 enables address decode for the display buffer from the
+system</i>"
+<br><b>I/OAS -- Input/Output Address Select<br>
+</b>"<i>This bit selects the CRT controller addresses. When set to 0, this
+bit sets the CRT controller addresses to 0x03Bx and the address for the
+Input Status Register 1 to 0x03BA for compatibility withthe monochrome
+adapter.&nbsp; When set to 1, this bit sets CRT controller addresses to
+0x03Dx and the Input Status Register 1 address to 0x03DA for compatibility
+with the color/graphics adapter. The Write addresses to the Feature Control
+register are affected in the same manner.</i>"</ul>
+&nbsp;
+<table border="" width="600" cellpading="2">
+<caption align="TOP"><a name="3CAR3xAW"></a><b>Feature Control Register (Read
+at 3CAh, Write at 3BAh (mono) or 3DAh (color))</b></caption>
+
+<tbody><tr align="CENTER" valign="CENTER">
+<td width="75">7</td>
+
+<td width="75">6</td>
+
+<td width="75">5</td>
+
+<td width="75">4</td>
+
+<td width="75">3</td>
+
+<td width="75">2</td>
+
+<td width="75">1</td>
+
+<td width="75">0</td>
+</tr>
+
+<tr align="CENTER" valign="CENTER">
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75">FC1</td>
+
+<td width="75">FC0</td>
+</tr>
+</tbody></table>
+&nbsp;
+<ul>
+<li>
+<b>FC1 -- Feature Control bit 1<br>
+</b>"<i>All bits are reserved.</i>"</li>
+
+<li>
+<b>FC2 -- Feature Control bit 0<br>
+</b>"<i>All bits are reserved.</i>"</li>
+</ul>
+&nbsp;
+<table border="" width="600" cellpading="2">
+<caption align="TOP"><a name="3C2R"></a><b>Input Status #0 Register (Read-only
+at 3C2h)</b></caption>
+
+<tbody><tr align="CENTER" valign="CENTER">
+<td width="75">7</td>
+
+<td width="75">6</td>
+
+<td width="75">5</td>
+
+<td width="75">4</td>
+
+<td width="75">3</td>
+
+<td width="75">2</td>
+
+<td width="75">1</td>
+
+<td width="75">0</td>
+</tr>
+
+<tr align="CENTER" valign="CENTER">
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75">SS</td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+</tr>
+</tbody></table>
+&nbsp;
+<ul><b>SS - Switch Sense<br>
+</b>"<i>Returns the status of the four sense switches as selected by the
+CS field of the Miscellaneous Output Register.</i>"</ul>
+&nbsp;
+<table border="" width="600" cellpading="2">
+<caption align="TOP"><a name="3xAR"></a><b>Input Status #1 Register (Read
+at 3BAh (mono) or 3DAh (color))</b></caption>
+
+<tbody><tr align="CENTER" valign="CENTER">
+<td width="75">7</td>
+
+<td width="75">6</td>
+
+<td width="75">5</td>
+
+<td width="75">4</td>
+
+<td width="75">3</td>
+
+<td width="75">2</td>
+
+<td width="75">1</td>
+
+<td width="75">0</td>
+</tr>
+
+<tr align="CENTER" valign="CENTER">
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75">VRetrace</td>
+
+<td width="75"></td>
+
+<td width="75"></td>
+
+<td width="75">DD</td>
+</tr>
+</tbody></table>
+&nbsp;
+<ul><b>VRetrace -- Vertical Retrace<br>
+</b>"<i>When set to 1, this bit indicates that the display is in a vertical
+retrace interval.This bit can be programmed, through the Vertical Retrace
+End register, to generate an interrupt at the start of the vertical retrace.</i>"
+<br><b>DD -- Display Disabled<br>
+</b>"<i>When set to 1, this bit indicates a horizontal or vertical retrace
+interval. This bit is the real-time status of the inverted 'display enable'
+signal. Programs have used this status bit to restrict screen updates to
+the inactive display intervals in order to reduce screen flicker. The video
+subsystem is designed to eliminate this software requirement; screen updates
+may be made at any time without screen degradation.</i>"</ul>
+Notice: All trademarks used or referred to on this page are the property
+of their respective owners.
+<br>All pages are Copyright © 1997, 1998, J. D. Neal, except where
+noted. Permission for utilization and distribution is subject to the terms
+of the <a href="http://www.osdever.net/FreeVGA/vga/license.htm">FreeVGA Project Copyright License</a>.
+
+
+
+</body></html>
