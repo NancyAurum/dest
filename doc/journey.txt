@@ -1885,7 +1885,7 @@ void stExit(int n) {
   exit(0);
 }
 
-During the DOS times, games were responsible to handle the audio drivers.
+During the DOS times, games were expected to handle the audio drivers.
 Stronghold uses the 3rd party driver libraries, called MIDPAK and DIGPAK.
 These were recently open sourced by their author:
 https://github.com/jratcliff63367/digpak
