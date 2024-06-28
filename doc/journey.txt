@@ -1855,7 +1855,7 @@ Then one has to run:
 That cancel the damage git already did to our files.
 - Why isn't that default?
 - Because Linux Torvalds is not smarter than his Linux.
-
+See https://www.reddit.com/r/git/comments/s8kr76/how_to_configure_git_to_never_modify_a_line_ending
 
 The most interesting place is the 3168:0000 error procedure.
 It asks providing the error number to Cathryn.
