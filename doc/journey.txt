@@ -1840,6 +1840,23 @@ The progress is steady. Even got a bit into the game logic, since I was
 trying to map all the C-strings references and name all the overlays.
 Still need to reverse the audio and video code.
 
+One annoying thing is Github converting line endings, which breaks scripts,
+like .bat files, should be in crlf. Is removing everything from .gitattributes
+and then adding there single line
+
+  * -text
+
+The forces treating all files as binary.
+
+Then one has to run:
+
+  git add --renormalize .
+
+That cancel the damage git already did to our files.
+- Why isn't that default?
+- Because Linux Torvalds is not smarter than his Linux.
+
+
 The most interesting place is the 3168:0000 error procedure.
 It asks providing the error number to Cathryn.
 Meaning Cathryn Mataga was out of the closet at the time of development.
