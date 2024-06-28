@@ -18,6 +18,8 @@
 #include "st.h"
 #include "stdos.h"
 
+bool GDebug;
+
 #define DIRSZ (MAXDIR+2)
 char GStaticBuffer[116];
 char GOriginalDir[DIRSZ];
@@ -237,10 +239,10 @@ bool create_game_cfg(char sfx,char mus,char irq) {
   return false;
 }
 
-uint16_t cfg_mice = 1;
-char cfg_irq = 0;
-char cfg_sfx = 0;
-char cfg_mus = 0;
+uint16_t CFG_Mice = 1;
+char CFG_Irq = 0;
+char CFG_Mus = 0; // what adio card to use for MidPak
+char CFG_Sfx = 0; // what audio card to use for DigPak
 
 void init_base() {
   char irq,mus,sfx;
@@ -464,10 +466,10 @@ void init_paths(void) {
   strcpy(GWorkDir,GOriginalDir);
   ensure_tail_slash(GWorkDir);
   strcat(GWorkDir,GSaveFileName);
-  full_path = append_name_to_path(GGameExe,GSaveFileName + 0xb);
+  full_path = append_name_to_path(GExeCmd,GSaveFileName + 0xb);
   full_path = strip_tail_slash(full_path);
   chpath(full_path);
-  //printf("%s | %s | %s\n", full_path, GGameExe, GWorkDir);
+  //printf("%s | %s | %s\n", full_path, GExeCmd, GWorkDir);
   return;
 }
 
@@ -486,11 +488,49 @@ char *stsprintf (char *buf,  const char *fmt, ...) {
   return buf;
 }
 
-char GCrLf[] = {0x0D,0x0A};
 
-void error(int code) {
+#if 1
+
+#define E_STRING 0x80
+void stExit(int code) {
   exit(code ? 0x80 : 0);
 }
+
+#else
+char *GErrorStrings[] = {
+  "Bad 'game.cfg' file. Please reconfigure.",
+  "Cannot find sound card.",
+  "Cannot find music card.",
+  "Cannot create configuration file.  Stronghold aborted.",
+  "Mouse error."
+};
+
+void stExit(int n) {
+  if (n && n < E_STRING) { //just in case we are still in text mode
+    printf("\n\rError %d\n", n);
+    biosReadKey();
+  }
+  biosVideoCall(0x0,0x3); /* Restore video to the 80x25 text mode */
+  if (!n) { /* No error; just exit */ }
+  else if (n < E_STRING) {
+    printf(("Error %d %d.  (Give Cathryn BOTH numbers.)\n", GGameState, n);
+  } else {
+    printf("%s\n", GErrorStrings[n-E_STRING]);
+  }
+  if (CFG_Mice) miceDisableHandler();
+  if (MusRunning) midMidiStop();
+  if (MIDHandle) audio_done((void _seg*)MIDHandle);
+  if (DIGHandle) audio_done((void _seg*)DIGHandle);
+  if (FMStrongDat >= 0) fmClose(FMStrongDat);
+  xmsFree();
+  emsFree();
+  chpath(GOriginalDir);
+  if (n) exit(0x80);
+  exit(0);
+}
+#endif
+
+char GCrLf[] = {0x0D,0x0A};
 
 char read_cfg(int handle) {
   char tmp;
@@ -503,8 +543,8 @@ char read_cfg(int handle) {
   return b;
 }
 
-void init_cfg_mice() {
-  cfg_mice = 1;
+void init_CFG_Mice() {
+  CFG_Mice = 1;
 }
 
 
@@ -520,55 +560,60 @@ void init_cfg() {
   
   update = 0;
   fh = open_wait_unlock_and_disk(stsprintf(lbuf,"%sgame.cfg", GWorkDir));
-  if (fh < 0) error(0x80);
+  if (fh < 0) stExit(E_BAD_GAME_CFG);
 
-  if (!(c = read_cfg(fh))) error(0x80);
+  if (!(c = read_cfg(fh))) stExit(E_BAD_GAME_CFG);
   if ((c < '1' || '9' < c) && (c < 'A' || 'B' < c)) {
-    if (c < 'a' || 'b' < c) error(0x80);
+    if (c < 'a' || 'b' < c) stExit(E_BAD_GAME_CFG);
     c = toupper(c);
   }
-  cfg_mus = c;
+  CFG_Sfx = c;
 
-  if (!(c = read_cfg(fh))) error(0x80);
+  if (!(c = read_cfg(fh))) stExit(E_BAD_GAME_CFG);
   if ((c < '1' || '9' < c) && (c < 'A' || 'B' < c)) {
-    if (c < 'a' || 'b' < c) error(0x80);
+    if (c < 'a' || 'b' < c) stExit(E_BAD_GAME_CFG);
     c = toupper(c);
   }
-  cfg_sfx = c;
+  CFG_Mus = c;
 
-  if (!(c = read_cfg(fh))) error(0x80);
-  if ((c < '0' || '9' < c) && (c < 'A' || 'F' < c)) error(0x80);
-  cfg_irq = c;
+  if (!(c = read_cfg(fh))) stExit(E_BAD_GAME_CFG);
+  if ((c < '0' || '9' < c) && (c < 'A' || 'F' < c)) stExit(E_BAD_GAME_CFG);
+  CFG_Irq = c;
 
   mice = read_cfg(fh);
   if (mice < '1' || '2' < mice) {
-    init_cfg_mice();
+    init_CFG_Mice();
     update = 1;
-    mice = cfg_mice ? mice = '1' : '2';
-  } else if (mice == '1') cfg_mice = 1;
-  else cfg_mice = 0;
+    mice = CFG_Mice ? mice = '1' : '2';
+  } else if (mice == '1') CFG_Mice = 1;
+  else CFG_Mice = 0;
 
   close(fh);
 
-  if (update) {
-    fh = creat_wait_unlock_and_disk(stsprintf(lbuf,"%sgame.cfg",GWorkDir));
-    if (fh < 0) error(0x83);
-    //again, crufty code where |= is missing for two statements
-    goterr =  write(fh,&cfg_mus,1) != 1;
-    goterr |= write(fh,GCrLf   ,2) != 2;
-    goterr =  write(fh,&cfg_sfx,1) != 1;
-    goterr |= write(fh,GCrLf   ,2) != 2;
-    goterr =  write(fh,&cfg_irq,1) != 1;
-    goterr |= write(fh,GCrLf   ,2) != 2;
-    goterr |= write(fh,&mice   ,1) != 1;
-    goterr |= write(fh,GCrLf   ,2) != 2;
-    goterr |= close(fh);
-    if (goterr) error(0x80);
-    clrscr();
-  }
-  return;
+  if (!update) return;
+
+  fh = creat_wait_unlock_and_disk(stsprintf(lbuf,"%sgame.cfg",GWorkDir));
+  if (fh < 0) stExit(E_CANT_MAKE_CFG);
+  //more crufty code where |= is missing for two statements
+  goterr =  write(fh,&CFG_Sfx,1) != 1;
+  goterr |= write(fh,GCrLf   ,2) != 2;
+  goterr =  write(fh,&CFG_Mus,1) != 1;
+  goterr |= write(fh,GCrLf   ,2) != 2;
+  goterr =  write(fh,&CFG_Irq,1) != 1;
+  goterr |= write(fh,GCrLf   ,2) != 2;
+  goterr |= write(fh,&mice   ,1) != 1;
+  goterr |= write(fh,GCrLf   ,2) != 2;
+  goterr |= close(fh);
+  if (goterr) stExit(E_BAD_GAME_CFG);
+  clrscr(); //clears write errors, but init_game does clrscr too
 }
 
+
+uint32_t *BDA_DailyTimeCounter = MK_FP(0x40,0x6C);
+
+void process_strong_dat(bool grab) {
+  UNUSED(grab);
+}
 
 void init_game() {
   //_OvrInitExt(0,0);
@@ -576,4 +621,14 @@ void init_game() {
   init_base();
   init_paths();
   init_cfg();
+  clrscr();
+  srand8(*BDA_DailyTimeCounter);
+  //digAlocBuf(0xfa0f);
+  if (!strcmp(GExeArg,"debug")) GDebug = 1;
+  if (!strcmp(GExeArg,"grab")) {
+    GDebug = 1;
+    process_strong_dat(1); //grab tries to grab strong.dat from network
+  } else {
+    process_strong_dat(0);
+  }
 }

@@ -41,10 +41,19 @@ extern void cd_to_path(char *path);
 extern int biosKeyAvail();
 extern uint16_t biosReadKey();
 
+//value passed to error() is above 0, it is treated as string id
+#define E_EXIT            0x00
+#define E_BAD_GAME_CFG    0x80
+#define E_NO_SFX_CARD     0x81
+#define E_NO_MUS_CARD     0x82
+#define E_CANT_MAKE_CFG   0x83
+#define E_MOUSE_ERROR     0x84
+extern void stExit(int n);
+
 
 /* Global Data */
 extern char GWorkDir[];
-extern char *GGameExe;
-extern char *GGameArg;
+extern char *GExeCmd;
+extern char *GExeArg;
 
 #endif

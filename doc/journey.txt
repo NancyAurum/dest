@@ -1829,3 +1829,81 @@ pageless memory management approaches and few tricks which could be useful in
 developing Symta further. So I guess this is the last part. I don't have the
 autistic dedication required for decompiling games.
 
+
+
+
+Entry 2024-06-28
+________________________________________________
+
+
+The progress is steady. Even got a bit into the game logic, since I was
+trying to map all the C-strings references and name all the overlays.
+Still need to reverse the audio and video code.
+
+The most interesting place is the 3168:0000 error procedure.
+It asks providing the error number to Cathryn.
+Meaning Cathryn Mataga was out of the closet at the time of development.
+
+void stExit(int n) {
+  if (n && n < E_STRING) { //just in case we are still in text mode
+    printf("\n\rError %d\n", n);
+    biosReadKey();
+  }
+  biosVideoCall(0x0,0x3); /* Restore video to the 80x25 text mode */
+  if (!n) { /* No error; just exit */ }
+  else if (n < E_STRING) {
+    printf(("Error %d %d.  (Give Cathryn BOTH numbers.)\n", GGameState, n);
+  } else {
+    printf("%s\n", GErrorStrings[n-E_STRING]);
+  }
+  if (CFG_Mice) miceDisableHandler();
+  if (MusRunning) midMidiStop();
+  if (MIDHandle) audio_done((void _seg*)MIDHandle);
+  if (DIGHandle) audio_done((void _seg*)DIGHandle);
+  if (FMStrongDat >= 0) fmClose(FMStrongDat);
+  xmsFree();
+  emsFree();
+  chpath(GOriginalDir);
+  if (n) exit(0x80);
+  exit(0);
+}
+
+During the DOS times, games were responsible to handle the audio drivers.
+Stronghold uses the 3rd party driver libraries, called MIDPAK and DIGPAK.
+These were recently open sourced by their author:
+https://github.com/jratcliff63367/digpak
+
+There are two of these driver packs, one for sound effects and another for music
+in MIDI format. That because music in uncompressed form takes hundreds of
+megabytes, while typical DOS hard drive had just 40MB during the times of
+Stronghold. The CDs with audio tracks were not popular enough and
+compressed audio was too resource intensive to play and rather low quality.
+
+So the solution was to synthesize music in real time. And that required
+hardware acceleration, since the x86 was too weak to do it in software.
+Still audio effects are impossible to synthesize with anything but
+the modern AI modelling. So we have a separate sfx drivers for a set of
+audio cards, some of which can play only PCM audio. Additionally,
+many music cards were unable to play PCM so some systems had two cards.
+
+
+Other interesting note: the game exe can take an argument: "grab" or "debug".
+The "debug" turns on a few keys, implemented by 2e25:0adf processKey() routine.
+Among  them is the ability to show additional info, like the game's world seed,
+as well as various cheats, like increasing character levels. The "grab" is like
+debug but apparently created the STRONG.DAT file from a the external
+files on a Novel Netware share. That is hinted by the network aware file code,
+where the game installs a custom handler and waits for the file to be available.
+
+Novel was similar to the NFS or Samba shares, but ran over IPX/SPX.
+Don't pass the "grab" option to the game, or you're up to a nasty surprise.
+It will erase your STRONG.DAT, but wont create a new one, since there are no
+new source files.
+
+My theory that each overlay corresponds to a separate file was correct.
+These are good news, since everything is nicely organized for us,
+map areas in a Zelda game, connected to a central hub.
+But it will take some time till I name every file in there,
+not speaking about decompiling them.
+
+<img src="https://i.imgur.com/rfeh7Mo.png" width=300>

@@ -7,6 +7,8 @@
 //open, creat
 #include <fcntl.h>
 
+#include <dos.h>
+
 #include "st.h"
 #include "stdos.h"
 
@@ -206,8 +208,8 @@ int creat_wait_unlock(char *filename) {
 
   do {
     ioErrorHndlrInstall();
-    /* mode 0 = create regular file */
-    handle = _creat(filename,0); //create file with default permissions
+    // _creat is basically open with O_CREAT, O_TRUNC and O_WRONLY flags.
+    handle = _creat(filename,_A_NORMAL); //create file with default permissions
     ioerr = ioErrorHndlrUninstall();
     if (handle != -1) return handle;
   } while (ioerr == ERROR_SHARING_VIOLATION);
@@ -221,7 +223,7 @@ int creat_wait_unlock_and_disk(char *filename) {
   
   do {
     ioErrorHndlrInstall();
-    handle = _creat(filename, 0);
+    handle = _creat(filename, _A_NORMAL);
     ioerr = ioErrorHndlrUninstall();
     if (handle != -1) return handle;
   } while (ioerr == ERROR_SHARING_VIOLATION || ioerr == ERROR_DEV_NOT_EXIST);

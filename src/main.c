@@ -6,12 +6,12 @@
 #include "st.h"
 #include "stdos.h"
 
-char *GGameExe;
-char *GGameArg;
+char *GExeCmd;
+char *GExeArg;
 
 int main(int argc, char **argv) {
-  GGameExe = argv[0];
-  GGameArg = argc < 2 ? "" : argv[1];
+  GExeCmd = argv[0];
+  GExeArg = argc < 2 ? "" : argv[1];
   init_game();
   return 0;
 }

@@ -1,2 +1,10 @@
-# Auto detect text files and perform LF normalization
-* text eol=lf
+# treat all files as binary
+* -text
+
+
+# treat these files as binary
+#*.bat -text
+
+
+# Enforce lf conversion for all other files
+#* text eol=lf
