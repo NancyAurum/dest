@@ -1,10 +1,36 @@
-Ghidra
-_________
+Accessing Interpreter
+___________________________
 
 Use the "Window -> Python" menu and discover the flat API using “dir()”:
 
+The function arguments are at:
+https://github.com/NationalSecurityAgency/ghidra/blob/master/Ghidra/Features/Base/src/main/java/ghidra/program/flatapi/FlatProgramAPI.java
 
-Useful Scripts:
+
+
+To lsit the FlatProgramAPI methods:
+from ghidra.program.flatapi import FlatProgramAPI
+for x in dir(FlatProgramAPI(getState().getCurrentProgram())): print(x)
+
+Apparently it is also possible to do to list arguments:
+  from ghidra.program.flatapi import FlatProgramAPI
+  fpapi = FlatProgramAPI(getState().getCurrentProgram())
+  for x in dir(fpapi): print(getattr(fpapi, x))
+
+
+
+Extended Python support
+___________________________
+
+There is also an extended Python support
+https://pypi.org/project/pyhidra/
+
+Another solution:
+https://pypi.org/project/ghidra-bridge/
+
+
+Premade Scripts
+___________________________
 * Data/ImportSymbolsScript.py (Ghidra/Features/Python/ghidra_scripts)
   It has format:
 
@@ -14,3 +40,559 @@ Useful Scripts:
   'l' is default and can be omitted
   
   see sym/int21.txt for an example of DOS syscall map.
+
+  
+  
+Snippets
+___________________________
+A collection of example snippets:
+https://github.com/HackOvert/GhidraSnippets
+
+
+Get the offset of the user cursor:
+  getState().getCurrentAddress().getOffset()
+
+Ghidra also defines currentAddress and currentProgram:
+  ghidra.program.model.data.DataUtilities.isUndefinedData(currentProgram, currentAddress)
+
+Get segmented address components:
+  adr = getState().getCurrentAddress()
+  "adr {:04X}:{:04X}".format(adr.getSegment(),adr.getSegmentOffset())
+
+Increment address:
+  adr.add(5)
+
+Convert that far ptr to Ghidra's address
+  toAddr((getShort(adr.add(2)) << 4) + getShort(adr))
+
+Print far pointer at adr:
+  "adr {:04X}:{:04X}".format(getShort(adr),getShort(adr.add(2)))
+
+Read null-terminated C-string from memory:
+    def getCstr(addr):
+      s = []
+      while True:
+        try:
+          c = getByte(addr)
+          if c == 0: break
+          s.append(chr(c))
+          addr = addr.add(1)
+        except MemoryAccessException:
+          break
+      return ''.join(s)
+
+
+For each of the 544 seg:ofs far pointers at the current address,
+print associated 0-ended C-string:
+def getCstr(addr):
+  s = []
+  while True:
+    try:
+      c = getByte(addr)
+      if c == 0: break
+      s.append(chr(c))
+      addr = addr.add(1)
+    except MemoryAccessException:
+      break
+  return ''.join(s)
+
+adr = getState().getCurrentAddress()
+
+for i in range(544):
+  sadr = toAddr((getShort(adr.add(i*4 + 2)) << 4) + getShort(adr.add(i*4)))
+  print(getCstr(sadr))
+
+
+
+
+
+I'm using Ghidra's builtin Python interpreter to process a 16 bit real mode
+x86 binary.
+
+The current address is at an array of far seg:ofs pointers (544 in total): 
+```python
+  adr = getState().getCurrentAddress()
+```
+Each pointer in the array points to a C-string.
+
+How would one uses the adr above to iterate over all array elements, printing each string?
+
+adr = getState().getCurrentAddress()
+bs = getBytes(adr,4)
+bs[1]*16+bs[0]
+
+
+sadr = toAddr((getShort(adr.add(2)) << 4) + getShort(adr))
+
+
+
+
+
+from ghidra.program.flatapi import FlatProgramAPI
+
+state = getState()
+program = state.getCurrentProgram()
+fpapi = FlatProgramAPI(program)
+
+for x in dir(fpapi): print(x)
+
+print(fpapi.currentProgram)
+print(fpapi.firstFunction)
+
+
+
+FlatProgramAPI:
+
+    from ghidra.program.flatapi import FlatProgramAPI
+
+    state = getState()
+    program = state.getCurrentProgram()
+    fpapi = FlatProgramAPI(program)
+
+    for x in dir(fpapi): print(x)
+
+    print(fpapi.currentProgram)
+    print(fpapi.firstFunction)
+
+
+FlatDecompilerAPI:
+
+    from ghidra.app.decompiler.flatapi import FlatDecompilerAPI
+    from ghidra.program.flatapi import FlatProgramAPI
+
+    fpapi = FlatProgramAPI(getState().getCurrentProgram())
+    fdapi = FlatDecompilerAPI(fpapi)
+
+    for x in dir(fdapi): print(x)
+
+    main_decomp = fdapi.decompile(fpapi.getFunction('main'))
+    print(main_decomp)
+
+
+
+
+
+
+
+
+
+
+
+Flat API:
+MAX_REFERENCES_TO
+__builtins__
+__doc__
+__name__
+__package__
+addEntryPoint
+addInstructionXref
+analyze
+analyzeAll
+analyzeChanges
+askAddress
+askBytes
+askChoice
+askChoices
+askDirectory
+askDomainFile
+askDouble
+askFile
+askInt
+askLanguage
+askLong
+askPassword
+askProgram
+askProjectFolder
+askString
+askValues
+askYesNo
+cleanup
+clearBackgroundColor
+clearListing
+closeProgram
+createAddressSet
+createAsciiString
+createBookmark
+createByte
+createChar
+createClass
+createDWord
+createData
+createDouble
+createDwords
+createEquate
+createExternalReference
+createFloat
+createFragment
+createFunction
+createHighlight
+createLabel
+createMemoryBlock
+createMemoryReference
+createNamespace
+createProgram
+createQWord
+createSelection
+createStackReference
+createSymbol
+createTableChooserDialog
+createUnicodeString
+createWord
+currentAddress
+currentHighlight
+currentLocation
+currentProgram
+currentSelection
+disassemble
+end
+execute
+find
+findBytes
+findPascalStrings
+findStrings
+getAddressFactory
+getAnalysisOptionDefaultValue
+getAnalysisOptionDefaultValues
+getAnalysisOptionDescription
+getAnalysisOptionDescriptions
+getBookmarks
+getByte
+getBytes
+getCategory
+getCodeUnitFormat
+getCurrentAnalysisOptionsAndValues
+getCurrentProgram
+getDataAfter
+getDataAt
+getDataBefore
+getDataContaining
+getDataTypes
+getDefaultLanguage
+getDemangled
+getDouble
+getEOLComment
+getEOLCommentAsRendered
+getEquate
+getEquates
+getFirstData
+getFirstFunction
+getFirstInstruction
+getFloat
+getFragment
+getFunction
+getFunctionAfter
+getFunctionAt
+getFunctionBefore
+getFunctionContaining
+getGhidraVersion
+getGlobalFunctions
+getInstructionAfter
+getInstructionAt
+getInstructionBefore
+getInstructionContaining
+getInt
+getLanguage
+getLastData
+getLastFunction
+getLastInstruction
+getLong
+getMemoryBlock
+getMemoryBlocks
+getMonitor
+getNamespace
+getPlateComment
+getPlateCommentAsRendered
+getPostComment
+getPostCommentAsRendered
+getPreComment
+getPreCommentAsRendered
+getProgramFile
+getProjectRootFolder
+getReference
+getReferencesFrom
+getReferencesTo
+getRepeatableComment
+getRepeatableCommentAsRendered
+getReusePreviousChoices
+getScriptAnalysisMode
+getScriptArgs
+getScriptName
+getShort
+getSourceFile
+getState
+getSymbol
+getSymbolAfter
+getSymbolAt
+getSymbolBefore
+getSymbols
+getUndefinedDataAfter
+getUndefinedDataAt
+getUndefinedDataBefore
+getUserName
+ghidra
+goTo
+importFile
+importFileAsBinary
+isAnalysisOptionDefaultValue
+isRunningHeadless
+java
+monitor
+openDataTypeArchive
+openProgram
+parseAddress
+parseBoolean
+parseBytes
+parseChoice
+parseChoices
+parseDirectory
+parseDomainFile
+parseDouble
+parseFile
+parseInt
+parseLanguageCompileSpecPair
+parseLong
+parseProjectFolder
+popup
+potentialPropertiesFileLocs
+printerr
+printf
+println
+propertiesFileParams
+removeBookmark
+removeData
+removeDataAt
+removeEntryPoint
+removeEquate
+removeEquates
+removeFunction
+removeFunctionAt
+removeHighlight
+removeInstruction
+removeInstructionAt
+removeMemoryBlock
+removeReference
+removeSelection
+removeSymbol
+resetAllAnalysisOptions
+resetAnalysisOption
+resetAnalysisOptions
+run
+runCommand
+runScript
+runScriptPreserveMyState
+saveProgram
+setAnalysisOption
+setAnalysisOptions
+setAnonymousServerCredentials
+setBackgroundColor
+setByte
+setBytes
+setCurrentHighlight
+setCurrentLocation
+setCurrentSelection
+setDouble
+setEOLComment
+setFloat
+setInt
+setLong
+setPlateComment
+setPostComment
+setPotentialPropertiesFileLocations
+setPreComment
+setPropertiesFile
+setPropertiesFileLocation
+setReferencePrimary
+setRepeatableComment
+setReusePreviousChoices
+setScriptArgs
+setServerCredentials
+setShort
+setSourceFile
+setToolStatusMessage
+show
+sourceFile
+start
+state
+this
+toAddr
+toHexString
+toString
+writer
+
+
+
+
+
+
+
+
+
+
+Program's flat API
+
+
+
+MAX_REFERENCES_TO
+__class__
+__copy__
+__deepcopy__
+__delattr__
+__doc__
+__ensure_finalizer__
+__eq__
+__format__
+__getattribute__
+__hash__
+__init__
+__ne__
+__new__
+__reduce__
+__reduce_ex__
+__repr__
+__setattr__
+__str__
+__subclasshook__
+__unicode__
+addEntryPoint
+addInstructionXref
+addressFactory
+analyze
+analyzeAll
+analyzeChanges
+class
+clearListing
+createAddressSet
+createAsciiString
+createBookmark
+createByte
+createChar
+createClass
+createDWord
+createData
+createDouble
+createDwords
+createEquate
+createExternalReference
+createFloat
+createFragment
+createFunction
+createLabel
+createMemoryBlock
+createMemoryReference
+createNamespace
+createQWord
+createStackReference
+createSymbol
+createUnicodeString
+createWord
+currentProgram
+disassemble
+end
+equals
+find
+findBytes
+findPascalStrings
+findStrings
+firstData
+firstFunction
+firstInstruction
+getAddressFactory
+getBookmarks
+getByte
+getBytes
+getClass
+getCurrentProgram
+getDataAfter
+getDataAt
+getDataBefore
+getDataContaining
+getDataTypes
+getDouble
+getEOLComment
+getEquate
+getEquates
+getFirstData
+getFirstFunction
+getFirstInstruction
+getFloat
+getFragment
+getFunction
+getFunctionAfter
+getFunctionAt
+getFunctionBefore
+getFunctionContaining
+getGlobalFunctions
+getInstructionAfter
+getInstructionAt
+getInstructionBefore
+getInstructionContaining
+getInt
+getLastData
+getLastFunction
+getLastInstruction
+getLong
+getMemoryBlock
+getMemoryBlocks
+getMonitor
+getNamespace
+getPlateComment
+getPostComment
+getPreComment
+getProgramFile
+getProjectRootFolder
+getReference
+getReferencesFrom
+getReferencesTo
+getRepeatableComment
+getShort
+getSymbol
+getSymbolAfter
+getSymbolAt
+getSymbolBefore
+getSymbols
+getUndefinedDataAfter
+getUndefinedDataAt
+getUndefinedDataBefore
+hashCode
+lastData
+lastFunction
+lastInstruction
+memoryBlocks
+monitor
+notify
+notifyAll
+openDataTypeArchive
+programFile
+projectRootFolder
+referencePrimary
+removeBookmark
+removeData
+removeDataAt
+removeEntryPoint
+removeEquate
+removeEquates
+removeFunction
+removeFunctionAt
+removeInstruction
+removeInstructionAt
+removeMemoryBlock
+removeReference
+removeSymbol
+saveProgram
+setByte
+setBytes
+setDouble
+setEOLComment
+setFloat
+setInt
+setLong
+setPlateComment
+setPostComment
+setPreComment
+setReferencePrimary
+setRepeatableComment
+setShort
+start
+toAddr
+toString
+wait
