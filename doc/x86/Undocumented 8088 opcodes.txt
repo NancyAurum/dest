@@ -1,0 +1,71 @@
+Encoded form is 8d c2 and does this:
+
+LEA AX,DX: As Joshua Rodd said, it loads AX with the last computed effective
+address. and I would add: Excluding addresses computed for flow control
+(addresses to be stored in IP).
+
+LEA computes the memory address of the 2nd parameter and seems to store this
+address in an internal register before storing it in the 1st parameter. If the
+2nd parameter is not in memory, no computation is done, and LEA seems to take
+the previous contents left in this internal register.
+
+So, the general case is that LEA AX,DX after an instruction whose parameter is
+[1234h], will load 1234h in AX, regardless of DX.
+
+After XLAT, it will load BX+AL.
+
+After PUSH, PUSHF, POPF and CALL it will load the resulting SP. Presumably the
+same for INT, RET and IRET, but I had no time to test them.
+
+After POP it will also load the resulting SP, except for POP [1234h] (it will
+load 1234h).
+
+JMP will not alter the last computed address, except for JMP [1234h].
+
+After LES and LDS, it will load the parameter address + 2. In the 8088 it could
+be different.
+
+CMPSB and CMPSW seem to calculate the instruction of next elements after
+performing the comparison (to update SI and DI), and they update SI first and
+DI next. So, after those instructions, the updated DI will remain in the
+internal register.
+
+
+Follow-up:
+
+“After PUSH, PUSHF, POPF and CALL it will load the resulting SP. Presumably the
+same for INT, RET and IRET, but I had no time to test them.”
+
+Confirmed, but one exception: After RET N, LEA AX,DX will load SP – N in AX
+(because RET N discards parameters, but does not access them).
+
+It’s also worth noting that INT seems to PUSH the return address after reading
+the interrupt handler address from the vector table.
+
+
+
+I've viewd 8D C2 as a debug tool for determining the last *calculated* effective address.  That is, when you have several paths to a single point, it can be difficult determining how you got there.
+
+
+==========================================
+
+
+It came to my attention the other day that there is an undocumented 8088 instruction that I haven't investigated at all. I've been playing with it today, and it's surprisingly interesting and potentially useful!
+
+There are 128 variants, each two bytes long. The first byte is 0xC4 or 0xC5 and the second is in the range 0xC0..0xFF. So it's LES/LDS but with a second argument that's a register instead of a memory EA. An LES or LDS normally loads 4 bytes from memory, but registers are only two bytes long so where does the data come from?
+
+The instruction (like LES/LDS itself) can be thought of as doing a two step process - loading the offset and them loading the segment.
+
+Let's tackle the second step (loading the segment) first. From the bus sniffer I can see that this instruction loads two bytes from RAM (excluding instruction fetches). The bytes it fetches are placed in the target segment register (ES or DS depending on which opcode is used). The address it fetches from is the value in the hidden "last address" register (the same one whose value is returned by the "LEA rw,r" undocumented instruction) plus 2. This makes perfect sense, since its exactly what we want for the second part of a normal LES/LDS. Normally the hidden register would be initialized by the first part, but without a memory operand it doesn't get initialized so you get the old value of the hidden register.
+
+So much for the segment. Where does the offset (placed in the destination register) come from? Well, it appears to be the last value read from or written to the bus (excluding instruction fetches) - in other words, a second secret register! If the last bus access was only one byte wide then the high byte will be 0xFF, unless you write a byte register to the bus. In that case, writing AL, CL, DL or BL will put the entire value of AX, CX, DX or BX respectively into the secret register. Writing AH, CH, DH or BH will do the same but with the bytes swapped.
+
+What makes this instruction especially cool is that as well as using the values in the hidden registers, it also updates them! In particular, the new value placed in the secret address register is the address that the target segment register is loaded from (i.e. two more than the previous value in the secret address register). So the secret address register is increased by 2. The new value placed in the secret data register is the value loaded from RAM, i.e. the new value of the target segment register.
+
+So, repeated instances of "LES AX,AX" give you a data stream (like "LODSW" or "POP" but without tying up SI or SP respectively). Downsides are that it stomps on ES, and that interrupts have to be off (since an interrupt will scribble on the value of the hidden address register). Similarly, repeated instances of "LDS AX,AX" essentially gives you a linked list (albeit one that's rather awkward to use). The fact that you can get a "free" byte swap in some conditions could be useful too.
+
+I haven't yet figured out a piece of code that could benefit from this trick, but it seems like it should be much more useful than "LEA rw,r" and I hope we'll be able to make use of it for the next 8088 endeavour!
+
+
+I also investigated the opcode FF with mod R/M bytes 37-3F, 77-7F, B7-BF and F7-FF (i.e. FF /7) which disassembles as "???" in debug. This one seems to be just another case of incomplete decoding, though - an alias for FF /6 (PUSH rw) - much less interesting. 
+

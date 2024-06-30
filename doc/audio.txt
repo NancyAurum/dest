@@ -1,0 +1,114 @@
+Digging the exact DIGPAK and MIDPAK version, I had to do some archeology...
+From what I got, the MIDPAK and DIGPAK drivers were distributed as shareware
+through BBS. The author asked $500 for each of them, for commercially use.
+BBS were telnet servers, offering read/posting messages and downloading files.
+The MIDPAK was a wrapper over the AIL library, which only allowed music.
+
+BTW, some schizos insist on using SSH for BBS (Telent is insecure!!!):
+https://forum.vcfed.org/index.php?threads/which-to-use-telnet-or-ssh-for-logging-into-bulliten-board-systems-bbss.43829/
+
+Apparently some people never paid $500, since README.PRN had the author
+complaining. So yeah, having an audio your game was rather expensive.
+The audio cards themselves could cost you $500 and more.
+Nowadays we have it for almost free, unless you want something advanced,
+like 3d or virtual reality stuff.
+
+
+
+In any case, first I will have to work through the rest of STRONG.DAT
+code, since I will need to extract the driver files to compare
+their exact binaries with the available distributions.
+Hopefully I wont need reversing all the int 66h stubs.
+Would also be nice finding the sources for VGA library,
+and the LBM package used. LBMs mean the graphics was likely made in
+Deluxe Paint on Amiga. Or maybe with a DOS port, like Deluxe Paint II,
+and DeluxePaint Animation, which are still considered warez:
+https://web.archive.org/web/20140117052406/http://www.phatcode.net/downloads.php?id=201
+
+
+MIDPAK.TXT:
+The MIDI driver MIDPAK hooks into user interrupt vector 66h to provide a
+clean clear programmers interface. MIDPAK uses the same interupt vector
+as DIGPAK. DIGPAK describes the complete set of Digitized sound drivers
+provided by THE Audio Solution.
+
+MIDPAK is fully compatible with DIGPAK.  If your application needs to
+play back both MIDI music and digitized sound you simply first load the
+digitized sound driver you need, and then load the MIDPAK midi driver on
+top of it.  The MIDPAK driver detects the presence of the DIGPAK sound
+driver and re-routes all calls through it.  If the digitized sound
+hardware does not support independent playback of digitized sound (DMA
+support: SoundBlaster, and ProAudio Spectrum do.) then MIDI music
+playback will shut down while the digitized sound effect is playing.
+MIDI music playback will continue once the digitized sound effect has
+completed.  This is completely transparent to the running application.
+
+MIDPAK uses the set of MIDI sound drivers developed by Miles Design
+Incorporated.  These drivers vary in size and can be noted by the
+extension of .ADV.  MIDPAK will always load the sound driver MUSIC.ADV
+when started.  The application should copy the apropriate sound driver
+over as MUSIC.ADV before loading MIDPAK.
+
+README.PRN:
+ Written by John W. Ratcliff (c) 1994
+	  Compuserve: 70253,3237
+	  Genie: J.RATCLIFF3
+	  BBS: 1-314-939-0200
+	  Addresss:
+			  747 Napa Lane
+			  St. Charles, MO 63304
+
+ A $500 per product license fee applies to all commercial software
+ products distributed with ANY DIGPAK and another $500 for MIDPAK
+ drivers.  That's a total of $1,000 if your product uses BOTH
+ DIGPAK and MIDPAK drivers.  If you distribute any commercial title with
+ DIGPAK and/or MIDPAK drivers resident then this license fee applies.
+
+
+https://www.vogons.org/viewtopic.php?t=39406
+DIGPAK/MIDPAK library, by John W. Ratcliff and John Miles.
+This is a real mode library, drivers work by hooking int 66h.
+MIDPAK is but a wrapper for Audio Interface Library 2.0 (AIL) drivers.
+However, MIDPAK delivers API functions different from AIL.
+
+PCM drivers extension: COM
+Music drivers extension: ADV
+Patch banks extensions: AD, OPL, MT (same as in Audio Interface Library)
+PCM files supported: VOC
+Music files supported: XMI
+Setup tool(s): SETD.EXE, SETM.EXE
+
+DIGPAK/MIDPAK developer's kit is available freely over the internet,
+search for DMKIT150.ZIP; or older version DIGIMIDI.ZIP. That doesn't include
+driver source code, but AIL drivers (they are used in MIDPAK) source code is
+still available for free from John Miles's site.
+
+
+
+https://www.vgmpf.com/Wiki/index.php?title=Midpak
+Midpak is a DOS program and developer suite that allows game designers
+to convert MIDI music into its proprietary XMI format to play during games. 
+
+
+
+http://justsolve.archiveteam.org/wiki/AIL_real_mode_driver
+
+AIL real mode driver (.ADV) is a music/MIDI driver file for DOS.
+It is associated with IBM Audio Interface Library (AIL), a toolkit by
+John Miles and Miles Design.
+
+AIL was later renamed to Miles Sound System (or maybe it's more like the
+predecessor?). Miles Sound System was acquired by RAD Game Tools in 1994.
+
+It is unclear what relationship, if any, AIL has to IBM. 
+
+There was also an edition of AIL for 32-bit protected mode DOS.
+And this doesn't even scratch the surface of what Miles Sound System
+has evolved into.
+
+One way to use ADV drivers was via MIDPAK, a third-party product which
+incorporated them. MIDPAK is a relative of DIGPAK (see DIGPAK sound driver).
+
+The source code for one version of AIL was released in 2000. 
+AIL Version 2" (AIL2.ZIP) - AIL v2.14 (and AIL/32 v1.05), including source code
+http://www.ke5fx.com/

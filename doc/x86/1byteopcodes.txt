@@ -1,0 +1,86 @@
+06            PUSH ES              Set [SP-2] to ES, then decrement SP by 2
+07            POP ES               Set ES to top of stack, increment SP by 2
+0E            PUSH CS              Set [SP-2] to CS, then decrement SP by 2
+16            PUSH SS              Set [SP-2] to SS, then decrement SP by 2
+17            POP SS               Set SS to top of stack, increment SP by 2
+1E            PUSH DS              Set [SP-2] to DS, then decrement SP by 2
+1F            POP DS               Set DS to top of stack, increment SP by 2
+27            DAA                  Decimal adjust AL after addition
+2F            DAS                  Decimal adjust AL after subtraction
+36            SS                   Use SS segment for the following memory reference
+37            AAA                  ASCII adjust AL (carry into AH) after addition
+3F            AAS                  ASCII adjust AL (borrow from AH) after subtraction
+60            PUSHA              1 Push AX,CX,DX,BX,original SP,BP,SI,DI
+60            PUSHAD             3 Push EAX,ECX,EDX,EBX,original ESP,EBP,ESI,EDI
+61            POPA               1 Pop DI,SI,BP,x ,BX,DX,CX,AX (SP value is ignored)
+61            POPAD              3 Pop EDI,ESI,EBP,x,EBX,EDX,ECX,EAX (ESP ign.)
+6C            INS rmb,DX         1 Input byte from port DX into [DI], advance DI
+6C            INSB               1 Input byte from port DX into ES:[DI], advance DI
+6D            INS rmv,DX         1 Input vword from port DX into [DI], advance DI
+6D            INSD               3 Input dword from port DX into ES:[DI], advance DI
+6D            INSW               1 Input vword from port DX into ES:[DI], advance DI
+6E            OUTS DX,rmb        1 Output byte [SI] to port number DX, advance SI
+6E            OUTSB              1 Output byte DS:[SI] to port number DX, advance SI
+6F            OUTS DX,rmv        1 Output word [SI] to port number DX, advance SI
+6F            OUTSD              3 Output dword DS:[SI] to port number DX, advance SI
+6F            OUTSW              1 Output word DS:[SI] to port number DX, advance SI
+90            NOP                  No Operation
+98            CBW                  Convert byte into word (AH = top bit of AL)
+98            CWDE               3 Sign-extend word AX to doubleword EAX
+99            CDQ                3 Convert dword to qword (EDX = top bit of EAX)
+99            CWD                  Convert word to doubleword (DX = top bit of AX)
+9B            WAIT                 Wait until floating-point operation is completed
+9C            PUSHF                Set [SP-2] to flags register, then decrement SP by 2
+9C            PUSHFD             3 Set [SP-4] to eflags reg, then decr SP by 4
+9D            POPF                 Set flags register to top of stack, increment SP by 2
+9D            POPFD              3 Set eflags reg to top of stack, incr SP by 2
+9E            SAHF                 Store AH into flags  SF ZF xx AF xx PF xx CF
+9F            LAHF                 Load: AH = flags  SF ZF xx AF xx PF xx CF
+9r            XCHG eAX,rv          Exchange eAX with vword register
+9r            XCHG rv,eAX          Exchange eAX with vword register
+A4            MOVS mb,mb           Move byte [SI] to ES:[DI], advance SI,DI
+A4            MOVSB                Move byte DS:[SI] to ES:[DI], advance SI,DI
+A5            MOVS mv,mv           Move vword [SI] to ES:[DI], advance SI,DI
+A5            MOVSD              3 Move dword DS:[SI] to ES:[DI], advance SI,DI
+A5            MOVSW                Move word DS:[SI] to ES:[DI], advance SI,DI
+A6            CMPS mb,mb           Compare bytes [SI] - ES:[DI], advance SI,DI
+A6            CMPSB                Compare bytes DS:[SI] - ES:[DI], advance SI,DI
+A7            CMPS mv,mv           Compare vwords [SI] - ES:[DI], advance SI,DI
+A7            CMPSD              3 Compare dwords DS:[SI] - ES:[DI], advance SI,DI
+A7            CMPSW                Compare words DS:[SI] - ES:[DI], advance SI,DI
+AA            STOS mb              Store AL to byte [DI], advance DI
+AA            STOSB                Store AL to byte ES:[DI], advance DI
+AB            STOS mv              Store eAX to word [DI], advance DI
+AB            STOSD              3 Store EAX to dword ES:[DI], advance DI
+AB            STOSW                Store AX to word ES:[DI], advance DI
+AC            LODS mb              Load byte [SI] into AL, advance SI
+AC            LODSB                Load byte [SI] into AL, advance SI
+AD            LODS mv              Load vword [SI] into eAX, advance SI
+AD            LODSD              3 Load dword [SI] into EAX, advance SI
+AD            LODSW                Load word [SI] into AX, advance SI
+AE            SCAS mb              Compare bytes AL - ES:[DI], advance DI
+AE            SCASB                Compare bytes AL - ES:[DI], advance DI
+AF            SCAS mv              Compare vwords eAX - ES:[DI], advance DI
+AF            SCASD              3 Compare dwords EAX - ES:[DI], advance DI
+AF            SCASW                Compare words AX - ES:[DI], advance DI
+C3            RET                  Return to caller (near or far, depending on PROC)
+C3            RETN                 Return to near caller (pop offset only)
+C9            LEAVE              1 Set SP to BP, then POP BP (reverses previous ENTER)
+CB            RETF                 Return to far caller (pop offset, then seg)
+CC            INT 3                Interrupt 3 (trap to debugger)
+CE            INTO                 Interrupt 4 if overflow flag is 1
+CF            IRET                 Interrupt return (far return and pop flags)
+CF            IRETD              3 Interrupt return (pop EIP, ECS, Eflags)
+D7            XLAT                 Set AL to memory byte DS:[BX + unsigned AL]
+EC            IN AL,DX             Input byte from port DX into AL
+ED            IN eAX,DX            Input vword from port DX into eAX
+EE            OUT DX,AL            Output byte AL to port number DX
+EF            OUT DX,eAX           Output word eAX to port number DX
+F4            HLT                  Halt
+F5            CMC                  Complement carry flag
+F8            CLC                  Clear carry flag
+F9            STC                  Set carry flag
+FA            CLI                  Clear interrupt enable flag; interrupts disabled
+FB            STI                  Set interrupt enable flag, interrupts enabled
+FC            CLD                  Clear direction flag so SI and DI will increment
+FD            STD                  Set direction flag so SI and DI will decrement
