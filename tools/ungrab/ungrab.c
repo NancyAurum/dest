@@ -43,6 +43,14 @@ typedef struct { //content table entry
   uint8_t info[12];  //0s when in STRONG.DAT
 } PACKED cte_t;
 
+typedef struct { //stronghold graphics
+  uint8_t type; //0=disk, 1=loaded
+  uint32_t sz;
+  uint16_t w;
+  uint16_t h;
+  //uint8 data[sz]; //RLE-packed pixels
+} PACKED gfx_t;
+
 void fail(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
