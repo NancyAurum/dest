@@ -41,7 +41,7 @@ typedef struct { //content table entry
   uint32_t ofs;      //offset inside STRONG.DAT
   uint32_t sz;       //size of the file
   uint8_t info[12];  //0s when in STRONG.DAT
-} PACKED cte_t;
+} PACKED cte_t; //21 bytes in size
 
 typedef struct { //stronghold graphics
   uint8_t type; //0=disk, 1=loaded
@@ -49,6 +49,8 @@ typedef struct { //stronghold graphics
   uint16_t w;
   uint16_t h;
   //uint8 data[sz]; //RLE-packed pixels
+                    //the first data byte could be either pixel or
+                    //additional info
 } PACKED gfx_t;
 
 void fail(char *fmt, ...) {
@@ -119,11 +121,13 @@ int main(int argc, char **argv) {
   }
 #endif
 
+#if 0
   for (i = 0; i < nitems; i++) {
     printf("Dumping entry %d...\n", i);
     write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
   }
   printf("Done!\n");
+#endif
 
   return 0;
 }

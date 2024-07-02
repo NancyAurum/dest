@@ -18,6 +18,9 @@ Apparently it is also possible to do to list arguments:
   for x in dir(fpapi): print(getattr(fpapi, x))
 
 
+Advanced Python scripting to solve a difficult task:
+https://dinohacks.com/posts/2024/2024-06-21-dealing-with-api-hashing-using-qiling/
+
 
 Extended Python support
 ___________________________
