@@ -84,6 +84,14 @@ Read null-terminated C-string from memory:
           break
       return ''.join(s)
 
+Convert signed Java bytes to unsigned:
+  def ubytes(bytes):
+    return map(lambda b: b & 0xff, bytes)
+
+Print byte list as string:
+  def hd(bytes):
+    return ' '.join('{:02x}'.format(byte&0xff) for byte in bytes)
+
 
 For each of the 544 seg:ofs far pointers at the current address,
 print associated 0-ended C-string:
@@ -108,29 +116,93 @@ for i in range(544):
 
 
 
+#### This script checks if Ghidra misgenerated near call references ####
 
-I'm using Ghidra's builtin Python interpreter to process a 16 bit real mode
-x86 binary.
+def ubytes(bs):
+  return map(lambda b: b & 0xff, bs)
 
-The current address is at an array of far seg:ofs pointers (544 in total): 
-```python
-  adr = getState().getCurrentAddress()
-```
-Each pointer in the array points to a C-string.
+def check_near_calls():
+  instructions = currentProgram.getListing().getInstructions(True)
+  while instructions.hasNext():
+      instruction = instructions.next()
+      if instruction.getMnemonicString() == "CALL" and instruction.getDefaultOperandRepresentation(0).startswith("0x"):
+        ibs = ubytes(instruction.getBytes())
+        if ibs[0] == 0xE8:
+          call_address = instruction.getAddress()
+          cseg = call_address.getSegment()
+          cofs = call_address.getSegmentOffset()
+          disp = ibs[2]*0x100 + ibs[1]
+          proper_ofs = (cofs+3 + disp)&0xFFFF
+          refs = getReferencesFrom(call_address)
+          for ref in refs:
+            if ref.getReferenceType().toString() == "UNCONDITIONAL_CALL":
+              adr = ref.getToAddress()
+              seg = adr.getSegment()
+              ofs = adr.getSegmentOffset()
+              fadr = ref.getFromAddress()
+              fseg = fadr.getSegment()
+              fofs = fadr.getSegmentOffset()
+              cseg = call_address.getSegment()
+              cofs = call_address.getSegmentOffset()
+              disp = ibs[2]*0x100 + ibs[1]
+              proper_ofs = (fofs+3 + disp)&0xFFFF
+              if ofs != proper_ofs:
+                print("Call at {:04X}:{:04X}".format(fseg,fofs))
+                print("  target is {:04X}:{:04X} but should be {:04X}:{:04X}"
+                  .format(seg,ofs,cseg,proper_ofs))
 
-How would one uses the adr above to iterate over all array elements, printing each string?
-
-adr = getState().getCurrentAddress()
-bs = getBytes(adr,4)
-bs[1]*16+bs[0]
-
-
-sadr = toAddr((getShort(adr.add(2)) << 4) + getShort(adr))
+check_near_calls()
 
 
 
 
 
+#### This script fixes misgenerated near call references ####
+from ghidra.program.model.symbol import RefType, SourceType
+
+# Required to add references
+reference_manager = currentProgram.getReferenceManager()
+
+def ubytes(bs):
+  return map(lambda b: b & 0xff, bs)
+
+def fix_near_calls():
+  instructions = currentProgram.getListing().getInstructions(True)
+  while instructions.hasNext():
+      instruction = instructions.next()
+      if instruction.getMnemonicString() == "CALL" and instruction.getDefaultOperandRepresentation(0).startswith("0x"):
+        ibs = ubytes(instruction.getBytes())
+        if ibs[0] == 0xE8:
+          call_address = instruction.getAddress()
+          cseg = call_address.getSegment()
+          cofs = call_address.getSegmentOffset()
+          disp = ibs[2]*0x100 + ibs[1]
+          proper_ofs = (cofs+3 + disp)&0xFFFF
+          refs = getReferencesFrom(call_address)
+          needs_fix = 0
+          for ref in refs:
+            if ref.getReferenceType().toString() == "UNCONDITIONAL_CALL":
+              adr = ref.getToAddress()
+              seg = adr.getSegment()
+              ofs = adr.getSegmentOffset()
+              fadr = ref.getFromAddress()
+              fseg = fadr.getSegment()
+              fofs = fadr.getSegmentOffset()
+              if seg != cseg or ofs != proper_ofs: needs_fix = 1
+          if needs_fix:
+            # Likely all references are invalid
+            for ref in refs: removeReference(ref)
+            # Create the correct reference
+            proper_adr = toAddr((cseg << 4) + proper_ofs)
+            reference_manager.addMemoryReference(call_address, proper_adr, RefType.UNCONDITIONAL_CALL, SourceType.USER_DEFINED, 0)
+
+fix_near_calls()
+
+
+
+
+
+#Example of using FlatProgramAPI
 from ghidra.program.flatapi import FlatProgramAPI
 
 state = getState()
@@ -175,427 +247,3 @@ FlatDecompilerAPI:
 
 
 
-
-
-
-
-
-
-Flat API:
-MAX_REFERENCES_TO
-__builtins__
-__doc__
-__name__
-__package__
-addEntryPoint
-addInstructionXref
-analyze
-analyzeAll
-analyzeChanges
-askAddress
-askBytes
-askChoice
-askChoices
-askDirectory
-askDomainFile
-askDouble
-askFile
-askInt
-askLanguage
-askLong
-askPassword
-askProgram
-askProjectFolder
-askString
-askValues
-askYesNo
-cleanup
-clearBackgroundColor
-clearListing
-closeProgram
-createAddressSet
-createAsciiString
-createBookmark
-createByte
-createChar
-createClass
-createDWord
-createData
-createDouble
-createDwords
-createEquate
-createExternalReference
-createFloat
-createFragment
-createFunction
-createHighlight
-createLabel
-createMemoryBlock
-createMemoryReference
-createNamespace
-createProgram
-createQWord
-createSelection
-createStackReference
-createSymbol
-createTableChooserDialog
-createUnicodeString
-createWord
-currentAddress
-currentHighlight
-currentLocation
-currentProgram
-currentSelection
-disassemble
-end
-execute
-find
-findBytes
-findPascalStrings
-findStrings
-getAddressFactory
-getAnalysisOptionDefaultValue
-getAnalysisOptionDefaultValues
-getAnalysisOptionDescription
-getAnalysisOptionDescriptions
-getBookmarks
-getByte
-getBytes
-getCategory
-getCodeUnitFormat
-getCurrentAnalysisOptionsAndValues
-getCurrentProgram
-getDataAfter
-getDataAt
-getDataBefore
-getDataContaining
-getDataTypes
-getDefaultLanguage
-getDemangled
-getDouble
-getEOLComment
-getEOLCommentAsRendered
-getEquate
-getEquates
-getFirstData
-getFirstFunction
-getFirstInstruction
-getFloat
-getFragment
-getFunction
-getFunctionAfter
-getFunctionAt
-getFunctionBefore
-getFunctionContaining
-getGhidraVersion
-getGlobalFunctions
-getInstructionAfter
-getInstructionAt
-getInstructionBefore
-getInstructionContaining
-getInt
-getLanguage
-getLastData
-getLastFunction
-getLastInstruction
-getLong
-getMemoryBlock
-getMemoryBlocks
-getMonitor
-getNamespace
-getPlateComment
-getPlateCommentAsRendered
-getPostComment
-getPostCommentAsRendered
-getPreComment
-getPreCommentAsRendered
-getProgramFile
-getProjectRootFolder
-getReference
-getReferencesFrom
-getReferencesTo
-getRepeatableComment
-getRepeatableCommentAsRendered
-getReusePreviousChoices
-getScriptAnalysisMode
-getScriptArgs
-getScriptName
-getShort
-getSourceFile
-getState
-getSymbol
-getSymbolAfter
-getSymbolAt
-getSymbolBefore
-getSymbols
-getUndefinedDataAfter
-getUndefinedDataAt
-getUndefinedDataBefore
-getUserName
-ghidra
-goTo
-importFile
-importFileAsBinary
-isAnalysisOptionDefaultValue
-isRunningHeadless
-java
-monitor
-openDataTypeArchive
-openProgram
-parseAddress
-parseBoolean
-parseBytes
-parseChoice
-parseChoices
-parseDirectory
-parseDomainFile
-parseDouble
-parseFile
-parseInt
-parseLanguageCompileSpecPair
-parseLong
-parseProjectFolder
-popup
-potentialPropertiesFileLocs
-printerr
-printf
-println
-propertiesFileParams
-removeBookmark
-removeData
-removeDataAt
-removeEntryPoint
-removeEquate
-removeEquates
-removeFunction
-removeFunctionAt
-removeHighlight
-removeInstruction
-removeInstructionAt
-removeMemoryBlock
-removeReference
-removeSelection
-removeSymbol
-resetAllAnalysisOptions
-resetAnalysisOption
-resetAnalysisOptions
-run
-runCommand
-runScript
-runScriptPreserveMyState
-saveProgram
-setAnalysisOption
-setAnalysisOptions
-setAnonymousServerCredentials
-setBackgroundColor
-setByte
-setBytes
-setCurrentHighlight
-setCurrentLocation
-setCurrentSelection
-setDouble
-setEOLComment
-setFloat
-setInt
-setLong
-setPlateComment
-setPostComment
-setPotentialPropertiesFileLocations
-setPreComment
-setPropertiesFile
-setPropertiesFileLocation
-setReferencePrimary
-setRepeatableComment
-setReusePreviousChoices
-setScriptArgs
-setServerCredentials
-setShort
-setSourceFile
-setToolStatusMessage
-show
-sourceFile
-start
-state
-this
-toAddr
-toHexString
-toString
-writer
-
-
-
-
-
-
-
-
-
-
-Program's flat API
-
-
-
-MAX_REFERENCES_TO
-__class__
-__copy__
-__deepcopy__
-__delattr__
-__doc__
-__ensure_finalizer__
-__eq__
-__format__
-__getattribute__
-__hash__
-__init__
-__ne__
-__new__
-__reduce__
-__reduce_ex__
-__repr__
-__setattr__
-__str__
-__subclasshook__
-__unicode__
-addEntryPoint
-addInstructionXref
-addressFactory
-analyze
-analyzeAll
-analyzeChanges
-class
-clearListing
-createAddressSet
-createAsciiString
-createBookmark
-createByte
-createChar
-createClass
-createDWord
-createData
-createDouble
-createDwords
-createEquate
-createExternalReference
-createFloat
-createFragment
-createFunction
-createLabel
-createMemoryBlock
-createMemoryReference
-createNamespace
-createQWord
-createStackReference
-createSymbol
-createUnicodeString
-createWord
-currentProgram
-disassemble
-end
-equals
-find
-findBytes
-findPascalStrings
-findStrings
-firstData
-firstFunction
-firstInstruction
-getAddressFactory
-getBookmarks
-getByte
-getBytes
-getClass
-getCurrentProgram
-getDataAfter
-getDataAt
-getDataBefore
-getDataContaining
-getDataTypes
-getDouble
-getEOLComment
-getEquate
-getEquates
-getFirstData
-getFirstFunction
-getFirstInstruction
-getFloat
-getFragment
-getFunction
-getFunctionAfter
-getFunctionAt
-getFunctionBefore
-getFunctionContaining
-getGlobalFunctions
-getInstructionAfter
-getInstructionAt
-getInstructionBefore
-getInstructionContaining
-getInt
-getLastData
-getLastFunction
-getLastInstruction
-getLong
-getMemoryBlock
-getMemoryBlocks
-getMonitor
-getNamespace
-getPlateComment
-getPostComment
-getPreComment
-getProgramFile
-getProjectRootFolder
-getReference
-getReferencesFrom
-getReferencesTo
-getRepeatableComment
-getShort
-getSymbol
-getSymbolAfter
-getSymbolAt
-getSymbolBefore
-getSymbols
-getUndefinedDataAfter
-getUndefinedDataAt
-getUndefinedDataBefore
-hashCode
-lastData
-lastFunction
-lastInstruction
-memoryBlocks
-monitor
-notify
-notifyAll
-openDataTypeArchive
-programFile
-projectRootFolder
-referencePrimary
-removeBookmark
-removeData
-removeDataAt
-removeEntryPoint
-removeEquate
-removeEquates
-removeFunction
-removeFunctionAt
-removeInstruction
-removeInstructionAt
-removeMemoryBlock
-removeReference
-removeSymbol
-saveProgram
-setByte
-setBytes
-setDouble
-setEOLComment
-setFloat
-setInt
-setLong
-setPlateComment
-setPostComment
-setPreComment
-setReferencePrimary
-setRepeatableComment
-setShort
-start
-toAddr
-toString
-wait
