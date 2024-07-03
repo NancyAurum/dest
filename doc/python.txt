@@ -32,7 +32,7 @@ Another solution:
 https://pypi.org/project/ghidra-bridge/
 
 
-Premade Scripts
+Ghidra supplied scripts
 ___________________________
 * Data/ImportSymbolsScript.py (Ghidra/Features/Python/ghidra_scripts)
   It has format:
@@ -50,155 +50,6 @@ Snippets
 ___________________________
 A collection of example snippets:
 https://github.com/HackOvert/GhidraSnippets
-
-
-Get the offset of the user cursor:
-  getState().getCurrentAddress().getOffset()
-
-Ghidra also defines currentAddress and currentProgram:
-  ghidra.program.model.data.DataUtilities.isUndefinedData(currentProgram, currentAddress)
-
-Get segmented address components:
-  adr = getState().getCurrentAddress()
-  "adr {:04X}:{:04X}".format(adr.getSegment(),adr.getSegmentOffset())
-
-Increment address:
-  adr.add(5)
-
-Convert that far ptr to Ghidra's address
-  toAddr((getShort(adr.add(2)) << 4) + getShort(adr))
-
-Print far pointer at adr:
-  "adr {:04X}:{:04X}".format(getShort(adr),getShort(adr.add(2)))
-
-Read null-terminated C-string from memory:
-    def getCstr(addr):
-      s = []
-      while True:
-        try:
-          c = getByte(addr)
-          if c == 0: break
-          s.append(chr(c))
-          addr = addr.add(1)
-        except MemoryAccessException:
-          break
-      return ''.join(s)
-
-Convert signed Java bytes to unsigned:
-  def ubytes(bytes):
-    return map(lambda b: b & 0xff, bytes)
-
-Print byte list as string:
-  def hd(bytes):
-    return ' '.join('{:02x}'.format(byte&0xff) for byte in bytes)
-
-
-For each of the 544 seg:ofs far pointers at the current address,
-print associated 0-ended C-string:
-def getCstr(addr):
-  s = []
-  while True:
-    try:
-      c = getByte(addr)
-      if c == 0: break
-      s.append(chr(c))
-      addr = addr.add(1)
-    except MemoryAccessException:
-      break
-  return ''.join(s)
-
-adr = getState().getCurrentAddress()
-
-for i in range(544):
-  sadr = toAddr((getShort(adr.add(i*4 + 2)) << 4) + getShort(adr.add(i*4)))
-  print(getCstr(sadr))
-
-
-
-
-#### This script checks if Ghidra misgenerated near call references ####
-
-def ubytes(bs):
-  return map(lambda b: b & 0xff, bs)
-
-def check_near_calls():
-  instructions = currentProgram.getListing().getInstructions(True)
-  while instructions.hasNext():
-      instruction = instructions.next()
-      if instruction.getMnemonicString() == "CALL" and instruction.getDefaultOperandRepresentation(0).startswith("0x"):
-        ibs = ubytes(instruction.getBytes())
-        if ibs[0] == 0xE8:
-          call_address = instruction.getAddress()
-          cseg = call_address.getSegment()
-          cofs = call_address.getSegmentOffset()
-          disp = ibs[2]*0x100 + ibs[1]
-          proper_ofs = (cofs+3 + disp)&0xFFFF
-          refs = getReferencesFrom(call_address)
-          for ref in refs:
-            if ref.getReferenceType().toString() == "UNCONDITIONAL_CALL":
-              adr = ref.getToAddress()
-              seg = adr.getSegment()
-              ofs = adr.getSegmentOffset()
-              fadr = ref.getFromAddress()
-              fseg = fadr.getSegment()
-              fofs = fadr.getSegmentOffset()
-              cseg = call_address.getSegment()
-              cofs = call_address.getSegmentOffset()
-              disp = ibs[2]*0x100 + ibs[1]
-              proper_ofs = (fofs+3 + disp)&0xFFFF
-              if ofs != proper_ofs:
-                print("Call at {:04X}:{:04X}".format(fseg,fofs))
-                print("  target is {:04X}:{:04X} but should be {:04X}:{:04X}"
-                  .format(seg,ofs,cseg,proper_ofs))
-
-check_near_calls()
-
-
-
-
-
-#### This script fixes misgenerated near call references ####
-from ghidra.program.model.symbol import RefType, SourceType
-
-# Required to add references
-reference_manager = currentProgram.getReferenceManager()
-
-def ubytes(bs):
-  return map(lambda b: b & 0xff, bs)
-
-def fix_near_calls():
-  instructions = currentProgram.getListing().getInstructions(True)
-  while instructions.hasNext():
-      instruction = instructions.next()
-      if instruction.getMnemonicString() == "CALL" and instruction.getDefaultOperandRepresentation(0).startswith("0x"):
-        ibs = ubytes(instruction.getBytes())
-        if ibs[0] == 0xE8:
-          call_address = instruction.getAddress()
-          cseg = call_address.getSegment()
-          cofs = call_address.getSegmentOffset()
-          disp = ibs[2]*0x100 + ibs[1]
-          proper_ofs = (cofs+3 + disp)&0xFFFF
-          refs = getReferencesFrom(call_address)
-          needs_fix = 0
-          for ref in refs:
-            if ref.getReferenceType().toString() == "UNCONDITIONAL_CALL":
-              adr = ref.getToAddress()
-              seg = adr.getSegment()
-              ofs = adr.getSegmentOffset()
-              fadr = ref.getFromAddress()
-              fseg = fadr.getSegment()
-              fofs = fadr.getSegmentOffset()
-              if seg != cseg or ofs != proper_ofs: needs_fix = 1
-          if needs_fix:
-            # Likely all references are invalid
-            for ref in refs: removeReference(ref)
-            # Create the correct reference
-            proper_adr = toAddr((cseg << 4) + proper_ofs)
-            reference_manager.addMemoryReference(call_address, proper_adr, RefType.UNCONDITIONAL_CALL, SourceType.USER_DEFINED, 0)
-
-fix_near_calls()
-
-
 
 
 
@@ -242,8 +93,4 @@ FlatDecompilerAPI:
 
     main_decomp = fdapi.decompile(fpapi.getFunction('main'))
     print(main_decomp)
-
-
-
-
 

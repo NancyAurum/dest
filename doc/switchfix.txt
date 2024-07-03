@@ -1,0 +1,5 @@
+https://github.com/NationalSecurityAgency/ghidra/issues/6679
+
+There is a way to manually help the decompiler recover switch-statements correctly. To show how this works, I'll go through this process without the above fix applied. To do this, you should first remove all memory references from the jmp instruction. By pressing R while the mouse cursor is on the mnemonic, the memory dialog pops up, and you can easily remove all entries. Then, you have to manually add new COMPUTED_JUMP references; 1 for each of the switch cases.
+
+Then, open the script manager and run the SwitchOverride.java script. That should add some more references to the jump, but more importantly, the decompiler is now updated and shows the correct number of switch cases, along with a comment saying that the switch case has been manually overridden.

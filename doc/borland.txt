@@ -1,3 +1,12 @@
+long type
+----------------------------------------
+
+long value is returned in DX:AX pair (DX is hi word)
+long argument is normally passed on stack.
+Yet for compiler generated functions (i.e. LXMUL),
+the the first argument is in DX:AX and the second is in CX:BX
+
+
 _seg
 ----------------------------------------
 https://stackoverflow.com/questions/67524817/meaning-of-keyword-modifier-seg-in-old-c-code
