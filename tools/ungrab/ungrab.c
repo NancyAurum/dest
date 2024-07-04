@@ -22,6 +22,8 @@
 #include <string.h>
 
 #include "nap.h"
+#include "pic.h"
+
 
 #define NG_UTIL_IMPLEMENTATION
 #include "util.h"
@@ -51,7 +53,7 @@ typedef struct { //stronghold graphics
   //uint8 data[sz]; //RLE-packed pixels
                     //the first data byte could be either pixel or
                     //additional info
-} PACKED gfx_t;
+} PACKED stg_t;
 
 void fail(char *fmt, ...) {
   va_list ap;
@@ -75,6 +77,78 @@ void usage() {
   P("\n");
   exit(0);
 #undef P
+}
+
+typedef struct { //extended information
+  int ext;
+  int16_t sx;
+  int16_t sy;
+  int16_t ex; //inclusive
+  int16_t ey;
+  char *name;
+} einfo_t;
+
+einfo_t einfo[] = {
+  {0,  0,  0,  10, 15,"mouse03.lbm"},
+  {0, 77,  11, 93, 27,"mouse03.lbm"},
+  {0, 96,  55,109, 62,"mouse03.lbm"},
+  {0, 159, 22,171, 32,"mouse03.lbm"},
+
+  //bigcomp.lbm is 320x200 lbm with smaller items
+  //the first row elements are 50x42 in size
+  //3 in total
+  //original LBM had grid lines between them
+  //i.e. these were 52x44
+  {0, 159, 22,171, 32,"bigcomp.lbm"},
+
+  {0,0,0,0,0,0}
+};
+
+
+int rle_decode(uint8_t *src, uint8_t *dst, int sz) {
+  uint8_t *q;
+  uint8_t b;
+  int i;
+  uint8_t *end = dst + sz;
+  uint8_t *ps;
+  uint8_t *s = src;
+
+  do {
+    do {
+      ps = s;
+      s = ps + 1;
+      b = *ps;
+    } while (b == 0x80);
+    if (b < 0x80) {
+      i = (uint8_t)(b + 1);
+      do {
+        q = s;
+        s = s + 1;
+        if (*q != 0) {
+          *dst = *q;
+        }
+        dst = dst + 1;
+        i = i - 1;
+      } while (i != 0);
+    }
+    else {
+      i = (uint8_t)((b ^ 0xff) + 2);
+      q = s;
+      s = ps + 2;
+      b = *q;
+      if (b == 0) {
+        dst = dst + i;
+      }
+      else {
+        for (; i != 0; i = i - 1) {
+          q = dst;
+          dst = dst + 1;
+          *q = b;
+        }
+      }
+    }
+  } while (dst < end);
+  return s - src;
 }
 
 
@@ -121,10 +195,39 @@ int main(int argc, char **argv) {
   }
 #endif
 
+
+
 #if 0
   for (i = 0; i < nitems; i++) {
     printf("Dumping entry %d...\n", i);
     write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
+  }
+  printf("Done!\n");
+#endif
+
+  
+
+#if 1
+  for (i = 0; i < nitems; i++) {
+    if (i == 0) {
+      einfo_t *ei = &einfo[i];
+      stg_t *stg = (stg_t*)(file+ct[i].ofs);
+      printf("%dx%d %d bytes\n", stg->w, stg->h, stg->sz);
+      pic_t *pic = picNew(stg->w, stg->h, 8);
+      pic->P = new(uint8_t,4*256);
+      for (j = 0; j < 256; j++) {
+        pic->P[j*4+0] = rand()%256;
+        pic->P[j*4+1] = rand()%256;
+        pic->P[j*4+2] = rand()%256;
+        pic->P[j*4+3] = 0;
+      }
+      //picClear(pic, 0xFF00FF);
+      rle_decode((uint8_t*)(stg+1), pic->D, stg->w*stg->h);
+      pngSave("./out/test.png", pic);
+    }
+    break;
+    //printf("Dumping entry %d...\n", i);
+    //write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
   }
   printf("Done!\n");
 #endif

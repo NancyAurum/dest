@@ -2053,3 +2053,42 @@ like ranges, color cycling and index painting, so some people used Deluxe Paint
 up until the modern pixel art editors appeared.
 
 
+Entry 2024-07-04: Fixing Switches and Decompiling Larger Functions with Ghidra
+________________________________________________
+
+When a function is larger enough Ghidra fails to decompile it,
+giving the following message:
+
+  exception while decompiling 7e7c:0b9c:
+  Response buffer size exceded for: st.exe #6682 
+
+And we can have multiple such large functions even in a 1993 DOS program.
+Unfortunately Ghidra doesn't expose this buffer size setting.
+So the workaround for now, go to DecompileOptions.java, and changing
+`SUGGESTED_MAX_PAYLOAD_BYTES` to 100. It is misnamed BYTES, but really
+it is megabytes. After the change one has to recompile Ghidra.
+
+The function at 7e7c:0b9c requires 2000 decompile.
+There are some switch analysis errors (the computed jmp at 8699:19fe is botched)
+Decompiler also says stuff like "Low-level Error: Unlinked join address"
+
+The proper solution would be having a per-function setting and asking the user,
+if they want to increase the buffer size for that function, if the current size
+is not enough.
+
+But part of such functions arise due to Ghidra having troubles analyzing
+Borland C++ 3.0 produced switch code, collating unrelated program parts as
+switch cases. BC++ generates a very simple switch table at the end of
+a function. Yet Ghidra ignores it, generating jumps to absolutely random places.
+These can be fixed by clearing existing references by the jump's address,
+and then manually adding a set of COMPUTED_JUMP references. The one runs
+SwitchOverride.java at the jump's address. That technique can apparently
+also be used to trick the decompiler to join non-switch code into a switch,
+which can then be edited manually into a compilable form
+
+It would be nice if Ghidra did some sanity checks, that the jump target lies
+inside the function or anywhere near it. And if anything is suspicious,
+just asking user for further input, mentioning that SwitchOverride.java script.
+Apparently the 8bit and 16bit CPUs are not a huge priority, which is sad since
+16bit programs are small enough for a single person to handle and less boring
+than the modern 32bit or 64bit stuff, and yet everyone supports 32bit x86.

@@ -27,6 +27,6 @@ typedef struct { //temporary representation of decoded LBM
   uint8_t cmap[256*3];
   far_t aptr; //segment aligned pointer to the pixels buffer
   far_t bptr; //the ptr used to free the aptr buffer
-} gfx_tmp_t;
+} stg_tmp_t;
 
 #endif

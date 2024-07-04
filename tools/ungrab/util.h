@@ -43,7 +43,11 @@ void mkpath(char *path, int flags);
 
 char *_hidden_cat_(char *a0, ...);
 
+#define new(Type, Sz) \
+  ((Type*)memset(malloc(sizeof(Type)*(Sz)), 0, sizeof(Type)*(Sz)))
 
+
+#define del(ptr) free(ptr)
 
 #define cat(...) _hidden_cat_(__VA_ARGS__, 0)
 char *afmt(char *s, char *fmt, ...);
