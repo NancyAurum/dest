@@ -3,3 +3,50 @@ https://github.com/NationalSecurityAgency/ghidra/issues/6679
 There is a way to manually help the decompiler recover switch-statements correctly. To show how this works, I'll go through this process without the above fix applied. To do this, you should first remove all memory references from the jmp instruction. By pressing R while the mouse cursor is on the mnemonic, the memory dialog pops up, and you can easily remove all entries. Then, you have to manually add new COMPUTED_JUMP references; 1 for each of the switch cases.
 
 Then, open the script manager and run the SwitchOverride.java script. That should add some more references to the jump, but more importantly, the decompiler is now updated and shows the correct number of switch cases, along with a comment saying that the switch case has been manually overridden.
+
+
+
+As said before, I barely have any experience with real-mode 16-bit x86, so I'm not sure how well these changes actually model reality, or if it's just an ugly hack that happens to work decently well for this one sample. Anyway, I pasted the patch I applied below.
+
+
+https://github.com/NationalSecurityAgency/ghidra/issues/2628
+diff --git a/Ghidra/Processors/x86/data/languages/ia.sinc b/Ghidra/Processors/x86/data/languages/ia.sinc
+index dd8c841131..1bf5513a0c 100644
+--- a/Ghidra/Processors/x86/data/languages/ia.sinc
++++ b/Ghidra/Processors/x86/data/languages/ia.sinc
+@@ -1046,8 +1046,8 @@ addr64: [Base64 + Index64*ss + simm32_64] is mod=2 & r_m=4; Index64 & Base64 & s
+ addr64: [Base64 + Index64*ss]                  is mod=2 & r_m=4; Index64 & Base64 & ss; imm32=0   { local tmp=Base64+Index64*ss; export tmp; }
+ @endif
+ 
+-currentCS: CS is protectedMode=0 & CS { tmp:4 = (inst_next >> 4) & 0xf000; CS = tmp:2; export CS; }
+-currentCS: CS is protectedMode=1 & CS { tmp:4 = (inst_next >> 16) & 0xffff; CS = tmp:2; export CS; }
++currentCS: CS is protectedMode=0 & CS { export CS; }
++currentCS: CS is protectedMode=1 & CS { export CS; }
+  
+ segWide: is segover=0                  { export 0:$(SIZE); }
+ segWide: CS: is segover=1 & CS { export 0:$(SIZE); }
+@@ -2526,10 +2526,10 @@ with : lockprefx=0 {
+ @endif
+ 
+ # direct far calls generate an opcode undefined exception in x86-64
+-:CALLF ptr1616      is vexMode=0 & addrsize=0 & opsize=0 & byte=0x9a; ptr1616           { push22(CS); build ptr1616; push22(&:2 inst_next); call ptr1616; }
+-:CALLF ptr1616      is vexMode=0 & addrsize=1 & opsize=0 & byte=0x9a; ptr1616           { push42(CS); build ptr1616; push42(&:2 inst_next); call ptr1616; }
+-:CALLF ptr1632      is vexMode=0 & addrsize=0 & opsize=1 & byte=0x9a; ptr1632           { push22(CS); build ptr1632; push24(&:4 inst_next); call ptr1632; }
+-:CALLF ptr1632      is vexMode=0 & addrsize=1 & opsize=1 & byte=0x9a; ptr1632           { pushseg44(CS); build ptr1632; push44(&:4 inst_next); call ptr1632; }
++:CALLF ptr1616      is vexMode=0 & addrsize=0 & opsize=0 & byte=0x9a; ptr1616           { tmp:2 = CS; push22(CS); build ptr1616; push22(&:2 inst_next); call ptr1616; CS = tmp; }
++:CALLF ptr1616      is vexMode=0 & addrsize=1 & opsize=0 & byte=0x9a; ptr1616           { tmp:2 = CS; push42(CS); build ptr1616; push42(&:2 inst_next); call ptr1616; CS = tmp; }
++:CALLF ptr1632      is vexMode=0 & addrsize=0 & opsize=1 & byte=0x9a; ptr1632           { tmp:2 = CS; push22(CS); build ptr1632; push24(&:4 inst_next); call ptr1632; CS = tmp; }
++:CALLF ptr1632      is vexMode=0 & addrsize=1 & opsize=1 & byte=0x9a; ptr1632           { tmp:2 = CS; pushseg44(CS); build ptr1632; push44(&:4 inst_next); call ptr1632; CS = tmp; }
+ :CALLF addr16       is vexMode=0 & addrsize=0 & opsize=0 & byte=0xff; addr16 & reg_opcode=3 ... { local ptr:$(SIZE) = segment(DS,addr16); local addrptr:$(SIZE) = segment(*:2 (ptr+2),*:2 ptr);
+                                                                                                   push22(CS); push22(&:2 inst_next); call [addrptr]; }
+ :CALLF addr32       is vexMode=0 & addrsize=1 & opsize=0 & byte=0xff; addr32 & reg_opcode=3 ... { local dest:4 = addr32; push42(CS); push42(&:2 inst_next); call [dest]; }
+
+With this patch applied, the pcode for the JMP instruction looks much more like I expected.
+
+       4b0a:09e5 2e ff a7 69 0b       JMP        word ptr CS:[BX + 0xb69]
+                                                      $U2e80:2 = INT_ADD BX, 0xb69:2
+                                                      $U4680:4 = CALLOTHER "segment", CS, $U2e80:2
+                                                      $U8e00:2 = LOAD ram($U4680:4)
+                                                      $U29880:4 = CALLOTHER "segment", CS, $U8e00:2
+                                                      BRANCHIND $U29880:4
+

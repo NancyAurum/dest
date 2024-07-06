@@ -479,7 +479,7 @@ While Turbo C++ and Borland C++ 3.0 compiler executables are different,
 the startup code and the functions in CL.LIB appear to have exactly
 the same machine code with both compilers. The executable size difference could
 be due to the Turbo C++ has two features cut, since the compiler is missing
-the following option, which were in earlier released Borland C++ 3.0:
+the following options, which were in earlier released Borland C++ 3.0:
   -Hxxx   Use pre-compiled headers
   -Wxxx   Create Windows application
 

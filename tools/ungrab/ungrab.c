@@ -45,8 +45,10 @@ typedef struct { //content table entry
   uint8_t info[12];  //0s when in STRONG.DAT
 } PACKED cte_t; //21 bytes in size
 
-typedef struct { //stronghold graphics
-  uint8_t type; //0=disk, 1=loaded
+//palettes have type==0, they are at 741, 906, 917 1451, 1453, 1455, 1457
+
+typedef struct { //stronghold graphics type1 (header size = 9)
+  uint8_t type; //=1 (UI)
   uint32_t sz;
   uint16_t w;
   uint16_t h;
@@ -54,6 +56,51 @@ typedef struct { //stronghold graphics
                     //the first data byte could be either pixel or
                     //additional info
 } PACKED stg_t;
+
+
+typedef struct { //stronghold graphics type2 (header size = 0xE)
+  uint8_t type;  //=2 (building)
+  int16_t x;
+  int16_t y;
+  uint8_t type2; //=1
+  uint32_t sz;
+  uint16_t w;
+  uint16_t h;
+  //uint8 data[sz]; //RLE-packed pixels
+                    //the first data byte could be either pixel or
+                    //additional info
+} PACKED stg2_t;
+
+typedef struct { //stronghold audio (header size = 0xD)
+  uint8_t type; //=3 (audio file)
+  uint16_t w;
+  uint16_t h;
+  uint16_t sz;
+  uint8_t unk[6]; //3C 00 07 B8 __ __ = preprocesed VOC
+                  // unsigned 8bit PCM, little-ending, mono, 11025Hz
+                  //00 3F 3F 00 00 00 = XMI
+                  //07 00 10 00 00 00 = XMI
+                  //3C 00 07 B8 00 00 = XMI
+  //uint8 data[sz]; //RLE-packed pixels
+                    //the first data byte could be either pixel or
+                    //additional info
+} PACKED stg3_t;
+
+
+typedef struct { //stronghold graphics type4 (header size = 0x14)
+  uint8_t type; //=4
+  uint8_t unk[5];
+  uint8_t type2; //=2
+  int16_t x;
+  int16_t y;
+  uint8_t type1;
+  uint32_t sz;
+  uint16_t w;
+  uint16_t h;
+  //uint8 data[sz]; //RLE-packed pixels
+                    //the first data byte could be either pixel or
+                    //additional info
+} PACKED stg4_t;
 
 void fail(char *fmt, ...) {
   va_list ap;
@@ -209,10 +256,13 @@ int main(int argc, char **argv) {
 
 #if 1
   for (i = 0; i < nitems; i++) {
-    if (i == 0) {
-      einfo_t *ei = &einfo[i];
-      stg_t *stg = (stg_t*)(file+ct[i].ofs);
-      printf("%dx%d %d bytes\n", stg->w, stg->h, stg->sz);
+    einfo_t *ei = &einfo[i];
+    stg_t *stg = (stg_t*)(file+ct[i].ofs);
+    stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
+    stg4_t *stg4 = (stg4_t*)(file+ct[i].ofs);
+    if (stg->type==1 && stg->w && stg->h && stg->sz && stg->w < 320 && stg->h < 200 && stg->sz < 320*200+9) {
+      continue;
+      printf("%d: type1 %dx%d %d bytes\n", i, stg->w, stg->h, stg->sz);
       pic_t *pic = picNew(stg->w, stg->h, 8);
       pic->P = new(uint8_t,4*256);
       for (j = 0; j < 256; j++) {
@@ -223,11 +273,42 @@ int main(int argc, char **argv) {
       }
       //picClear(pic, 0xFF00FF);
       rle_decode((uint8_t*)(stg+1), pic->D, stg->w*stg->h);
-      pngSave("./out/test.png", pic);
+      pngSave(fmt("%s%04d.png",outpath, i), pic);
+    } else if (stg2->type==2 && stg2->w && stg2->h && stg2->sz && stg2->w < 320 && stg2->h < 200 && stg2->sz < 320*200+0xE) {
+      continue;
+      printf("%d: type2 %dx%d (%d,%d) %d bytes\n", i, stg2->w, stg2->h, stg2->x, stg2->y, stg2->sz);
+      pic_t *pic = picNew(stg2->w, stg2->h, 8);
+      pic->P = new(uint8_t,4*256);
+      for (j = 0; j < 256; j++) {
+        pic->P[j*4+0] = rand()%256;
+        pic->P[j*4+1] = rand()%256;
+        pic->P[j*4+2] = rand()%256;
+        pic->P[j*4+3] = 0;
+      }
+      //picClear(pic, 0xFF00FF);
+      rle_decode((uint8_t*)(stg2+1), pic->D, stg2->w*stg2->h);
+      pngSave(fmt("%s%04d.png",outpath, i), pic);
+    } else if (stg2->type==3) {
+      printf("%d: type3\n", i);
+      continue;
+    } else if (stg4->type==4 && stg4->w && stg4->h && stg4->sz && stg4->w < 320 && stg4->h < 200 && stg4->sz < 320*200+sizeof(stg4_t)) {
+      continue;
+      printf("%d: type4 %dx%d (%d,%d) %d bytes\n", i, stg4->w, stg4->h, stg4->x, stg4->y, stg4->sz);
+      pic_t *pic = picNew(stg4->w, stg4->h, 8);
+      pic->P = new(uint8_t,4*256);
+      for (j = 0; j < 256; j++) {
+        pic->P[j*4+0] = rand()%256;
+        pic->P[j*4+1] = rand()%256;
+        pic->P[j*4+2] = rand()%256;
+        pic->P[j*4+3] = 0;
+      }
+      //picClear(pic, 0xFF00FF);
+      rle_decode((uint8_t*)(stg4+1), pic->D, stg4->w*stg4->h);
+      pngSave(fmt("%s%04d.png",outpath, i), pic);
+    } else {
+      //printf("%d: dumping raw...\n", i);
+      //write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
     }
-    break;
-    //printf("Dumping entry %d...\n", i);
-    //write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
   }
   printf("Done!\n");
 #endif
