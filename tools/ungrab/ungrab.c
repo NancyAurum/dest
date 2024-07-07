@@ -73,8 +73,8 @@ typedef struct { //stronghold graphics type2 (header size = 0xE)
 
 typedef struct { //stronghold audio (header size = 0xD)
   uint8_t type; //=3 (audio file)
-  uint16_t w;
-  uint16_t h;
+  uint16_t w; //0
+  uint16_t h; //0
   uint16_t sz;
   uint8_t unk[6]; //3C 00 07 B8 __ __ = preprocesed VOC
                   // unsigned 8bit PCM, little-ending, mono, 11025Hz
@@ -88,7 +88,7 @@ typedef struct { //stronghold audio (header size = 0xD)
 
 
 typedef struct { //stronghold graphics type4 (header size = 0x14)
-  uint8_t type; //=4
+  uint8_t type; //=4 (unit)
   uint8_t unk[5];
   uint8_t type2; //=2
   int16_t x;
@@ -151,8 +151,12 @@ einfo_t einfo[] = {
   {0,0,0,0,0,0}
 };
 
+int pals[] = {741,906,917,923,926,932,938,1261,1263,1451,1453,1455,1457,1669,1671,1673,1675,1839,1841,1843,1845,1861,1947,1949,2010,2144,2146,2238,2356,2358,2468,2470,2508,2602,2676,2706,2721,2852,2888,2995,3078,3080,3109,3126,3201,3235,3274,3296,3327,3370,3403,3440,3442,3444,3446,3448};
 
-int rle_decode(uint8_t *src, uint8_t *dst, int sz) {
+int imgpals[4000];
+
+
+int unrle(uint8_t *src, uint8_t *dst, int sz) {
   uint8_t *q;
   uint8_t b;
   int i;
@@ -199,9 +203,21 @@ int rle_decode(uint8_t *src, uint8_t *dst, int sz) {
 }
 
 
+int is_txt(uint8_t *p, uint32_t size) {
+  uint32_t i;
+  if (!size) return 0;
+  //if (p[size-1] != 0x1A) return 0;
+  for (i = 0; i < size; i++) {
+    if (p[i] >= 0x80) return 0;
+    if (p[i] == 0x1A && i==size-1) continue;
+    if (p[i] < 0x20 && p[i]!=0xd && p[i]!=0xa) return 0;
+  }
+  return 1;
+}
 
 int main(int argc, char **argv) {
-  int i, j;
+  int i, j, k;
+  int npals = sizeof(pals)/sizeof(pals[0]);
 
   NAP_INTRO
   NAP_IF("h") usage(); NAP_FI
@@ -252,62 +268,89 @@ int main(int argc, char **argv) {
   printf("Done!\n");
 #endif
 
-  
 
 #if 1
+  uint8_t *pal = file+ct[741].ofs;
   for (i = 0; i < nitems; i++) {
     einfo_t *ei = &einfo[i];
     stg_t *stg = (stg_t*)(file+ct[i].ofs);
     stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
+    stg3_t *stg3 = (stg3_t*)(file+ct[i].ofs);
     stg4_t *stg4 = (stg4_t*)(file+ct[i].ofs);
-    if (stg->type==1 && stg->w && stg->h && stg->sz && stg->w < 320 && stg->h < 200 && stg->sz < 320*200+9) {
-      continue;
+    if (stg->type==1 && stg->w && stg->h && stg->sz && stg->w <= 320 && stg->h <= 200 && stg->sz <= 320*200+9) {
+      //continue;
       printf("%d: type1 %dx%d %d bytes\n", i, stg->w, stg->h, stg->sz);
       pic_t *pic = picNew(stg->w, stg->h, 8);
+      unrle((uint8_t*)(stg+1), pic->D, stg->w*stg->h);
       pic->P = new(uint8_t,4*256);
+      pic->K = 0;
+      uint8_t *q = pal;
       for (j = 0; j < 256; j++) {
-        pic->P[j*4+0] = rand()%256;
-        pic->P[j*4+1] = rand()%256;
-        pic->P[j*4+2] = rand()%256;
+        pic->P[j*4+0] = q[j*3 + 0]<<2;
+        pic->P[j*4+1] = q[j*3 + 1]<<2;
+        pic->P[j*4+2] = q[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
       //picClear(pic, 0xFF00FF);
-      rle_decode((uint8_t*)(stg+1), pic->D, stg->w*stg->h);
-      pngSave(fmt("%s%04d.png",outpath, i), pic);
-    } else if (stg2->type==2 && stg2->w && stg2->h && stg2->sz && stg2->w < 320 && stg2->h < 200 && stg2->sz < 320*200+0xE) {
-      continue;
+      pngSave(fmt("%s%04dt1.png",outpath, i), pic);
+    } else if (stg2->type==2 && stg2->w && stg2->h && stg2->sz && stg2->w <= 320 && stg2->h <= 200 && stg2->sz <= 320*200+0xE) {
+      //continue;
       printf("%d: type2 %dx%d (%d,%d) %d bytes\n", i, stg2->w, stg2->h, stg2->x, stg2->y, stg2->sz);
       pic_t *pic = picNew(stg2->w, stg2->h, 8);
+      unrle((uint8_t*)(stg2+1), pic->D, stg2->w*stg2->h);
       pic->P = new(uint8_t,4*256);
+      pic->K = 0;
       for (j = 0; j < 256; j++) {
-        pic->P[j*4+0] = rand()%256;
-        pic->P[j*4+1] = rand()%256;
-        pic->P[j*4+2] = rand()%256;
+        pic->P[j*4+0] = pal[j*3 + 0]<<2;
+        pic->P[j*4+1] = pal[j*3 + 1]<<2;
+        pic->P[j*4+2] = pal[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      //picClear(pic, 0xFF00FF);
-      rle_decode((uint8_t*)(stg2+1), pic->D, stg2->w*stg2->h);
-      pngSave(fmt("%s%04d.png",outpath, i), pic);
-    } else if (stg2->type==3) {
-      printf("%d: type3\n", i);
-      continue;
-    } else if (stg4->type==4 && stg4->w && stg4->h && stg4->sz && stg4->w < 320 && stg4->h < 200 && stg4->sz < 320*200+sizeof(stg4_t)) {
-      continue;
+      pngSave(fmt("%s%04dt2.png",outpath, i), pic);
+    } else if (stg3->type==3 && stg3->sz && stg3->sz <= ct[i].sz && !stg3->w && !stg3->h) {
+      //continue;
+      printf("%d: type3 %dx%d\n", i, stg3->w, stg3->h);
+      write_whole_file_path(fmt("%s%04dt3.b",outpath, i),
+         file+ct[i].ofs, ct[i].sz);
+    } else if (stg4->type==4 && stg4->w && stg4->h && stg4->sz && stg4->w <= 320 && stg4->h <= 200 && stg4->sz <= 320*200+sizeof(stg4_t)) {
+      //continue;
       printf("%d: type4 %dx%d (%d,%d) %d bytes\n", i, stg4->w, stg4->h, stg4->x, stg4->y, stg4->sz);
       pic_t *pic = picNew(stg4->w, stg4->h, 8);
+      unrle((uint8_t*)(stg4+1), pic->D, stg4->w*stg4->h);
       pic->P = new(uint8_t,4*256);
+      uint8_t *upal = file+ct[741].ofs;
+      pic->K = 0;
       for (j = 0; j < 256; j++) {
-        pic->P[j*4+0] = rand()%256;
-        pic->P[j*4+1] = rand()%256;
-        pic->P[j*4+2] = rand()%256;
+        pic->P[j*4+0] = upal[j*3 + 0]<<2;
+        pic->P[j*4+1] = upal[j*3 + 1]<<2;
+        pic->P[j*4+2] = upal[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
+      pngSave(fmt("%s%04dt4.png",outpath, i), pic);
+    } else if (ct[i].sz==768) {
+      pal = file+ct[i].ofs;
+      //continue;
+      printf("%d: palette\n", i);
+      pic_t *pic = picNew(16, 16, 8);
+      pic->P = new(uint8_t,4*256);
+      uint8_t *q = file+ct[i].ofs;
+      for (j = 0; j < 256; j++) {
+        pic->P[j*4+0] = q[j+3 + 0]<<2;
+        pic->P[j*4+1] = q[j+3 + 1]<<2;
+        pic->P[j*4+2] = q[j+3 + 2]<<2;
+        pic->P[j*4+3] = 0;
+        picPut(pic, j%16, j/16, j);
+      }
       //picClear(pic, 0xFF00FF);
-      rle_decode((uint8_t*)(stg4+1), pic->D, stg4->w*stg4->h);
-      pngSave(fmt("%s%04d.png",outpath, i), pic);
+      pngSave(fmt("%s%04d_pal.png",outpath, i), pic);
+    } else if (is_txt(file+ct[i].ofs, ct[i].sz)) {
+      //continue;
+      printf("%d: dumping txt...\n", i);
+      write_whole_file_path(fmt("%s%04d.txt",outpath, i), file+ct[i].ofs, ct[i].sz);
     } else {
-      //printf("%d: dumping raw...\n", i);
-      //write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
+      //continue;
+      printf("%d: dumping raw...\n", i);
+      write_whole_file_path(fmt("%s%04d.b",outpath, i), file+ct[i].ofs, ct[i].sz);
     }
   }
   printf("Done!\n");
