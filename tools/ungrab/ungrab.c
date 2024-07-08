@@ -353,9 +353,9 @@ einfo_t einfo[] = {
 
 
   //tg = grabLbmTR(460);
-  {0,9,68,92,182,-4,56,560},
-  {0,108,68,191,182,-3,56,560},
-  {0,208,68,291,182,-1,56,560},
+  {0,  9, 68, 92,182, -4, 56, 460},
+  {0,108, 68,191,182, -3, 56, 460},
+  {0,208, 68,291,182, -1, 56, 460},
 
 
   //grabLbmTR(172);
@@ -894,7 +894,10 @@ void load_names() {
   p[names_size-1] = 0;
   while(*p) {
     names[names_count++] = p;
-    while(*p && *p != '\n') ++p;
+    while(*p && *p != '\n') {
+      if (*p == '/') *p = '_';
+      ++p;
+    }
     if (*p == '\n') *p++ = 0;
   }
 }
@@ -1051,6 +1054,8 @@ void test() {
 
 int main(int argc, char **argv) {
   int i, j, k;
+  int nexts = sizeof(einfo)/sizeof(einfo[0]);
+
 
   NAP_INTRO
   NAP_IF("h") usage(); NAP_FI
@@ -1066,7 +1071,7 @@ int main(int argc, char **argv) {
 
   load_names();
   
-  test();
+  //test();
 
   
   int64_t file_size;
@@ -1113,14 +1118,16 @@ int main(int argc, char **argv) {
 #if 1
   uint8_t *pal = file+ct[741].ofs;
   for (i = 0; i < nitems; i++) {
-    einfo_t *ei = &einfo[i];
+    //einfo_t *ei = &einfo[i];
+    char *name = "";
+    if (i < nexts) name = names[einfo[i].nid];
     stg_t *stg = (stg_t*)(file+ct[i].ofs);
     stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
     stg3_t *stg3 = (stg3_t*)(file+ct[i].ofs);
     stg4_t *stg4 = (stg4_t*)(file+ct[i].ofs);
     if (stg->type==1 && stg->w && stg->h && stg->sz && stg->w <= 320 && stg->h <= 200 && stg->sz <= 320*200+9) {
       //continue;
-      printf("%d: type1 %dx%d %d bytes\n", i, stg->w, stg->h, stg->sz);
+      printf("%d: type1 %dx%d %d bytes %s\n", i, stg->w, stg->h, stg->sz, name);
       pic_t *pic = picNew(stg->w, stg->h, 8);
       unrle((uint8_t*)(stg+1), pic->D, stg->w*stg->h);
       pic->P = new(uint8_t,4*256);
@@ -1133,10 +1140,10 @@ int main(int argc, char **argv) {
         pic->P[j*4+3] = 0;
       }
       //picClear(pic, 0xFF00FF);
-      pngSave(fmt("%s%04dt1.png",outpath, i), pic);
+      pngSave(fmt("%s%04dt1%s.png",outpath, i, name), pic);
     } else if (stg2->type==2 && stg2->w && stg2->h && stg2->sz && stg2->w <= 320 && stg2->h <= 200 && stg2->sz <= 320*200+0xE) {
       //continue;
-      printf("%d: type2 %dx%d (%d,%d) %d bytes\n", i, stg2->w, stg2->h, stg2->x, stg2->y, stg2->sz);
+      printf("%d: type2 %dx%d (%d,%d) %d bytes %s\n", i, stg2->w, stg2->h, stg2->x, stg2->y, stg2->sz, name);
       pic_t *pic = picNew(stg2->w, stg2->h, 8);
       unrle((uint8_t*)(stg2+1), pic->D, stg2->w*stg2->h);
       pic->P = new(uint8_t,4*256);
@@ -1147,15 +1154,15 @@ int main(int argc, char **argv) {
         pic->P[j*4+2] = pal[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      pngSave(fmt("%s%04dt2.png",outpath, i), pic);
+      pngSave(fmt("%s%04dt2%s.png",outpath, i,name), pic);
     } else if (stg3->type==3 && stg3->sz && stg3->sz <= ct[i].sz && !stg3->w && !stg3->h) {
       //continue;
-      printf("%d: type3 %dx%d\n", i, stg3->w, stg3->h);
-      write_whole_file_path(fmt("%s%04dt3.b",outpath, i),
+      printf("%d: type3 %dx%d %s\n", i, stg3->w, stg3->h, name);
+      write_whole_file_path(fmt("%s%04dt3%s.b",outpath, i,name),
          file+ct[i].ofs, ct[i].sz);
     } else if (stg4->type==4 && stg4->w && stg4->h && stg4->sz && stg4->w <= 320 && stg4->h <= 200 && stg4->sz <= 320*200+sizeof(stg4_t)) {
       //continue;
-      printf("%d: type4 %dx%d (%d,%d) %d bytes\n", i, stg4->w, stg4->h, stg4->x, stg4->y, stg4->sz);
+      printf("%d: type4 %dx%d (%d,%d) %d bytes %s\n", i, stg4->w, stg4->h, stg4->x, stg4->y, stg4->sz, name);
       pic_t *pic = picNew(stg4->w, stg4->h, 8);
       unrle((uint8_t*)(stg4+1), pic->D, stg4->w*stg4->h);
       pic->P = new(uint8_t,4*256);
@@ -1167,7 +1174,7 @@ int main(int argc, char **argv) {
         pic->P[j*4+2] = upal[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      pngSave(fmt("%s%04dt4.png",outpath, i), pic);
+      pngSave(fmt("%s%04dt4%s.png",outpath, i,name), pic);
     } else if (ct[i].sz==768) {
       pal = file+ct[i].ofs;
       //continue;
@@ -1186,12 +1193,12 @@ int main(int argc, char **argv) {
       pngSave(fmt("%s%04d_pal.png",outpath, i), pic);
     } else if (is_txt(file+ct[i].ofs, ct[i].sz)) {
       //continue;
-      printf("%d: dumping txt...\n", i);
-      write_whole_file_path(fmt("%s%04d.txt",outpath, i), file+ct[i].ofs, ct[i].sz);
+      printf("%d: %s dumping txt...\n", i, name);
+      write_whole_file_path(fmt("%s%04d%s.txt",outpath, i,name), file+ct[i].ofs, ct[i].sz);
     } else {
       //continue;
-      printf("%d: dumping raw...\n", i);
-      write_whole_file_path(fmt("%s%04d.b",outpath, i), file+ct[i].ofs, ct[i].sz);
+      printf("%d: %s dumping raw...\n", i, name);
+      write_whole_file_path(fmt("%s%04d%s.b",outpath, i,name), file+ct[i].ofs, ct[i].sz);
     }
   }
   printf("Done!\n");
