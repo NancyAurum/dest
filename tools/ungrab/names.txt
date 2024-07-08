@@ -542,3 +542,5 @@ cred02.lbm
 cred03.lbm
 youlose1.lbm
 button2.lbm
+triangls.pal
+nwpanel1.pal
