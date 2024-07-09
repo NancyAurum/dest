@@ -1369,6 +1369,72 @@ einfo_t einfo[] = {
 
   //grabLbm(411,0,0);
   {8, 0,0,0,0,0,0,411},
+
+  //grabLbm(78,0,0);
+  {0, 8,3,226,194,-8,-3,78},
+  {0, 221,157,229,198,-221,-157,78},
+  {0, 208,195,223,199,-208,-195,78},
+  {0, 8,117,226,194,-8,-117,78},
+  {9,0,0,0,0,0,0,549},
+
+  //psVar12 = grabLbm(543,0,0);
+  {0,8,5,16,10,0,0,543},
+
+  //psVar12 = grabLbm(139,0,0);
+  {0,16,121,57,131,0,0,139},
+  {0,16,134,57,144,0,0,139},
+  {0,234,121,300,131,0,0,139},
+  {0,234,134,300,144,0,0,139},
+  {0,153,121,230,131,0,0,139},
+  {0,153,134,230,144,0,0,139},
+
+
+  //psVar12 = grabLbm(179,0,0);
+  {0,94,47,108,89,0,0,179},
+  {0,114,47,128,89,0,0,179},
+  {0,223,8,237,50,0,0,179},
+
+
+  //psVar12 = grabLbm(158,0,0);
+  {9,0,0,  0, 0,0,0,546},
+  {0,0,0,319,80,0,0,158},
+
+  //psVar12 = grabLbm(159,0,0);
+  {0,0,0,219,143,0,0,159},
+
+  //psVar12 = grabLbm(159,0xdc,0);
+  {0,0,0,219,143,0xdc,0,159},
+
+  //psVar12 = grabLbm(160,0,0);
+  {0,0,0,279,143,0,0,160},
+
+
+  //psVar12 = grabLbm(160,0x118,0);
+  {0,0,0,279,143,0x118,0,160},
+
+  //psVar12 = grabLbm(161,0,0);
+  {9,0,0,0,0,0,0,547},
+  {0,0,144,319,199,0,0,161},
+  {0,0,0,47,10,0,0,161},
+
+  //psVar12 = grabLbm(412,0,0);
+  {9,0,0,0,0,0,0,548},
+  {0,0,0,319,80,0,0,412},
+
+
+  //psVar12 = grabLbm(414,0,0);
+  {0,0,0,219,143,0,0,414},
+
+
+  //psVar12 = grabLbm(414,0xdc,0);
+  {0,0,0,219,143,0xdc,0,414},
+
+  //psVar12 = grabLbm(413,0,0);
+  {0,0,0,279,143,0,0,413},
+
+  //psVar12 = grabLbm(413,0x118,0);
+  {0,0,0,279,143,0x118,0,413},
+
 };
 
 /*
@@ -1877,9 +1943,9 @@ int main(int argc, char **argv) {
 #if 1
   uint8_t *pal = file+ct[741].ofs; //nwpanel1.lbm's palette
   for (i = 0; i < nitems; i++) {
-    einfo_t *ei = i < nexts ? &einfo[i] : 0;
+    einfo_t *ei = (i < nexts) ? &einfo[i] : 0;
     char *name = ei ? names[ei->nid] : "";
-    if (!ei || ei->type != 8) continue;
+    //if (!ei || ei->type != 8) continue;
     stg_t *stg = (stg_t*)(file+ct[i].ofs);
     stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
     stg3_t *stg3 = (stg3_t*)(file+ct[i].ofs);
@@ -1907,10 +1973,12 @@ int main(int argc, char **argv) {
       unrle((uint8_t*)(stg2+1), pic->D, stg2->w*stg2->h);
       pic->P = new(uint8_t,4*256);
       pic->K = 0;
+      uint8_t *q = pal;
+      if (ei && ei->nid == 78) q = file+ct[906].ofs;
       for (j = 0; j < 256; j++) {
-        pic->P[j*4+0] = pal[j*3 + 0]<<2;
-        pic->P[j*4+1] = pal[j*3 + 1]<<2;
-        pic->P[j*4+2] = pal[j*3 + 2]<<2;
+        pic->P[j*4+0] = q[j*3 + 0]<<2;
+        pic->P[j*4+1] = q[j*3 + 1]<<2;
+        pic->P[j*4+2] = q[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
       pngSave(fmt("%s%04dt2%s.png",outpath, i,name), pic);
@@ -1954,7 +2022,7 @@ int main(int argc, char **argv) {
       //continue;
       printf("%d: %s dumping txt...\n", i, name);
       write_whole_file_path(fmt("%s%04d%s.txt",outpath, i,name), file+ct[i].ofs, ct[i].sz);
-    } else if (ei || ei->type == 8) {
+    } else if (ei && ei->type == 8) {
       uint8_t *q = file+ct[i].ofs;
       int nchars = 96;
       int h = *q;
@@ -1965,7 +2033,7 @@ int main(int argc, char **argv) {
 
       //printf("%x\n", h);
       for (j = 0; j < nchars; j++) {
-        printf("  %2d: ofs=%x w=%d\n", j, *(uint16_t*)(q + 1 + j*2), *(q+0xC1+j));
+        //printf("  %2d: ofs=%x w=%d\n", j, *(uint16_t*)(q + 1 + j*2), *(q+0xC1+j));
         int cw = *(q+0xC1+j);
         int x, y;
         uint8_t *p = q + 0x121 + *(uint16_t*)(q + 1 + j*2);

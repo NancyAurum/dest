@@ -544,3 +544,7 @@ youlose1.lbm
 button2.lbm
 triangls.pal
 nwpanel1.pal
+back03.pal
+marble.pal
+back2.pal
+talkwin9.pal
