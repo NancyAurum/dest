@@ -548,3 +548,14 @@ back03.pal
 marble.pal
 back2.pal
 talkwin9.pal
+winrebg1.pal
+captbg2.pal
+l1.pal
+l4.pal
+l7.pal
+l2.pal
+l5.pal
+l8.pal
+l3.pal
+l6.pal
+l9.pal

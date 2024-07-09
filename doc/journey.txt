@@ -2092,3 +2092,43 @@ just asking user for further input, mentioning that SwitchOverride.java script.
 Apparently the 8bit and 16bit CPUs are not a huge priority, which is sad since
 16bit programs are small enough for a single person to handle and less boring
 than the modern 32bit or 64bit stuff, and yet everyone supports 32bit x86.
+
+
+Entry 2024-07-09: Asset System and Palettes Recovery
+________________________________________________
+
+Finally I managed to solve the last bit of palette twiddling. The game has
+a base palette, but each biome gets 48 personal colors.
+These get loaded when the viewport's cell get a new biome's cell.
+So to decode skyline images, one first recovers the biome's palette.
+Then applies writes biome palette at over the colors at index 160 and up.
+
+The games features a ton of such crazy twiddling, all code manually, during
+the asset init stage. Many thousands lines of error prone C code, packed into
+3 huge routines, which require minutes to decompile - that is what one has to
+go through to recover the original files information.
+
+I'm still astonished by the core architecture, which is competent at times.
+The game's design is solid, and was later ripped off in Dungeon Keeper and
+Majesty. But then architecture devolves into a crazy mess of hardcoded asset ids
+with handling routines.
+
+And that it is not the workings of the compiler or the macro expander, but
+the original source code had all that. I.e. the Cathryn surely knew it is
+bad design, but still did it, likely due to deadlines, which in fact prevented
+all the debug code being stripped, despite the memory limitations. And the game
+itself suffers from the difficulty being too easy, which all reviewers noticed.
+
+I personally believe that asset system is the main part of the game.
+If it fails, then everything else fails, since everything else builds upon
+the assets system, directed by it and is constrained by it.
+
+The next steps are recovering names for the audio files, audio drivers, unit
+animations, the text messages, the *.FLC movies and demo savegame.
+
+After that it will be possible to recreate the grab process, which is mandatory
+part of decompiling the asset initialization routines. But it requires the input
+files which I'm recreating now, and it is the hardest part of the project.
+
+
+<img src="https://i.imgur.com/PLPpuZs.png" width=800>

@@ -1408,9 +1408,10 @@ einfo_t einfo[] = {
   //psVar12 = grabLbm(160,0,0);
   {0,0,0,279,143,0,0,160},
 
-
   //psVar12 = grabLbm(160,0x118,0);
   {0,0,0,279,143,0x118,0,160},
+
+
 
   //psVar12 = grabLbm(161,0,0);
   {9,0,0,0,0,0,0,547},
@@ -1434,6 +1435,116 @@ einfo_t einfo[] = {
 
   //psVar12 = grabLbm(413,0x118,0);
   {0,0,0,279,143,0x118,0,413},
+
+
+
+  //psVar12 = grabLbm(422,0,0);
+  {9,0,0,0,0,0,0,550},
+  {0,0,0,319,113,0,0,422},
+
+  //psVar12 = grabLbm(421,0,0);
+  {0,0,0,219,143,0,0,421},
+
+  //psVar12 = grabLbm(421,0xdc,0);
+  {0,0,0,219,143,0xdc,0,421},
+
+  //psVar12 = grabLbm(420,0,0);
+  {0,0,0,279,143,0,0,420},
+
+  //psVar12 = grabLbm(420,0x118,0);
+  {0,0,0,279,143,0x118,0,420},
+
+
+
+  //psVar12 = grabLbm(437,0,0);
+  {9,0,0,0,0,0,0,551},
+  {0,0,0,319,113,0,0,437},
+
+  //psVar12 = grabLbm(438,0,0);
+  {0,0,0,219,143,0,0,438},
+
+  //psVar12 = grabLbm(438,0xdc,0);
+  {0,0,0,219,143,0xdc,0,438},
+
+  //psVar12 = grabLbm(439,0,0);
+  {0,0,0,279,143,0,0,439},
+
+  //psVar12 = grabLbm(439,0x118,0);
+  {0,0,0,279,143,0x118,0,439},
+
+  /*
+  305 l1
+  328 l4
+  331 l7
+  307 l2
+  329 l5
+  332 l8
+  306 l3
+  330 l6
+  333 l9
+  */
+  //psVar12 = grabLbm(305,0,0);
+  {6,0,0,319,59,0,0,305},
+  {9,0,0,0,0,0,0,552},
+  //psVar12 = grabLbm(305,320,0);
+  {7,0,0,319,59,320,0,305},
+
+
+  //psVar12 = grabLbm(328,0,0);
+  {6,0,0,319,59,0,0,328},
+  {9,0,0,0,0,0,0,553},
+  //psVar12 = grabLbm(328,320,0);
+  {7,0,0,319,59,320,0,328},
+
+
+  //psVar12 = grabLbm(331,0,0);
+  {6,0,0,319,59,0,0,331},
+  {9,0,0,0,0,0,0,554},
+  //psVar12 = grabLbm(331,320,0);
+  {7,0,0,319,59,320,0,331},
+
+
+  //psVar12 = grabLbm(307,0,0);
+  {6,0,0,319,59,0,0,307},
+  {9,0,0,0,0,0,0,555},
+  //psVar12 = grabLbm(307,320,0);
+  {7,0,0,319,59,320,0,307},
+
+
+  //psVar12 = grabLbm(329,0,0);
+  {6,0,0,319,59,0,0,329},
+  {9,0,0,0,0,0,0,556},
+  //psVar12 = grabLbm(329,320,0);
+  {7,0,0,319,59,320,0,329},
+
+  //psVar12 = grabLbm(332,0,0);
+  {6,0,0,319,59,0,0,332},
+  {9,0,0,0,0,0,0,557},
+  //psVar12 = grabLbm(332,320,0);
+  {7,0,0,319,59,320,0,332},
+
+
+  //psVar12 = grabLbm(306,0,0);
+  {6,0,0,319,59,0,0,306},
+  {9,0,0,0,0,0,0,558},
+  //psVar12 = grabLbm(306,320,0);
+  {7,0,0,319,59,320,0,306},
+
+
+  //psVar12 = grabLbm(330,0,0);
+  {6,0,0,319,59,0,0,330},
+  {9,0,0,0,0,0,0,559},
+  //psVar12 = grabLbm(330,320,0);
+  {7,0,0,319,59,320,0,330},
+
+
+  //psVar12 = grabLbm(333,0,0);
+  {6,0,0,319,59,0,0,333},
+  {9,0,0,0,0,0,0,560},
+  //psVar12 = grabLbm(333,320,0);
+  {7,0,0,319,59,320,0,333},
+
+
 
 };
 
@@ -1877,6 +1988,19 @@ void load_names() {
   }
 }
 
+
+uint8_t *normalizeSkylinePal(uint8_t *base, uint8_t *q) {
+  int j;
+  uint8_t *pal = new(uint8_t,256*3);
+  memcpy(pal, base, 256*3);
+  for (j = 0; j < 48; j++) { //160*3
+    pal[(j+160)*3+0] = q[j*3 + 0];
+    pal[(j+160)*3+1] = q[j*3 + 1];
+    pal[(j+160)*3+2] = q[j*3 + 2];
+  }
+  return pal;
+}
+
 int main(int argc, char **argv) {
   int i, j, k;
   int nexts = sizeof(einfo)/sizeof(einfo[0]);
@@ -1941,6 +2065,7 @@ int main(int argc, char **argv) {
 
 
 #if 1
+  uint8_t *bpal = file+ct[741].ofs; //base palette
   uint8_t *pal = file+ct[741].ofs; //nwpanel1.lbm's palette
   for (i = 0; i < nitems; i++) {
     einfo_t *ei = (i < nexts) ? &einfo[i] : 0;
@@ -1958,6 +2083,8 @@ int main(int argc, char **argv) {
       pic->P = new(uint8_t,4*256);
       pic->K = 0;
       uint8_t *q = pal;
+      if (ei && ei->type == 6) q = normalizeSkylinePal(bpal,file+ct[i+1].ofs);
+      if (ei && ei->type == 7) q = normalizeSkylinePal(bpal,file+ct[i-1].ofs);
       for (j = 0; j < 256; j++) {
         pic->P[j*4+0] = q[j*3 + 0]<<2;
         pic->P[j*4+1] = q[j*3 + 1]<<2;
@@ -2010,9 +2137,9 @@ int main(int argc, char **argv) {
       pic->P = new(uint8_t,4*256);
       uint8_t *q = file+ct[i].ofs;
       for (j = 0; j < 256; j++) {
-        pic->P[j*4+0] = q[j+3 + 0]<<2;
-        pic->P[j*4+1] = q[j+3 + 1]<<2;
-        pic->P[j*4+2] = q[j+3 + 2]<<2;
+        pic->P[j*4+0] = q[j*3 + 0]<<2;
+        pic->P[j*4+1] = q[j*3 + 1]<<2;
+        pic->P[j*4+2] = q[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
         picPut(pic, j%16, j/16, j);
       }
@@ -2053,6 +2180,19 @@ int main(int argc, char **argv) {
         pic->P[j*4+3] = 0;
       }
       pngSave(fmt("%s%04d%s.png",outpath, i, name), pic);
+    } else if (ct[i].sz=144) {
+      printf("%d: skyline palette\n", i);
+      pal = normalizeSkylinePal(bpal,file+ct[i].ofs);
+      pic_t *pic = picNew(16, 16, 8);
+      uint8_t *q = pal;
+      for (j = 0; j < 256; j++) {
+        pic->P[j*4+0] = q[j*3 + 0]<<2;
+        pic->P[j*4+1] = q[j*3 + 1]<<2;
+        pic->P[j*4+2] = q[j*3 + 2]<<2;
+        pic->P[j*4+3] = 0;
+        picPut(pic, j%16, j/16, j);
+      }
+      pngSave(fmt("%s%04d%s.png",outpath, i, name), pic);
     } else {
       //continue;
       printf("%d: %s dumping raw...\n", i, name);
@@ -2064,3 +2204,4 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
