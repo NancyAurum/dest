@@ -2103,7 +2103,7 @@ These get loaded when the viewport's cell get a new biome's cell.
 So to decode skyline images, one first recovers the biome's palette.
 Then applies writes biome palette at over the colors at index 160 and up.
 
-The games features a ton of such crazy twiddling, all code manually, during
+The games features a ton of such crazy twiddling, all done manually, during
 the asset init stage. Many thousands lines of error prone C code, packed into
 3 huge routines, which require minutes to decompile - that is what one has to
 go through to recover the original files information.
@@ -2132,3 +2132,58 @@ files which I'm recreating now, and it is the hardest part of the project.
 
 
 <img src="https://i.imgur.com/PLPpuZs.png" width=800>
+
+
+
+Dumping More and More
+ ________________________________________________
+Okay. I have successfully dumped the VOC files.
+It was a bit confusing since Hz parameter had really strange values.
+But that is because they were decoded using the following function:
+
+uint16_t stshDecVocSampleRate(uint8_t encfreq) {
+  return 1000000 / (0x100 - encfreq);
+}
+
+
+
+Why VOC encoded sample rate as a byte?
+No idea. Maybe early Sound Blaster had single byte registers.
+Or it was easier to have single byte timings.
+In any case, that results in lose of precision.
+Therefore 11111Hz instead of 11025Hz.
+
+Some VOC authoring software stored filename and a comment inside the audio data section.
+That results into a thud sounds preceding the proper audio signal.
+Apparently nobody noticed it due to the low quality of the early audio.
+
+Surprisingly no modern audio player supports VOC files,
+despite them being the standard during 90ies.
+Later versions also support 16bit audio.
+
+The *.com files for audio drivers are also packed inside STRONG.DAT.
+Still have to research how these get loaded and run.
+
+Anyway, I'm now proceeding to properly naming the sprites.
+That isn't hard but requires parsing the entity types.
+Since file ids for animation LBMs are stored inside types.
+Portrait file ids also reside inside the entity type.
+Entity types are large 149-byte structs.
+These build upon the assets system and form the core of the game.
+The game manual also doesn't list any stats for the unity types.
+So I have no idea which value is max health and which is move speed.
+
+I'm probably the first person after Cathryn who looks at these.
+Since the game FAQs don't have any unit stats either.
+Although people do know there is the "debug" option.
+So either somebody disassembled the game's main or it was published on the game's BBS.
+And they apparently successfully got through the overlay manager.
+Since the "debug" option handler lies inside the overlayed code.
+That means they used a live debugger.
+
+The actor entities are differentiated from the static entities.
+I.e. buildings and scenery have they own entity types.
+That is a bad design, leading to combinatorial explosion.
+Then again, universal entity types requires proper ECS.
+Unsure how challenging will be implementing ECS for 286.
+

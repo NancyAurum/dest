@@ -76,11 +76,12 @@ typedef struct { //stronghold audio (header size = 0xD)
   uint16_t w; //0
   uint16_t h; //0
   uint16_t sz;
-  uint8_t unk[6]; //3C 00 07 B8 __ __ = preprocesed VOC
+  uint8_t unk[4]; //3C 00 07 B8 __ __ = preprocesed VOC
                   // unsigned 8bit PCM, little-ending, mono, 11025Hz
                   //00 3F 3F 00 00 00 = XMI
                   //07 00 10 00 00 00 = XMI
                   //3C 00 07 B8 00 00 = XMI
+  uint16_t freq; //samplerate in Hz
   //uint8 data[sz]; //RLE-packed pixels
                     //the first data byte could be either pixel or
                     //additional info
@@ -1546,6 +1547,302 @@ einfo_t einfo[] = {
 
 
 
+  //ping.xmi
+  {10,0,0,0,0,0,0,18},
+  //zound007.voc
+  {10,0,0,0,0,0,0,19},
+  //zound011.voc
+  {10,0,0,0,0,0,0,20},
+  //zound006.voc
+  {10,0,0,0,0,0,0,21},
+  //zound001.voc
+  {10,0,0,0,0,0,0,22},
+  //zound005.voc
+  {10,0,0,0,0,0,0,24},
+  //thud2.voc
+  {10,0,0,0,0,0,0,25},
+  //mage.xmi
+  {10,0,0,0,0,0,0,59},
+  //fallen.xmi
+  {10,0,0,0,0,0,0,66},
+  //falloop.xmi
+  {10,0,0,0,0,0,0,67},
+  //falop2.xmi
+  {10,0,0,0,0,0,0,68},
+  //antkill.xmi
+  {10,0,0,0,0,0,0,69},
+  //add.xmi
+  {10,0,0,0,0,0,0,70},
+  //march.xmi
+  {10,0,0,0,0,0,0,71},
+  //ants2.xmi
+  {10,0,0,0,0,0,0,72},
+  //ant2loop.xmi
+  {10,0,0,0,0,0,0,73},
+  //mageloop.xmi
+  {10,0,0,0,0,0,0,74},
+  //magelop2.xmi
+  {10,0,0,0,0,0,0,75},
+  //bat.voc
+  {10,0,0,0,0,0,0,103},
+  //dragon.voc
+  {10,0,0,0,0,0,0,104},
+  //clank.voc
+  {10,0,0,0,0,0,0,105},
+  //sword4.voc
+  {10,0,0,0,0,0,0,106},
+  //foots.voc
+  {10,0,0,0,0,0,0,107},
+  //clink.voc
+  {10,0,0,0,0,0,0,108},
+  //crash1.voc
+  {10,0,0,0,0,0,0,109},
+  //foots2.voc
+  {10,0,0,0,0,0,0,110},
+  //walk2.voc
+  {10,0,0,0,0,0,0,111},
+  //magic.voc
+  {10,0,0,0,0,0,0,112},
+  //dies.voc
+  {10,0,0,0,0,0,0,113},
+  //harpy.voc
+  {10,0,0,0,0,0,0,114},
+  //frog.voc
+  {10,0,0,0,0,0,0,136},
+  //rattler.voc
+  {10,0,0,0,0,0,0,163},
+  //cue13.xmi
+  {10,0,0,0,0,0,0,204},
+  //cue2.xmi
+  {10,0,0,0,0,0,0,205},
+  //cue3.xmi
+  {10,0,0,0,0,0,0,206},
+  //cue4.xmi
+  {10,0,0,0,0,0,0,207},
+  //cue5a.xmi
+  {10,0,0,0,0,0,0,208},
+  //cue6.xmi
+  {10,0,0,0,0,0,0,209},
+  //cue7.xmi
+  {10,0,0,0,0,0,0,210},
+  //cue8.xmi
+  {10,0,0,0,0,0,0,211},
+  //cue10.xmi
+  {10,0,0,0,0,0,0,212},
+  //cue12.xmi
+  {10,0,0,0,0,0,0,213},
+  //cue15a.xmi
+  {10,0,0,0,0,0,0,214},
+  //cue15b.xmi
+  {10,0,0,0,0,0,0,215},
+  //cuex1.xmi
+  {10,0,0,0,0,0,0,216},
+  //cuex2b.xmi
+  {10,0,0,0,0,0,0,217},
+  //theme2.xmi
+  {10,0,0,0,0,0,0,218},
+  //2.voc
+  {10,0,0,0,0,0,0,223},
+  //8.voc
+  {10,0,0,0,0,0,0,227},
+  //35a.voc
+  {10,0,0,0,0,0,0,262},
+  //wolf.voc
+  {10,0,0,0,0,0,0,254},
+  //miss.voc
+  {10,0,0,0,0,0,0,233},
+  //18.voc
+  {10,0,0,0,0,0,0,235},
+  //zero.voc
+  {10,0,0,0,0,0,0,239},
+  //zero.voc
+  {10,0,0,0,0,0,0,239},
+  //zero.voc
+  {10,0,0,0,0,0,0,239},
+  //zero.voc
+  {10,0,0,0,0,0,0,239},
+  //magecast.voc
+  {10,0,0,0,0,0,0,229},
+  //magecst2.voc
+  {10,0,0,0,0,0,0,230},
+  //cleric.voc
+  {10,0,0,0,0,0,0,222},
+  //murm1.voc
+  {10,0,0,0,0,0,0,228},
+  //hit1.voc
+  {10,0,0,0,0,0,0,231},
+  //hit2.voc
+  {10,0,0,0,0,0,0,232},
+  //45A.voc
+  {10,0,0,0,0,0,0,279},
+  //45B.voc
+  {10,0,0,0,0,0,0,280},
+  //29.voc
+  {10,0,0,0,0,0,0,253},
+  //cue11.xmi
+  {10,0,0,0,0,0,0,285},
+  //cue9b.xmi
+  {10,0,0,0,0,0,0,286},
+  //cue16.xmi
+  {10,0,0,0,0,0,0,287},
+  //zero.voc
+  {10,0,0,0,0,0,0,239},
+  //zero.voc
+  {10,0,0,0,0,0,0,239},
+  //sword5.voc
+  {10,0,0,0,0,0,0,268},
+  //spore2.voc
+  {10,0,0,0,0,0,0,269},
+  //spore3.voc
+  {10,0,0,0,0,0,0,270},
+  //phoenix.voc
+  {10,0,0,0,0,0,0,271},
+  //troll.voc
+  {10,0,0,0,0,0,0,272},
+  //fire4.voc
+  {10,0,0,0,0,0,0,273},
+  //placeb1.xmi
+  {10,0,0,0,0,0,0,244},
+  //placeb2.xmi
+  {10,0,0,0,0,0,0,245},
+  //placeb3.xmi
+  {10,0,0,0,0,0,0,246},
+  //placeb5.xmi
+  {10,0,0,0,0,0,0,247},
+  //mine4.xmi
+  {10,0,0,0,0,0,0,248},
+  //attack1.xmi
+  {10,0,0,0,0,0,0,249},
+  //volume.xmi
+  {10,0,0,0,0,0,0,297},
+  //cue9a.xmi
+  {10,0,0,0,0,0,0,298},
+  //poison.voc
+  {10,0,0,0,0,0,0,226},
+  //place.xmi
+  {10,0,0,0,0,0,0,325},
+  //volume.xmi
+  {10,0,0,0,0,0,0,297},
+  //volume.xmi
+  {10,0,0,0,0,0,0,297},
+  //14a.xmi
+  {10,0,0,0,0,0,0,334},
+  //cue5b.xmi
+  {10,0,0,0,0,0,0,335},
+  //boos.voc
+  {10,0,0,0,0,0,0,336},
+  //zero.voc
+  {10,0,0,0,0,0,0,239},
+  //lightngn.voc
+  {10,0,0,0,0,0,0,338},
+  //outdoor1.voc
+  {10,0,0,0,0,0,0,339},
+  //outdoor2.voc
+  {10,0,0,0,0,0,0,340},
+  //outdoor3.voc
+  {10,0,0,0,0,0,0,341},
+  //unhappy1.voc
+  {10,0,0,0,0,0,0,342},
+  //unhappy2.voc
+  {10,0,0,0,0,0,0,343},
+  //unhappy3.voc
+  {10,0,0,0,0,0,0,344},
+  //trn1out.voc
+  {10,0,0,0,0,0,0,345},
+  //trn2out.voc
+  {10,0,0,0,0,0,0,346},
+  //trn3out.voc
+  {10,0,0,0,0,0,0,347},
+  //mine1out.voc
+  {10,0,0,0,0,0,0,348},
+  //mine2out.voc
+  {10,0,0,0,0,0,0,349},
+  //mine3out.voc
+  {10,0,0,0,0,0,0,350},
+  //mark1.voc
+  {10,0,0,0,0,0,0,351},
+  //mark2.voc
+  {10,0,0,0,0,0,0,352},
+  //mark3.voc
+  {10,0,0,0,0,0,0,353},
+  //forg3out.voc
+  {10,0,0,0,0,0,0,354},
+  //forg2out.voc
+  {10,0,0,0,0,0,0,355},
+  //forg1out.voc
+  {10,0,0,0,0,0,0,356},
+  //saw1out.voc
+  {10,0,0,0,0,0,0,357},
+  //saw2out.voc
+  {10,0,0,0,0,0,0,358},
+  //saw3out.voc
+  {10,0,0,0,0,0,0,359},
+  //crick1.voc
+  {10,0,0,0,0,0,0,360},
+  //crick2.voc
+  {10,0,0,0,0,0,0,361},
+  //crick3.voc
+  {10,0,0,0,0,0,0,362},
+  //birdssp.voc
+  {10,0,0,0,0,0,0,363},
+  //birds1.voc
+  {10,0,0,0,0,0,0,364},
+  //birds2.voc
+  {10,0,0,0,0,0,0,365},
+  //birds3.voc
+  {10,0,0,0,0,0,0,366},
+  //howl1.voc
+  {10,0,0,0,0,0,0,367},
+  //howl2.voc
+  {10,0,0,0,0,0,0,368},
+  //howl3.voc
+  {10,0,0,0,0,0,0,369},
+  //breeze1.voc
+  {10,0,0,0,0,0,0,370},
+  //breeze2.voc
+  {10,0,0,0,0,0,0,371},
+  //breeze3.voc
+  {10,0,0,0,0,0,0,372},
+  //riv1.voc
+  {10,0,0,0,0,0,0,373},
+  //riv2.voc
+  {10,0,0,0,0,0,0,374},
+  //riv3.voc
+  {10,0,0,0,0,0,0,375},
+  //brook1.voc
+  {10,0,0,0,0,0,0,376},
+  //brook2.voc
+  {10,0,0,0,0,0,0,377},
+  //brook3.voc
+  {10,0,0,0,0,0,0,378},
+  //farm1.voc
+  {10,0,0,0,0,0,0,379},
+  //farm2.voc
+  {10,0,0,0,0,0,0,380},
+  //farm3.voc
+  {10,0,0,0,0,0,0,381},
+  //thunshrt.voc
+  {10,0,0,0,0,0,0,418},
+
+  //audio drivers
+  {9,0,0,0,0,0,0,561},
+  {9,0,0,0,0,0,0,562},
+  {9,0,0,0,0,0,0,563},
+  {9,0,0,0,0,0,0,564},
+  {9,0,0,0,0,0,0,565},
+  {9,0,0,0,0,0,0,566},
+  {9,0,0,0,0,0,0,567},
+  {9,0,0,0,0,0,0,568},
+  {9,0,0,0,0,0,0,569},
+  {9,0,0,0,0,0,0,570},
+  {9,0,0,0,0,0,0,571},
+  {9,0,0,0,0,0,0,572},
+  {9,0,0,0,0,0,0,573},
+  {9,0,0,0,0,0,0,574},
+  {9,0,0,0,0,0,0,575},
+  {9,0,0,0,0,0,0,576},
+  {9,0,0,0,0,0,0,577},
+
 };
 
 /*
@@ -2001,9 +2298,56 @@ uint8_t *normalizeSkylinePal(uint8_t *base, uint8_t *q) {
   return pal;
 }
 
+int16_t audio_ids[] = {
+   18,     19,     20,     21,
+   22,     24,     25,     59,
+   66,     67,     68,     69,
+   70,     71,     72,     73,
+   74,     75,    103,    104,
+  105,    106,    107,    108,
+  109,    110,    111,    112,
+  113,    114,    136,    163,
+  204,    205,    206,    207,
+  208,    209,    210,    211,
+  212,    213,    214,    215,
+  216,    217,    218,    223,
+  227,    262,    254,    233,
+  235,    239,    239,    239,
+  239,    229,    230,    222,
+  228,    231,    232,    279,
+  280,    253,    285,    286,
+  287,    239,    239,    268,
+  269,    270,    271,    272,
+  273,    244,    245,    246,
+  247,    248,    249,    297,
+  298,    226,    325,    297,
+  297,    334,    335,    336,
+  239,    338,    339,    340,
+  341,    342,    343,    344,
+  345,    346,    347,    348,
+  349,    350,    351,    352,
+  353,    354,    355,    356,
+  357,    358,    359,    360,
+  361,    362,    363,    364,
+  365,    366,    367,    368,
+  369,    370,    371,    372,
+  373,    374,    375,    376,
+  377,    378,    379,    380,
+  381,    418
+};
+
+typedef struct {
+  uint8_t id[20]; //"Creative Voice File\n"
+  uint16_t data_ofs; //usually 0x1A = sizeof(voc_t)
+  uint16_t version; //usually 0A 01
+  uint16_t validation; //usually 29 11
+} PACKED voc_t;
+
+
 int main(int argc, char **argv) {
   int i, j, k;
   int nexts = sizeof(einfo)/sizeof(einfo[0]);
+  int naids = sizeof(audio_ids)/sizeof(audio_ids[0]);
 
 
   NAP_INTRO
@@ -2019,7 +2363,16 @@ int main(int argc, char **argv) {
 
 
   load_names();
-  
+
+#if 0
+  for (j = 0; j < naids; j++) {
+    printf("  //%s\n", names[audio_ids[j]]);
+    printf("  {10,0,0,0,0,0,0,%d},\n", audio_ids[j]);
+  }
+#endif
+
+  //exit(0);
+
   //test();
 
   
@@ -2075,6 +2428,7 @@ int main(int argc, char **argv) {
     stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
     stg3_t *stg3 = (stg3_t*)(file+ct[i].ofs);
     stg4_t *stg4 = (stg4_t*)(file+ct[i].ofs);
+    //if (stg3->type!=3) continue;
     if (stg->type==1 && stg->w && stg->h && stg->sz && stg->w <= 320 && stg->h <= 200 && stg->sz <= 320*200+9) {
       //continue;
       printf("%d: type1 %dx%d %d bytes %s\n", i, stg->w, stg->h, stg->sz, name);
@@ -2112,8 +2466,31 @@ int main(int argc, char **argv) {
     } else if (stg3->type==3 && stg3->sz && stg3->sz <= ct[i].sz && !stg3->w && !stg3->h) {
       //continue;
       printf("%d: type3 %dx%d %s\n", i, stg3->w, stg3->h, name);
-      write_whole_file_path(fmt("%s%04dt3%s.b",outpath, i,name),
-         file+ct[i].ofs, ct[i].sz);
+      int sz = ct[i].sz - sizeof(stg3_t);
+      if (strstr(name, ".voc")) {
+        int vocsz = sizeof(voc_t)+ct[i].sz + 4 + 2 + 1;
+        uint8_t *q = new(uint8_t,vocsz);
+        voc_t *voc = (voc_t *)q; 
+        strcpy(voc->id, "Creative Voice File");
+        voc->id[19] = 0x1A;
+        voc->data_ofs = 0x1A;
+        voc->version = 0x010A;
+        voc->validation = 0x1129;
+        q += sizeof(voc_t);
+        *q++ = 0x01; //Sound data block
+        *(uint32_t*)q = sz+2; //block size
+        q += 3;
+        //*q++ = 0xFF-(1000000/11025); //in practice VOC encoders used 0xFF
+        *q++ = 0x100-(1000000/stg3->freq); //in practice VOC encoders used 0xFF
+        *q++ = 0; //0 = 8-bit unsigned PCM
+        memcpy(q, (uint8_t*)(stg3+1), sz);
+        write_whole_file_path(fmt("%s%04dt3%s",outpath, i,name), voc, vocsz);
+        q = (uint8_t*)voc;
+        q[vocsz-1] = 0;
+      } else {
+        write_whole_file_path(fmt("%s%04dt3%s",outpath, i,name),
+           file+ct[i].ofs+sizeof(stg3_t), sz);
+      }
     } else if (stg4->type==4 && stg4->w && stg4->h && stg4->sz && stg4->w <= 320 && stg4->h <= 200 && stg4->sz <= 320*200+sizeof(stg4_t)) {
       //continue;
       printf("%d: type4 %dx%d (%d,%d) %d bytes %s\n", i, stg4->w, stg4->h, stg4->x, stg4->y, stg4->sz, name);
@@ -2180,7 +2557,7 @@ int main(int argc, char **argv) {
         pic->P[j*4+3] = 0;
       }
       pngSave(fmt("%s%04d%s.png",outpath, i, name), pic);
-    } else if (ct[i].sz=144) {
+    } else if (ct[i].sz==144) {
       printf("%d: skyline palette\n", i);
       pal = normalizeSkylinePal(bpal,file+ct[i].ofs);
       pic_t *pic = picNew(16, 16, 8);
@@ -2196,7 +2573,7 @@ int main(int argc, char **argv) {
     } else {
       //continue;
       printf("%d: %s dumping raw...\n", i, name);
-      write_whole_file_path(fmt("%s%04d%s.b",outpath, i,name), file+ct[i].ofs, ct[i].sz);
+      write_whole_file_path(fmt(ei?"%s%04d%s":"%s%04d%s.b",outpath, i,name), file+ct[i].ofs, ct[i].sz);
     }
   }
   printf("Done!\n");
