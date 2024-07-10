@@ -2136,7 +2136,8 @@ files which I'm recreating now, and it is the hardest part of the project.
 
 
 Dumping More and More
- ________________________________________________
+________________________________________________
+
 Okay. I have successfully dumped the VOC files.
 It was a bit confusing since Hz parameter had really strange values.
 But that is because they were decoded using the following function:
@@ -2147,7 +2148,7 @@ uint16_t stshDecVocSampleRate(uint8_t encfreq) {
 
 
 
-Why VOC encoded sample rate as a byte?
+Why VOC encoded the sample rate as a byte?
 No idea. Maybe early Sound Blaster had single byte registers.
 Or it was easier to have single byte timings.
 In any case, that results in lose of precision.

@@ -90,7 +90,9 @@ typedef struct { //stronghold audio (header size = 0xD)
 
 typedef struct { //stronghold graphics type4 (header size = 0x14)
   uint8_t type; //=4 (unit)
-  uint8_t unk[5];
+  int16_t ox;
+  int16_t oy;
+  uint8_t ow;
   uint8_t type2; //=2
   int16_t x;
   int16_t y;
@@ -101,7 +103,7 @@ typedef struct { //stronghold graphics type4 (header size = 0x14)
   //uint8 data[sz]; //RLE-packed pixels
                     //the first data byte could be either pixel or
                     //additional info
-} PACKED stg4_t;
+} PACKED frm_t;
 
 void fail(char *fmt, ...) {
   va_list ap;
@@ -2427,7 +2429,7 @@ int main(int argc, char **argv) {
     stg_t *stg = (stg_t*)(file+ct[i].ofs);
     stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
     stg3_t *stg3 = (stg3_t*)(file+ct[i].ofs);
-    stg4_t *stg4 = (stg4_t*)(file+ct[i].ofs);
+    frm_t *frm = (frm_t*)(file+ct[i].ofs);
     //if (stg3->type!=3) continue;
     if (stg->type==1 && stg->w && stg->h && stg->sz && stg->w <= 320 && stg->h <= 200 && stg->sz <= 320*200+9) {
       //continue;
@@ -2491,11 +2493,11 @@ int main(int argc, char **argv) {
         write_whole_file_path(fmt("%s%04dt3%s",outpath, i,name),
            file+ct[i].ofs+sizeof(stg3_t), sz);
       }
-    } else if (stg4->type==4 && stg4->w && stg4->h && stg4->sz && stg4->w <= 320 && stg4->h <= 200 && stg4->sz <= 320*200+sizeof(stg4_t)) {
+    } else if (frm->type==4 && frm->w && frm->h && frm->sz && frm->w <= 320 && frm->h <= 200 && frm->sz <= 320*200+sizeof(frm_t)) {
       //continue;
-      printf("%d: type4 %dx%d (%d,%d) %d bytes %s\n", i, stg4->w, stg4->h, stg4->x, stg4->y, stg4->sz, name);
-      pic_t *pic = picNew(stg4->w, stg4->h, 8);
-      unrle((uint8_t*)(stg4+1), pic->D, stg4->w*stg4->h);
+      printf("%d: type4 %dx%d (%d,%d) %d bytes %s\n", i, frm->w, frm->h, frm->x, frm->y, frm->sz, name);
+      pic_t *pic = picNew(frm->w, frm->h, 8);
+      unrle((uint8_t*)(frm+1), pic->D, frm->w*frm->h);
       pic->P = new(uint8_t,4*256);
       uint8_t *upal = file+ct[741].ofs;
       pic->K = 0;
