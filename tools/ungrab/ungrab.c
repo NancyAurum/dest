@@ -35,6 +35,11 @@
 //ensures compiler wont add gaps between the fields.
 #define PACKED __attribute__((packed)) 
 
+
+#define undefined uint8_t
+#define true 1
+
+
 //FIXME: map file hash to filename, in case we encounter STRONG.DAT with
 //unknown entries.
 
@@ -90,8 +95,7 @@ typedef struct { //stronghold audio (header size = 0xD)
 
 typedef struct { //stronghold graphics type4 (header size = 0x14)
   uint8_t type; //=4 (unit)
-  int16_t ox;
-  int16_t oy;
+  uint32_t next; //far pointer for to the next frm_t; 0 = no next frame
   uint8_t ow;
   uint8_t type2; //=2
   int16_t x;
@@ -135,8 +139,8 @@ typedef struct { //extended information
   int16_t sy;
   int16_t ex; //inclusive
   int16_t ey;
-  int16_t ox;
-  int16_t oy;
+  int16_t x; //where to draw it on screen
+  int16_t y;
   int nid; //name id
 } einfo_t;
 
@@ -1845,6 +1849,62 @@ einfo_t einfo[] = {
   {9,0,0,0,0,0,0,576},
   {9,0,0,0,0,0,0,577},
 
+
+  //file=37 (fire.lbm), nframes=44
+  //anim=0, nframes=5
+  {2, 42,  0, 54, 19,  0,  7,  37},
+  {0, 42, 27, 54, 46,  0,  7,  37},
+  {0, 42, 54, 54, 73,  0,  7,  37},
+  {0, 42, 81, 54,100,  0,  7,  37},
+  {0, 42,108, 54,127,  0,  7,  37},
+  //anim=1, nframes=7
+  {1,  4,  0, 34, 19, 15,  7,  37},
+  {0,  4, 27, 34, 46, 15,  7,  37},
+  {0,  4, 54, 34, 73, 15,  7,  37},
+  {0,  4, 81, 34,100, 15,  7,  37},
+  {0,  4,108, 34,127, 15,  7,  37},
+  {0,  4,135, 34,154, 15,  7,  37},
+  {0,  4,162, 34,181, 15,  7,  37},
+  //anim=2, nframes=6
+  {1,111,  0,132, 19, 12,  7,  37},
+  {0,111, 27,132, 46, 12,  7,  37},
+  {0,111, 54,132, 73, 12,  7,  37},
+  {0,111, 81,132,100, 12,  7,  37},
+  {0,111,108,132,127, 12,  7,  37},
+  {0,111,135,132,154, 12,  7,  37},
+  //anim=3, nframes=6
+  {1,150,  0,186, 19,  0, 19,  37},
+  {0,150, 27,186, 46,  0, 19,  37},
+  {0,150, 54,186, 73,  0, 19,  37},
+  {0,150, 81,186,100,  0, 19,  37},
+  {0,150,108,186,127,  0, 19,  37},
+  {0,150,135,186,154,  0, 19,  37},
+  //anim=4, nframes=6
+  {1,186,  0,200, 19, 10, 18,  37},
+  {0,186, 27,200, 46, 10, 18,  37},
+  {0,186, 54,200, 73, 10, 18,  37},
+  {0,186, 81,200,100, 10, 18,  37},
+  {0,186,108,200,127, 10, 18,  37},
+  {0,186,135,200,154, 10, 18,  37},
+  //anim=5, nframes=7
+  {1, 69,  0, 96, 19, 14,  7,  37},
+  {0, 69, 27, 96, 46, 14,  7,  37},
+  {0, 69, 54, 96, 73, 14,  7,  37},
+  {0, 69, 81, 96,100, 14,  7,  37},
+  {0, 69,108, 96,127, 14,  7,  37},
+  {0, 69,135, 96,154, 14,  7,  37},
+  {0, 69,162, 96,181, 14,  7,  37},
+  //anim=6, nframes=3
+  {1,212,  0,220, 19,  4, 15,  37},
+  {0,212, 27,220, 46,  4, 15,  37},
+  {0,212, 54,220, 73,  4, 15,  37},
+  //anim=7, nframes=3
+  {1,212, 81,220,100,  4, 15,  37},
+  {0,212,108,220,127,  4, 15,  37},
+  {0,212,135,220,154,  4, 15,  37},
+  //anim=8, nframes=1
+  {1, 48,142, 51,142,  0,  0,  37},
+
 };
 
 /*
@@ -1899,9 +1959,6 @@ einfo_t einfo[] = {
 
 */
 
-
-
-#define true 1
 
 void test() {
   int ii,jj,cc,iVar7,iVar2, iVar4;
@@ -2191,7 +2248,7 @@ void test() {
     iVar4 = iVar4 + 1;
   }
 
-#endif
+
 
   //uStack_a = grabLbm(35,0,0);
   iVar4 = 0;
@@ -2201,9 +2258,10 @@ void test() {
     iVar4 = iVar4 + 1;
   }
 
+#endif
+
   exit(0);
 }
-
 
 
 
@@ -2346,6 +2404,104 @@ typedef struct {
 } PACKED voc_t;
 
 
+/* There are 9 projectile animations:
+
+5 frames of fireball flying
+7 farmes of fireball explosion
+6 frames of purple explosion
+6 frames of Z-z-z sleep anim 
+6 frames of blue effect
+7 frames of magic arrow
+3 frames of blue bolt appear
+3 frames of blue bolt disappear
+1 frame of arrow
+
+*/
+
+uint8_t ProjectileAnms[] = {
+  0x09, 0x2a, 0x00, 0x00, 0x00, 0x36, 0x00, 0x13, 0x00, 0x16, 0x1b, 0x00,
+  0x00, 0x07, 0x00, 0x0f, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,
+  0x00, 0xff, 0x04, 0x05, 0x02, 0xff, 0x0a, 0x04, 0x00, 0x00, 0x00, 0x22,
+  0x00, 0x13, 0x00, 0x00, 0x1b, 0x0f, 0x00, 0x07, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0xff, 0xff, 0x07, 0x00, 0xff,
+  0x0b, 0x6f, 0x00, 0x00, 0x00, 0x84, 0x00, 0x13, 0x00, 0x00, 0x1b, 0x0c,
+  0x00, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,
+  0x00, 0xff, 0xff, 0x06, 0x00, 0xff, 0x0c, 0x96, 0x00, 0x00, 0x00, 0xba,
+  0x00, 0x13, 0x00, 0x00, 0x1b, 0x00, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0xff, 0x00, 0x06, 0x00, 0xff,
+  0x0d, 0xba, 0x00, 0x00, 0x00, 0xc8, 0x00, 0x13, 0x00, 0x00, 0x1b, 0x0a,
+  0x00, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,
+  0x00, 0xff, 0x05, 0x06, 0x00, 0xff, 0x08, 0x45, 0x00, 0x00, 0x00, 0x60,
+  0x00, 0x13, 0x00, 0x00, 0x1b, 0x0e, 0x00, 0x07, 0x00, 0x0c, 0x00, 0x0d,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0xff, 0x06, 0x07, 0x07, 0xff,
+  0x0e, 0xd4, 0x00, 0x00, 0x00, 0xdc, 0x00, 0x13, 0x00, 0x00, 0x1b, 0x04,
+  0x00, 0x0f, 0x00, 0x0a, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,
+  0x00, 0xff, 0x00, 0x03, 0x02, 0xff, 0x10, 0xd4, 0x00, 0x51, 0x00, 0xdc,
+  0x00, 0x64, 0x00, 0x00, 0x1b, 0x04, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0xff, 0xff, 0x03, 0x00, 0xff,
+  0x06, 0x30, 0x00, 0x8e, 0x00, 0x33, 0x00, 0x8e, 0x00, 0x00, 0x19, 0x00,
+  0x00, 0x00, 0x00, 0x07, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0xff, 0x00, 0x01, 0x02, 0xff};
+
+typedef struct { /* sprite animation definition */
+  uint8_t frmid;  //index into spr_t frames
+  int16_t sx;
+  int16_t sy;
+  int16_t ex;
+  int16_t ey;
+  uint8_t fw; //frame width; added to X, after the X column if finished
+  uint8_t fh; //frame height, added to Y, after every frame
+  int16_t x;
+  int16_t y;
+  uint8_t ow;
+  uint8_t unk[11];
+  uint8_t nframes;
+  uint8_t flags;
+  undefined field23_0x1d;
+} PACKED anm_t;
+
+void dump_anm(int fid, anm_t *anms, int nanms) {
+  int i, j;
+  int total = 0;
+  for (i = 0; i < nanms; i++) {
+    anm_t *a = anms+i;
+    total += a->nframes;
+#if 0
+    int w = a->ex - a->sx + 1;
+    int h = a->ey - a->sy + 1;
+    printf("%d: %dx%d (%d,%d) flags=%2X ow=%d\n",i,w,h,a->x,a->y,a->flags,a->ow);
+#endif
+  }
+#if 1
+  printf("  //file=%d (%s), nframes=%d\n", fid, names[fid], total);
+  for (i = 0; i < nanms; i++) {
+    anm_t *anm = anms+i;
+    int sx = anm->sx;
+    int sy = anm->sy;
+    int ex = anm->ex;
+    int ey = anm->ey;
+    int x = anm->x;
+    int y = anm->y;
+    int anim_height = ey - sy;
+    printf("  //anim=%d, nframes=%d\n", i, anm->nframes);
+    for (j = 0; j < anm->nframes; j++) {
+      int how = j ? 0 : 1;
+      if (i == 0) how = 2;
+      printf("  {%d,%3d,%3d,%3d,%3d,%3d,%3d,%4d},\n", how, sx, sy, ex, ey, x, y,fid);
+      sy += anm->fh;
+      ey += anm->fh;
+      if (ey > 199) {
+        sy = sy%anm->fh;
+        ey + sy + anim_height;
+        sx += anm->fw;
+        ex += anm->fw;
+      }
+    }
+  }
+#endif
+  exit(0);
+}
+
 int main(int argc, char **argv) {
   int i, j, k;
   int nexts = sizeof(einfo)/sizeof(einfo[0]);
@@ -2374,7 +2530,7 @@ int main(int argc, char **argv) {
 #endif
 
   //exit(0);
-
+  //dump_anm(37, (anm_t*)ProjectileAnms, 9);
   //test();
 
   
@@ -2422,9 +2578,12 @@ int main(int argc, char **argv) {
 #if 1
   uint8_t *bpal = file+ct[741].ofs; //base palette
   uint8_t *pal = file+ct[741].ofs; //nwpanel1.lbm's palette
+  int anm_id = 0;
+  int frm_id = 0;
   for (i = 0; i < nitems; i++) {
     einfo_t *ei = (i < nexts) ? &einfo[i] : 0;
     char *name = ei ? names[ei->nid] : "";
+    //if (strcmp(name, "fire.lbm")) continue;
     //if (!ei || ei->type != 8) continue;
     stg_t *stg = (stg_t*)(file+ct[i].ofs);
     stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
@@ -2495,6 +2654,14 @@ int main(int argc, char **argv) {
       }
     } else if (frm->type==4 && frm->w && frm->h && frm->sz && frm->w <= 320 && frm->h <= 200 && frm->sz <= 320*200+sizeof(frm_t)) {
       //continue;
+      if (ei && ei->type == 1) { //new anm_t?
+        frm_id = 0;
+        anm_id += 1; //new anm_t?
+      }
+      if (ei && ei->type == 2) { //new spr_t?
+        frm_id = 0;
+        anm_id = 0;
+      }
       printf("%d: type4 %dx%d (%d,%d) %d bytes %s\n", i, frm->w, frm->h, frm->x, frm->y, frm->sz, name);
       pic_t *pic = picNew(frm->w, frm->h, 8);
       unrle((uint8_t*)(frm+1), pic->D, frm->w*frm->h);
@@ -2507,7 +2674,8 @@ int main(int argc, char **argv) {
         pic->P[j*4+2] = upal[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      pngSave(fmt("%s%04dt4%s.png",outpath, i,name), pic);
+      pngSave(fmt("%s%04dt4%s_%d_%d.png",outpath, i,name, anm_id, frm_id), pic);
+      frm_id++;
     } else if (ct[i].sz==768) {
       pal = file+ct[i].ofs;
       //continue;

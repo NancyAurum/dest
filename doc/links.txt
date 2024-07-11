@@ -1,3 +1,6 @@
+* C Beautifier (useful for the Ghidra's decompiled code):
+  https://formatter.org/cpp-formatter
+
 * https://static.grumpycoder.net/pixel/support/analyzeHeadlessREADME.html
 
 * DOS interrupt analyzer:
