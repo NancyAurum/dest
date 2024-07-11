@@ -11,8 +11,12 @@ adr = getState().getCurrentAddress()
 # Increment address:
 adr.add(5)
 
+# function to read unsigned short from an address
+def getWord(adr):
+  return getShort(adr)&0xFFFF
+
 # Convert a far ptr to Ghidra's address
-toAddr((getShort(adr.add(2)) << 4) + getShort(adr))
+toAddr((getWord(adr.add(2)) << 4) + getWord(adr))
 
 # Print far pointer at adr:
 "adr {:04X}:{:04X}".format(getShort(adr),getShort(adr.add(2)))
