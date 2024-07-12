@@ -107,6 +107,15 @@ typedef struct { //stronghold graphics type4 (header size = 0x14)
                     //additional info
 } PACKED frm_t;
 
+#define FNT_NCHARS 96
+
+typedef struct {
+  uint8_t h; //glyph height 
+  uint16_t ofs[FNT_NCHARS]; //glyph pixels offsets
+  uint8_t ws[FNT_NCHARS]; //glyph widths
+} PACKED fnt_hdr_t;
+
+
 void fail(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -1587,7 +1596,7 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
     //if (stg->type!=3) continue;
     //if (stg->type!=4) continue;
 
-    //if (strcmp(name, "anim/1el1m.lbm")) continue;
+    if (strcmp(name, "demfont1.lbm")) continue;
 
     if (strcmp(prev_name, name)) {
       printf("Extracting %s...\n", name);
@@ -1716,26 +1725,37 @@ end4:
       write_whole_file_path(fmt("%s%s",outpath, name), file+ct[i].ofs, ct[i].sz);
     } else if (ei && ei->type == 8) {
       uint8_t *q = file+ct[i].ofs;
-      int nchars = 96;
-      int h = *q;
-      int w = nchars * *q;
+      fnt_hdr_t *fh = (fnt_hdr_t*)q;
 
-      pic_t *pic = picNew(w, h, 8);
+      pic_t *pic = picNew(320, 200, 8);
 
-      //printf("%x\n", h);
-      for (j = 0; j < nchars; j++) {
-        //printf("  %2d: ofs=%x w=%d\n", j, *(uint16_t*)(q + 1 + j*2), *(q+0xC1+j));
-        int cw = *(q+0xC1+j);
+
+      int ch = fh->h;
+
+      int cx = 0;
+      int cy = 1;
+#if 1
+      for (j = 0; j < FNT_NCHARS; j++) {
+        int cw = fh->ws[j];
         int x, y;
-        uint8_t *p = q + 0x121 + *(uint16_t*)(q + 1 + j*2);
-        for (y = 0; y < h; y++) {
+        int c = 0x20 + j;
+        if (c == 'A' || c == 'a' || c == '[') {
+          cx = 0;
+          cy += ch+1;
+        }
+        uint8_t *p = (uint8_t*)(fh+1) + fh->ofs[j];
+        picPut(pic, cx   , cy-1, 0xFF);
+        picPut(pic, cx+cw-1, cy-1, 0xFF);
+        for (y = 0; y < ch; y++) {
           for (x = 0; x < cw; x++) {
-            picPut(pic, pic->H*j+x, y, p[y*cw+x]);
+            picPut(pic, cx+x, cy+y, p[y*cw+x]);
           }
         }
+        cx += cw+2;
       }
-      pic->P = new(uint8_t,4*256);
       pic->K = 0;
+#endif
+      picPut(pic, 0, ch, 0xFF);
       q = pal;
       for (j = 0; j < 256; j++) {
         pic->P[j*4+0] = q[j*3 + 0]<<2;
@@ -1744,6 +1764,7 @@ end4:
         pic->P[j*4+3] = 0;
       }
       savePic(fmt("%s%s",outpath, name), pic);
+      sheet = 0;
     } else if (ct[i].sz==144) {
     } else {
       write_whole_file_path(fmt("%s%s",outpath, name), file+ct[i].ofs, ct[i].sz);
@@ -1751,8 +1772,6 @@ end4:
   }
   printf("Done!\n");
 }
-
-
 
 
 
