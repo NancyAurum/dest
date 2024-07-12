@@ -124,15 +124,6 @@ void fail(char *fmt, ...) {
 }
 
 
-void usage() {
-#define P printf
-  P("UnGrab v0.1 by Nancy Sadkov\n");
-  P("Usage: ungrab path/to/STRONG.DAT output/folder/\n");
-  P("\n");
-  exit(0);
-#undef P
-}
-
 typedef struct { //extended information
   int type;
   uint16_t sx;
@@ -1274,6 +1265,8 @@ typedef struct { /* sprite animation definition */
   undefined field23_0x1d;
 } PACKED anm_t;
 
+
+
 void dump_anm(int fid, anm_t *anms, int nanms) {
   int i, j;
   int total = 0;
@@ -1300,13 +1293,17 @@ void dump_anm(int fid, anm_t *anms, int nanms) {
     printf("  //anim=%d, nframes=%d\n", i, anm->nframes);
     for (j = 0; j < anm->nframes; j++) {
       int how = j ? 0 : 1;
-      if (i == 0) how = 2;
+      if (i == 0 && j == 0) how = 2;
       printf("  {%d,%3d,%3d,%3d,%3d,%3d,%3d,%4d},\n", how, sx, sy, ex, ey, x, y,fid);
+
+      //advance to the next frame in this row
       sy += anm->fh;
       ey += anm->fh;
+
       if (ey > 199) {
-        sy = sy%anm->fh;
-        ey + sy + anim_height;
+        // advance to the next column
+        sy = anm->sy % anm->fh;
+        ey = sy + anim_height;
         sx += anm->fw;
         ex += anm->fw;
       }
@@ -1342,7 +1339,7 @@ void dump_agnt_anms() {
 int ninfos = sizeof(einfo)/sizeof(einfo[0]);
 int naids = sizeof(audio_ids)/sizeof(audio_ids[0]);
 
-void dump_raw_named(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
+void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
   int i, j, k;
   uint8_t *bpal = file+ct[741].ofs; //base palette
   uint8_t *pal = file+ct[741].ofs;
@@ -1428,7 +1425,7 @@ void dump_raw_named(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
       //continue;
       if (ei && ei->type == 1) { //new anm_t?
         frm_id = 0;
-        anm_id += 1; //new anm_t?
+        anm_id += 1;
       }
       if (ei && ei->type == 2) { //new spr_t?
         frm_id = 0;
@@ -1521,10 +1518,9 @@ void dump_raw_named(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
   printf("Done!\n");
 }
 
-void recover_files(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
+void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
   int i, j, k;
-  int anm_id = 0;
-  int frm_id = 0;
+  int anm_id=0, frm_id=0;
   char *prev_name = "";
 
   if (nitems > ninfos) {
@@ -1578,6 +1574,7 @@ void recover_files(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
     //if (stg->type!=3) continue;
     //if (stg->type!=4) continue;
 
+    //if (strcmp(name, "anim/1el1m.lbm")) continue;
 
     if (strcmp(prev_name, name)) {
       printf("Extracting %s...\n", name);
@@ -1670,15 +1667,16 @@ void recover_files(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
            file+ct[i].ofs+sizeof(stg3_t), sz);
       }
     } else if (frm->type==4 && frm->w && frm->h && frm->sz && frm->w <= 320 && frm->h <= 200 && frm->sz <= 320*200+sizeof(frm_t)) {
-      //continue;
-      if (ei && ei->type == 1) { //new anm_t?
+      if (ei->type == 1) { //new anm_t?
         frm_id = 0;
         anm_id += 1;
       }
-      if (ei && ei->type == 2) { //new spr_t?
+      if (ei->type == 2) { //new spr_t?
         frm_id = 0;
         anm_id = 0;
       }
+      
+      //printf("  %d: %d,%d\n", ei->type, anm_id, frm_id);
       pic_t *pic = picNew(frm->w, frm->h, 8);
       unrle((uint8_t*)(frm+1), pic->D, frm->w*frm->h);
       uint8_t *upal = file+ct[741].ofs;
@@ -1688,7 +1686,17 @@ void recover_files(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         sheet->P[j*4+2] = upal[j*3 + 2]<<2;
         sheet->P[j*4+3] = 0;
       }
+#if 0
+      if (!((anm_id == 1 && frm_id == 8) || (anm_id == 2  && frm_id == 5))) goto end4;
+
+      printf("anim=%d, frame=%d\n", anm_id, frm_id);
+      int ww = ei->ex - ei->sx + 1;
+      int hh = ei->ey - ei->sy + 1;
+      printf("  %d,%d:%dx%d \n", ei->sx, ei->sy, ww, hh);
+#endif
+
       picBlt(sheet, pic, 0, ei->sx, ei->sy, 0, 0, frm->w, frm->h);
+end4:
       frm_id++;
     } else if (ct[i].sz==768) {
     } else if (is_txt(file+ct[i].ofs, ct[i].sz)) {
@@ -1731,12 +1739,122 @@ void recover_files(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
   printf("Done!\n");
 }
 
+
+
+
+
+
+void dump_anm2(int fid, anm_t *anms, int nanms) {
+  int i, j;
+  if (strcmp(names[fid], "anim/1el1m.lbm")) return;
+  for (i = 0; i < nanms; i++) {
+    anm_t *anm = anms+i;
+    int sx = anm->sx;
+    int sy = anm->sy;
+    int ex = anm->ex;
+    int ey = anm->ey;
+    int x = anm->x;
+    int y = anm->y;
+    int anim_height = ey - sy;
+    for (j = 0; j < anm->nframes; j++) {
+      int how = j ? 0 : 1;
+      if (i == 0 && j == 0) how = 2;
+
+      if ((i == 1 && j == 8) || (i == 2  && j == 5)) {
+        printf("anim=%d, frame=%d fw=%d fh=%d\n", i, j, anm->fw+1, anm->fh+1);
+        int ww = ex - sx + 1;
+        int hh = ey - sy + 1;
+        printf("  %d,%d:%dx%d \n", sx, sy, ww, hh);
+      }
+
+      //printf("  {%d,%3d,%3d,%3d,%3d,%3d,%3d,%4d},\n", how, sx, sy, ex, ey, x, y,fid);
+
+      //advance to the next frame in this row
+      sy += anm->fh;
+      ey += anm->fh;
+
+      if (ey > 199) {
+        // advance to the next column
+        sy = anm->sy % anm->fh;
+        ey = sy + anim_height;
+        sx += anm->fw;
+        ex += anm->fw;
+      }
+    }
+  }
+}
+
+void dump_agnt_anms2() {
+  int i, j;
+  agntG_t *ags = (agntG_t*)AgntGs;
+  for (i = 0; i < 42; i++) {
+    agntG_t *ag = ags+i;
+    int anms_index = (ag->anms - ags[0].anms)/0x1e;
+    for (j = 0; j < 6; j++) {
+      if (!ag->sprfls[j]) continue;
+      dump_anm2(ag->sprfls[j], (anm_t*)AgntAnms+anms_index, ag->nanims); 
+    }
+  }
+  exit(0);
+}
+
+
+void extract_raw(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
+  int i, j;
+  for (i = 0; i < nitems; i++) {
+    printf("Dumping entry %d...\n", i);
+    write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
+  }
+  printf("Done!\n");
+}
+
+void info(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
+  int i, j;
+  for (i = 0; i < nitems; i++) {
+    printf("%04d: Ofs=%x Sz=%x\n", i, ct[i].ofs, ct[i].sz);
+    if (ct[i].state) fail("entry %d has non-null state", i);
+    for (j = 0; j < 12; j++)
+      if (ct[i].info[j]) fail("entry %d has non-null info", i);
+  }
+}
+
+#define CMD_INFO       0
+#define CMD_GRAB       1
+#define CMD_UNGRAB     2
+#define CMD_DUMP       3
+#define CMD_RAW        4
+
+
+void usage() {
+#define P printf
+  P("UnGrab v0.1 by Nancy Sadkov\n");
+  P("Recovers original files from the 1993 D&D Stronghold's STRONG.DAT\n");
+  P("Usage: ungrab [OPTIONS] path/to/STRONG.DAT output/folder/\n");
+  P("If no [OPTIONS] specified, extracts the original files normally\n");
+  P("\n");
+  P("OPTIONS:\n");
+  P("  -png        save graphics as PNGs instead of LBMs\n");
+  P("  -info       print information about this STRONG.DAT\n");
+  P("  -dump       dump converted sprite frames and service files\n");
+  P("  -raw        dump raw unnamed and non-converted entries\n");
+  //P("  -grab       tries to create new STRONG.DAT from the output/folder\n");
+  P("\n");
+
+  exit(0);
+#undef P
+}
+
 int main(int argc, char **argv) {
   int i, j, k;
-
+  int cmd = CMD_UNGRAB;
 
   NAP_INTRO
   NAP_IF("h") usage(); NAP_FI
+  NAP_IF("info"  ) cmd = CMD_INFO;   NAP_FI
+  NAP_IF("grab"  ) cmd = CMD_GRAB;   NAP_FI
+  NAP_IF("ungrab") cmd = CMD_UNGRAB; NAP_FI
+  NAP_IF("dump"  ) cmd = CMD_DUMP;   NAP_FI
+  NAP_IF("raw"   ) cmd = CMD_RAW;    NAP_FI
   NAP_OUTRO(2,2)
 
 
@@ -1748,22 +1866,7 @@ int main(int argc, char **argv) {
 
   load_names();
 
-
-#if 0
-  for (j = 0; j < naids; j++) {
-    printf("  //%s\n", names[audio_ids[j]]);
-    printf("  {10,0,0,0,0,0,0,%d},\n", audio_ids[j]);
-  }
-#endif
-
-#if 0
-  for (j = 0; j < 34; j++) { //text files
-    printf("  {9,0,0,0,0,0,0,%d},\n", 578+j);
-  }
-  exit(0);
-#endif
-
-
+  //dump_agnt_anms2();
   //dump_agnt_anms();
   //dump_anm(37, (anm_t*)ProjectileAnms, 9);  exit(0);
   //test();
@@ -1775,9 +1878,11 @@ int main(int argc, char **argv) {
   uint32_t ctsz = file_size - ctofs;
   int nitems = ctsz/sizeof(cte_t);
 
-  printf("Content Table Offset: %x\n", ctofs);
-  printf("Content Table Size: %x\n", ctsz);
-  printf("Number of entries: %d\n", nitems);
+  if (cmd == CMD_INFO) {
+    printf("Content Table Offset: %x\n", ctofs);
+    printf("Content Table Size: %x\n", ctsz);
+    printf("Number of entries: %d\n", nitems);
+  }
 
   //do sanity check
   if (ctofs+sizeof(cte_t)*100 > file_size
@@ -1790,28 +1895,12 @@ int main(int argc, char **argv) {
 
   cte_t *ct = (cte_t*)(file+ctofs);
 
-#if 0
-  for (i = 0; i < nitems; i++) {
-    printf("%04d: Ofs=%x Sz=%x\n", i, ct[i].ofs, ct[i].sz);
-    if (ct[i].state) fail("entry %d has non-null state", i);
-    for (j = 0; j < 12; j++)
-      if (ct[i].info[j]) fail("entry %d has non-null info", i);
+  switch(cmd) {
+  case CMD_INFO: info(outpath, file, ct, nitems); break; 
+  case CMD_RAW: extract_raw(outpath, file, ct, nitems); break;
+  case CMD_DUMP: dump(outpath, file, ct, nitems); break;
+  case CMD_UNGRAB: ungrab(outpath, file, ct, nitems); break;
   }
-#endif
-
-
-
-#if 0
-  for (i = 0; i < nitems; i++) {
-    printf("Dumping entry %d...\n", i);
-    write_whole_file_path(fmt("%s%04d",outpath, i), file+ct[i].ofs, ct[i].sz);
-  }
-  printf("Done!\n");
-#endif
-
-  //dump_raw_named(outpath, file, ct, nitems);
-
-  recover_files(outpath, file, ct, nitems);
 
   return 0;
 }

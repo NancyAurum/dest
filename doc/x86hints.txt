@@ -19,8 +19,13 @@ in listing it look like
 Example EMS code in OpenWatcom overlay manager
 https://github.com/amindlost/cw/blob/01702a8bf5a7b31988eb280b514f97145818e614/src/wl/ovlmgr.asm#L4001
 
-And old touhous source code
+An old touhou source code
 https://github.com/nmlgc/ReC98/blob/87eed57ade4e2abd0f12272e568fe65a3643aeb3/libs/master.lib/ems_free.asm
+
+
+Signed divide DX:AX by r/m16, with result stored in AX := Quotient, DX := Remainder.
+IDIV BX    ; R = (DX:AX)%BX; Q = (DX:AX)/BX; DX=R; AX=Q
+
 
 lea dx,offset //same as mov dx,offset
 

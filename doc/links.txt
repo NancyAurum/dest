@@ -10,3 +10,6 @@
   https://github.com/Cisco-Talos/GhIDA
 
 * https://sites.google.com/site/es2reveng/getting-started-with-reverse-engineering
+
+* LP showing what the game is about
+  https://www.youtube.com/watch?v=YLmzXrAJOws
