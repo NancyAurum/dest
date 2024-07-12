@@ -32,8 +32,6 @@
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
-//ensures compiler wont add gaps between the fields.
-#define PACKED __attribute__((packed)) 
 
 
 #define undefined uint8_t
@@ -1312,6 +1310,8 @@ void dump_anm(int fid, anm_t *anms, int nanms) {
 #endif
 }
 
+
+
 void dump_agnt_anms() {
   int i, j;
   agntG_t *ags = (agntG_t*)AgntGs;
@@ -1335,6 +1335,19 @@ void dump_agnt_anms() {
   }
   exit(0);
 }
+
+
+
+
+
+int save_pngs;
+
+void savePic(char *outpath, pic_t *pic) {
+  if (save_pngs) pngSave(fmt("%s.png", outpath), pic);
+  else lbmSave(outpath, pic);
+}
+
+
 
 int ninfos = sizeof(einfo)/sizeof(einfo[0]);
 int naids = sizeof(audio_ids)/sizeof(audio_ids[0]);
@@ -1375,7 +1388,7 @@ void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         pic->P[j*4+3] = 0;
       }
       //picClear(pic, 0xFF00FF);
-      pngSave(fmt("%s%04dt1%s.png",outpath, i, name), pic);
+      savePic(fmt("%s%04dt1%s",outpath, i, name), pic);
     } else if (stg2->type==2 && stg2->w && stg2->h && stg2->sz && stg2->w <= 320 && stg2->h <= 200 && stg2->sz <= 320*200+0xE) {
       //continue;
       printf("%d: type2 %dx%d (%d,%d) %d bytes %s\n", i, stg2->w, stg2->h, stg2->x, stg2->y, stg2->sz, name);
@@ -1392,7 +1405,7 @@ void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         pic->P[j*4+2] = q[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      pngSave(fmt("%s%04dt2%s.png",outpath, i,name), pic);
+      savePic(fmt("%s%04dt2%s",outpath, i,name), pic);
     } else if (stg3->type==3 && stg3->sz && stg3->sz <= ct[i].sz && !stg3->w && !stg3->h) {
       //continue;
       printf("%d: type3 %dx%d %s\n", i, stg3->w, stg3->h, name);
@@ -1443,7 +1456,7 @@ void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         pic->P[j*4+2] = upal[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      pngSave(fmt("%s%04dt4%s_%d_%d.png",outpath, i,name, anm_id, frm_id), pic);
+      savePic(fmt("%s%04dt4%s_%d_%d",outpath, i,name, anm_id, frm_id), pic);
       frm_id++;
     } else if (ct[i].sz==768) {
       pal = file+ct[i].ofs;
@@ -1460,7 +1473,7 @@ void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         picPut(pic, j%16, j/16, j);
       }
       //picClear(pic, 0xFF00FF);
-      pngSave(fmt("%s%04d%s.png",outpath, i, name), pic);
+      savePic(fmt("%s%04d%s.lbm",outpath, i, name), pic);
     } else if (is_txt(file+ct[i].ofs, ct[i].sz)) {
       //continue;
       printf("%d: %s dumping text...\n", i, name);
@@ -1495,7 +1508,7 @@ void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         pic->P[j*4+2] = q[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      pngSave(fmt("%s%04d%s.png",outpath, i, name), pic);
+      savePic(fmt("%s%04d%s",outpath, i, name), pic);
     } else if (ct[i].sz==144) {
       printf("%d: skyline palette\n", i);
       pal = normalizeSkylinePal(bpal,file+ct[i].ofs);
@@ -1508,7 +1521,7 @@ void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         pic->P[j*4+3] = 0;
         picPut(pic, j%16, j/16, j);
       }
-      pngSave(fmt("%s%04d%s.png",outpath, i, name), pic);
+      savePic(fmt("%s%04d%s.lbm",outpath, i, name), pic);
     } else {
       //continue;
       printf("%d: %s dumping raw...\n", i, name);
@@ -1558,7 +1571,7 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
 
     if (strcmp(prev_name, name)) {
       if (sheet) {
-        pngSave(fmt("%s%s.png", outpath, prev_name), sheet);
+        savePic(fmt("%s%s", outpath, prev_name), sheet);
         sheet = 0;
       }
     }
@@ -1730,7 +1743,7 @@ end4:
         pic->P[j*4+2] = q[j*3 + 2]<<2;
         pic->P[j*4+3] = 0;
       }
-      pngSave(fmt("%s%s.png",outpath, name), pic);
+      savePic(fmt("%s%s",outpath, name), pic);
     } else if (ct[i].sz==144) {
     } else {
       write_whole_file_path(fmt("%s%s",outpath, name), file+ct[i].ofs, ct[i].sz);
@@ -1850,11 +1863,14 @@ int main(int argc, char **argv) {
 
   NAP_INTRO
   NAP_IF("h") usage(); NAP_FI
+  NAP_IF("png"   ) save_pngs = 1;    NAP_FI
   NAP_IF("info"  ) cmd = CMD_INFO;   NAP_FI
   NAP_IF("grab"  ) cmd = CMD_GRAB;   NAP_FI
   NAP_IF("ungrab") cmd = CMD_UNGRAB; NAP_FI
   NAP_IF("dump"  ) cmd = CMD_DUMP;   NAP_FI
   NAP_IF("raw"   ) cmd = CMD_RAW;    NAP_FI
+
+
   NAP_OUTRO(2,2)
 
 
@@ -1863,6 +1879,13 @@ int main(int argc, char **argv) {
 
   if (!file_exists(fargv[0])) fail("File doesn't exist: %s", fargv[0]);
 
+#if 0
+  pic_t *pp = picNew(320,200,8);
+  picPalSet(pp, 0, 0x0000FF);
+  picClear(pp, 0x0);
+  lbmSave("./test.lbm", pp);
+  exit(0);
+#endif
 
   load_names();
 

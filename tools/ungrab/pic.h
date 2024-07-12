@@ -146,6 +146,8 @@ u4 picGet(pic_t *P, int X, int Y);
 u4 picGet24(pic_t *P, int X, int Y);
 u4 picGet32(pic_t *P, int X, int Y);
 
+void picPalSet(pic_t *P, int Index, u4 Color);
+
 #define R8G8B8(R,G,B) (((R)<<16)|((G)<<8)|(B))
 #define R8G8B8A8(R,G,B,A) (((A)<<24)|((R)<<16)|((G)<<8)|(B))
 

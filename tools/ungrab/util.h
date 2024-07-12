@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+//ensures compiler wont add gaps between the fields.
+#define PACKED __attribute__((packed)) 
+
 //these should be redefinable, in case user wants to provide custom function
 int file_exists(char *filename);
 int path_is_folder(char *name);
