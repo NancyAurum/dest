@@ -12,6 +12,12 @@
 
                                          -Nancy Sadkov
 
+
+TODO:
+* The 0xFE marker in sprite sheets apparently formed a rect.
+  Confirm or disprove this theory.
+  I.e. it could have been a single pixel dot too.
+
 */
 
 #include <stdint.h>
@@ -211,7 +217,6 @@ int is_txt(uint8_t *p, uint32_t size) {
 
 int names_count;
 char *names[5000];
-
 
 void load_names() {
   if (!file_exists("./names.txt")) fail("File doesn't exist: names.txt");
@@ -1273,10 +1278,53 @@ typedef struct { /* sprite animation definition */
 } PACKED anm_t;
 
 
+//int ow_index = 1126;
+int ow_index = 1170;
+
+uint8_t ows[5000];
+
+void init_ows() {
+#include "ows.h"
+}
+
+void dump_anm_ow(int fid, anm_t *anms, int nanms) {
+  int i, j;
+  for (i = 0; i < nanms; i++) {
+    anm_t *anm = anms+i;
+    for (j = 0; j < anm->nframes; j++) {
+      int how = j ? 0 : 1;
+      //printf("%d\n", ow_index);
+      if (anms->flags&1) printf("ows[%d]=%d;\n", ow_index, 1);
+      ow_index++;
+    }
+  }
+}
+
+void dump_agnt_anms_ow() {
+  int i, j;
+  agntG_t *ags = (agntG_t*)AgntGs;
+  for (i = 0; i < 42; i++) {
+    agntG_t *ag = ags+i;
+    int anms_index = (ag->anms - ags[0].anms)/0x1e;
+    for (j = 0; j < 6; j++) {
+      if (!ag->sprfls[j]) continue;
+      dump_anm_ow(ag->sprfls[j], (anm_t*)AgntAnms+anms_index, ag->nanims); 
+    }
+    for (j = 0; j < 6; j++) {
+      if (!ag->prtfls[j]) continue;
+      ow_index++;
+      ow_index++;
+    }
+  }
+  exit(0);
+}
+
+
 
 void dump_anm(int fid, anm_t *anms, int nanms) {
   int i, j;
   int total = 0;
+
   for (i = 0; i < nanms; i++) {
     anm_t *a = anms+i;
     total += a->nframes;
@@ -1596,7 +1644,7 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
     //if (stg->type!=3) continue;
     //if (stg->type!=4) continue;
 
-    if (strcmp(name, "demfont1.lbm")) continue;
+    //if (strcmp(name, "demfont1.lbm")) continue;
 
     if (strcmp(prev_name, name)) {
       printf("Extracting %s...\n", name);
@@ -1629,6 +1677,11 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         if (nparts==1 && !ei->ex && !ei->ey) {
           w = ei->ex - ei->ex + 1;
           h = ei->ey - ei->ey + 1;
+        }
+
+        if (stg->type == 4) { //make all sheets the same size
+          w = 320;
+          h = 200;
         }
         sheet = picNew(w, h, 8);
         sheet->K = 0;
@@ -1698,8 +1751,12 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         anm_id = 0;
       }
       
-      //printf("  %d: %d,%d\n", ei->type, anm_id, frm_id);
+            //printf("  %d: %d,%d\n", ei->type, anm_id, frm_id);
       pic_t *pic = picNew(frm->w, frm->h, 8);
+
+      sheet->K = 0;
+      pic->K = 0;
+      
       unrle((uint8_t*)(frm+1), pic->D, frm->w*frm->h);
       uint8_t *upal = file+ct[741].ofs;
       for (j = 0; j < 256; j++) {
@@ -1718,6 +1775,15 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
 #endif
 
       picBlt(sheet, pic, 0, ei->sx, ei->sy, 0, 0, frm->w, frm->h);
+#if 1
+      //if (ows[i]) {
+        for (j = 0; j < ei->ey-ei->sy+2; j++) {
+          picPut(sheet, ei->sx-1, ei->sy+j-2, 0xFE);
+          picPut(sheet, ei->ex+1, ei->sy+j-2, 0xFE);
+        }
+      //}
+#endif
+
 end4:
       frm_id++;
     } else if (ct[i].sz==768) {
@@ -1734,7 +1800,6 @@ end4:
 
       int cx = 0;
       int cy = 1;
-#if 1
       for (j = 0; j < FNT_NCHARS; j++) {
         int cw = fh->ws[j];
         int x, y;
@@ -1754,7 +1819,6 @@ end4:
         cx += cw+2;
       }
       pic->K = 0;
-#endif
       picPut(pic, 0, ch, 0xFF);
       q = pal;
       for (j = 0; j < 256; j++) {
@@ -1907,7 +1971,10 @@ int main(int argc, char **argv) {
 #endif
 
   load_names();
+  init_ows();
 
+  //dump_anm_ow(37, (anm_t*)ProjectileAnms, 9);  exit(0);
+  //dump_agnt_anms_ow();
   //dump_agnt_anms2();
   //dump_agnt_anms();
   //dump_anm(37, (anm_t*)ProjectileAnms, 9);  exit(0);
