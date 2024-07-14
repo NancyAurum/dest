@@ -361,39 +361,78 @@ void sprDel(spr_t *S) {
 
 #define RowBytes(cols) ((((cols) + 15) / 16) * 2)
 
-static int runLength(u1 *P, int I, int N) {
-  int R = 1;
-  while (R<128 && N-I>=2 && P[I+0]==P[I+1]) {R++; I++;}
-  return R;
-}
 
-static int lbmLineRLE(u1 *O, u1 *P, int N) {
-  int I, J, V, T, C, R;
-  for (T=I=0; I < N; ) {
-    C = 0, R = 1, J = I;
-again:
-    while (C < 128 && J < N && (R=runLength(P,J,N)) < 2) {C++; J++;}
-    if (C && R == 2) {
-      if (C<127) {
-        R = 0;
-        C += 2;
-        J+=2;
-        goto again;
-      } else {
-      }
-    }
-    if (C) {
-      O[T++] = C-1;
-      while(C--) O[T++] = P[I++];
-    }
-    if (R > 1) {
-      O[T++] = 257-R;
-      O[T++] = P[J];
-      I += R;
+#if 1
+int lbmLineRLE(uint8_t *dst, uint8_t *src, uint16_t length) {
+  uint8_t *s = src;
+  uint8_t *d = dst;
+  uint8_t *end = src + length;
+  uint8_t b;
+
+  while (s < end) {
+    uint8_t *p = s;
+    uint16_t run_length = end - s;
+    if (run_length > 64) run_length = 64;
+
+    uint8_t *run_end = s + run_length;
+    b = *s++;
+    while (s < run_end && *s == b) s++;
+
+    uint16_t run_size = s - p;
+    if (run_size < 3) { //literal run?
+      while (s+2 < run_end && s[0] != s[1]) s++;
+      *d++ = s - p - 1;
+      while (p < s) *d++ = *p++;
+    } else  { //replicate run
+      *d++ = (int)0xFF - run_size + 2; // Store run-length
+      *d++ = b; // Store the byte
     }
   }
-  return T;
+  if ((d-dst) & 1) *d++ = 0x80; //align with NOP
+  return d - dst;
 }
+#endif
+
+#if 0
+static int lbmLineRLE(u1 *Dst, u1 *Src, int N) {
+  u1 *D = Dst;
+  u1 *S = Src;
+  u1 *E = S+N;
+  while (S < E) {
+#if 0
+    //*D++ = 0;
+    //*D++ = *S++;
+    int len = E - S;
+    if (len > 128) len = 128;
+    *D++ = len-1;
+    while (len--) *D++ = *S++;
+#else
+    uint8_t *R = S;
+    while (R < E && *R == *S && R-S < 128) R++;
+    if (R - S >= 2) {
+      *D++ = (uint8_t)(int8_t)-(R-S - 1);
+      *D++ = *S;
+      S = R;
+    } else {
+      R = S;
+    }
+    while (R < E && R-S < 128) {
+      if (R+2<E && R[0] == R[1] && R[0] == R[2]) break;
+      R++;
+    }
+    if (R - S) {
+      *D++ = R - S - 1;
+      while (S < R) *D++ = *S++;
+    }
+#endif
+  }
+  if ((D-Dst) & 1) *D++ = 0x80; //align with NOP
+  return D - Dst;
+}
+#endif
+
+
+//#define UNCOMP
 
 // FIXME: align chunks to 16-bit words
 void lbmSave(char *FileName, pic_t *P) {
@@ -402,25 +441,34 @@ void lbmSave(char *FileName, pic_t *P) {
 
   s4bePut(D+L, CHK_FORM); L+=4;
   s4bePut(D+L, 0); L+=4;
-  s4bePut(D+L, CHK_PBM); L+=4; // PBM (Planar Bitmap) type LBM
+
+  // PBM is chunky pixel type LBM, made by Deluxe Paint for DOS
+  s4bePut(D+L, CHK_PBM); L+=4;
 
   s4bePut(D+L, CHK_BMHD); L+=4;
-  s4bePut(D+L, 0x14); L+=4;
+  s4bePut(D+L, 0x14); L+=4; //BMHD size
   s2bePut(D+L, P->W); L+=2;
   s2bePut(D+L, P->H); L+=2;
   s2bePut(D+L, 0); L+=2; // x-origin
   s2bePut(D+L, 0); L+=2; // y-origin
   D[L++] = P->B; // number of color planes
   D[L++] = 0; // color key type (mask)
+#ifdef UNCOMP
+  D[L++] = cmpNone; // compression type
+#else
   D[L++] = cmpByteRun1; // compression type
+#endif
   D[L++] = 0; // color map flags
   s2bePut(D+L, 0xFF); L+=2; // color key
-  //s2bePut(D+L, 0x0506); L+=2; // aspect ratio
-  //s2bePut(D+L, 320); L+=2; // page width
-  //s2bePut(D+L, 200); L+=2; // page height
+#if 1
+  s2bePut(D+L, 0x0506); L+=2; // aspect ratio
+  s2bePut(D+L, 320); L+=2; // page width
+  s2bePut(D+L, 200); L+=2; // page height
+#else
   s2bePut(D+L, 0x0101); L+=2; // aspect ratio
   s2bePut(D+L, 640); L+=2; // page width
   s2bePut(D+L, 480); L+=2; // page height
+#endif
 
   s4bePut(D+L, CHK_CMAP); L+=4;
   s4bePut(D+L, 3*256); L+=4;
@@ -431,7 +479,7 @@ void lbmSave(char *FileName, pic_t *P) {
   }
 
 
-  s4bePut(D+L, CHK_DPPS); L+=4;
+  s4bePut(D+L, CHK_DPPS); L+=4; //Deluxe Pain Page Settings
   s4bePut(D+L, 110); L+=4;
   s2bePut(D+L+0, 2);
   s2bePut(D+L+14, 360);
@@ -449,7 +497,8 @@ void lbmSave(char *FileName, pic_t *P) {
 
   L += 110;
 
-  //Deluxe Paint normally writes 4 CRNG chunks in an ILBM when the user asks it to "Save Picture". 
+  //Deluxe Paint normally writes 4 CRNG chunks in an ILBM
+  //when the user asks it to "Save Picture". 
   times (I,16) {
     s4bePut(D+L, CHK_CRNG); L+=4;
     s4bePut(D+L, 8); L+=4;
@@ -476,7 +525,17 @@ void lbmSave(char *FileName, pic_t *P) {
   s4bePut(D+L, 0); L+=4;
   B = L;
 
-  times(I, P->H) L += lbmLineRLE(D+L, P->D+I*P->I, (P->W+1)/2*2);
+#ifdef UNCOMP
+  times(I, P->H) {
+    memcpy(D+L, P->D + I*P->I, P->W);
+    L += P->W;
+    if (L&1) L++;
+  }
+#else
+  times(I, P->H) {
+    L += lbmLineRLE(D+L, P->D+I*P->I, (P->W+1)/2*2);
+  }
+#endif
 
   s4bePut(D+4, L-8);
   s4bePut(D+B-4, L-B);
@@ -532,6 +591,42 @@ static u1 *decodeRLE(u1 *D, u1 *S, int ULen) {
 
   return S;
 }
+
+#if 0
+int lbm_unrle(uint8_t *src, uint8_t *dst, uint16_t len) {
+  uint8_t *ps;
+  uint8_t val;
+  uint8_t run_val;
+  uint8_t *pd;
+  int i;
+  uint8_t *end;
+  uint8_t *pps;
+  uint8_t *s;
+  uint8_t *d;
+
+  d = dst;
+  s = src;
+  do {
+    do {
+      pps = s++;
+      val = *pps;
+    } while (val == 0x80);
+    if (val < 0x80) { /* copy as is */
+      for (i = val + 1; i != 0; i--) *d++ = *s++;
+    } else { /* duplicate */
+      ps = s;
+      s = pps + 2;
+      run_val = *ps;
+      for (i = (val^0xff) + 2; i != 0; i--) {
+        ps = d;
+        d = d + 1;
+        *ps = run_val;
+      }
+    }
+  } while (d < end);
+  return s - src;
+}
+#endif
 
 static const u1 bit_mask[] = {1, 2, 4, 8, 16, 32, 64, 128};
 static u1 *decodeRow(u4 *D, u1 *S, bmhd *H) {

@@ -1,0 +1,1283 @@
+"ILBM" IFF Interleaved Bitmap
+
+Date:January 17, 1986 (CRNG data updated Oct, 1988 by Jerry Morrison)
+(Appendix E added and CAMG updated Oct, 1988 by Commodore-Amiga, Inc.)
+
+From:Jerry Morrison, Electronic Arts
+
+Status:Released and in use
+
+
+
+1. Introduction
+
+"EA IFF 85" is Electronic Arts' standard for interchange format files.  "ILBM" 
+is a format for a 2 dimensional raster graphics image, specifically an 
+InterLeaved bitplane BitMap image with color map.  An ILBM is an IFF "data 
+section" or "FORM type", which can be an IFF file or a part of one.  ILBM 
+allows simple, highly portable raster graphic storage.
+
+An ILBM is an archival representation designed for three uses.  First, a stand-
+alone image that specifies exactly how to display itself (resolution, size, 
+color map, etc.).  Second, an image intended to be merged into a bigger 
+picture which has its own depth, color map, and so on.  And third, an empty 
+image with a color map selection or "palette" for a paint program.  ILBM is 
+also intended as a building block for composite IFF FORMs like "animation 
+sequences" and "structured graphics".  Some uses of ILBM will be to preserve as 
+much information as possible across disparate environments.  Other uses will be 
+to store data for a single program or highly cooperative programs while 
+maintaining subtle details.  So we're trying to accomplish a lot with this one 
+format.
+
+This memo is the IFF supplement for FORM ILBM.  Section 2 defines the purpose 
+and format of property chunks bitmap header "BMHD", color map "CMAP", hotspot 
+"GRAB", destination merge data "DEST", sprite information "SPRT", and 
+Commodore Amiga viewport mode "CAMG".  Section 3 defines the standard data 
+chunk "BODY".  These are the "standard" chunks.  Section 4 defines the non-
+standard data chunks.  Additional specialized chunks like texture pattern can 
+be added later.  The ILBM syntax is summarized in Appendix A as a regular 
+expression and in Appendix B as a box diagram.  Appendix C explains the 
+optional run encoding scheme.  Appendix D names the committee responsible for 
+this FORM ILBM standard.
+
+Details of the raster layout are given in part 3, "Standard Data Chunk".  Some 
+elements are based on the Commodore Amiga hardware but generalized for use on 
+other computers.  An alternative to ILBM would be appropriate for computers 
+with true color data in each pixel, though the wealth of available ILBM images 
+makes import and export important.
+
+Reference:
+
+"EA IFF 85" Standard for Interchange Format Files describes the underlying 
+conventions for all IFF files.
+Amiga. is a registered trademark of Commodore-Amiga, Inc.
+Electronic Arts(tm) is a trademark of Electronic Arts.
+Macintosh(tm) is a trademark licensed to Apple Computer, Inc.
+MacPaint(tm) is a trademark of Apple Computer, Inc.
+
+
+
+2. Standard Properties
+
+ILBM has several defined property chunks that act on the main data chunks.  
+The required property "BMHD" and any optional properties must appear before 
+any "BODY" chunk.  (Since an ILBM has only one BODY chunk, any following 
+properties would be superfluous.)  Any of these properties may be shared over 
+a LIST of several IBLMs by putting them in a PROP ILBM (See the EA IFF 85 
+document).
+
+BMHD
+
+The required property "BMHD" holds a BitMapHeader as defined in the following 
+documentation.  It describes the dimensions of the image, the encoding used, 
+and other data necessary to understand the BODY chunk to follow.
+
+    typedef UBYTE Masking;     /* Choice of masking technique. */
+
+    #define mskNone                0
+    #define mskHasMask             1
+    #define mskHasTransparentColor 2
+    #define mskLasso               3
+
+    typedef UBYTE Compression;    /* Choice of compression algorithm 
+       applied to the rows of all source and mask planes.  "cmpByteRun1"
+       is the byte run encoding described in Appendix C.  Do not compress 
+       across rows! */
+    #define cmpNone        0
+    #define cmpByteRun1    1
+
+    typedef struct {
+      UWORD       w, h;             /* raster width & height in pixels      */
+      WORD        x, y;             /* pixel position for this image        */
+      UBYTE       nPlanes;          /* # source bitplanes                   */
+      Masking     masking;
+      Compression compression;
+      UBYTE       Flags;            /* CMAP flags (formerly pad1, unused)   */
+      UWORD       transparentColor; /* transparent "color number" (sort of) */
+      UBYTE       xAspect, yAspect; /* pixel aspect, a ratio width : height */
+      WORD        pageWidth, pageHeight; /* source "page" size in pixels    */
+    } BitMapHeader;
+
+
+Fields are filed in the order shown.  The UBYTE fields are byte-packed (the C 
+compiler must not add pad bytes to the structure).
+
+The fields w and h indicate the size of the image rectangle in pixels.  Each 
+row of the image is stored in an integral number of 16 bit words.  The number 
+of words per row is words=((w+15)/16) or Ceiling(w/16).  The fields x and y 
+indicate the desired position of this image within the destination picture. 
+Some reader programs may ignore x and y.  A safe default for writing an ILBM 
+is (x, y) = (0, 0).
+
+The number of source bitplanes in the BODY chunk is stored in nPlanes.  An ILBM 
+with a CMAP but no BODY and nPlanes = 0 is the recommended way to store a 
+color map.
+
+Note: Color numbers are color map index values formed by pixels in the 
+destination bitmap, which may be deeper than nPlanes if a DEST chunk calls 
+for merging the image into a deeper image.
+
+
+The field masking indicates what kind of masking is to be used for this image. 
+The value mskNone designates an opaque rectangular image.  The value mskHasMask 
+means that a mask plane is interleaved with the bitplanes in the BODY chunk 
+(see below).  The value mskHasTransparentColor indicates that pixels in the 
+source planes matching transparentColor are to be considered "transparent". 
+(Actually, transparentColor isn't a "color number" since it's matched with 
+numbers formed by the source bitmap rather than the possibly deeper destination
+bitmap.  Note that having a transparent color implies ignoring one of the color 
+registers.  The value mskLasso indicates the reader may construct a mask by 
+lassoing the image as in MacPaint(tm).  To do this, put a 1 pixel border of 
+transparentColor around the image rectangle.  Then do a seed fill from this 
+border.  Filled pixels are to be transparent.
+
+Issue: Include in an appendix an algorithm for converting a transparent color 
+to a mask plane, and maybe a lasso algorithm.
+
+A code indicating the kind of data compression used is stored in compression. 
+Beware that using data compression makes your data unreadable by programs that 
+don't implement the matching decompression algorithm.  So we'll employ as few 
+compression encodings as possible.  The run encoding byteRun1 is documented in 
+Appendix C.
+
+The field pad1 is a pad byte reserved for future use.  It must be set to 0 for 
+consistency.
+
+The transparentColor specifies which bit pattern means "transparent".  This 
+only applies if masking is mskHasTransparentColor or mskLasso.  Otherwise, 
+transparentColor should be 0 (see above).
+
+The pixel aspect ratio is stored as a ratio in the two fields xAspect and 
+yAspect.  This may be used by programs to compensate for different aspects 
+or to help interpret the fields w, h, x, y, pageWidth, and pageHeight, which 
+are in units of pixels.  The fraction xAspect/yAspect represents a pixel's 
+width/height.  It's recommended that your programs store proper fractions in 
+the BitMapHeader, but aspect ratios can always be correctly compared with the 
+test:
+
+xAspect * yDesiredAspect = yAspect * xDesiredAspect
+
+Typical values for aspect ratio are width : height = 10 : 11  for an Amiga 320 
+x 200 display and 1 : 1 for a Macintosh(tm) display.
+
+The size in pixels of the source "page" (any raster device) is stored in 
+pageWidth and pageHeight, e.g., (320, 200) for a low resolution Amiga display. 
+This information might be used to scale an image or to automatically set the 
+display format to suit the image.  Note that the image can be larger than the 
+page.
+
+
+
+CMAP
+
+The optional (but encouraged) property "CMAP" stores color map data as 
+triplets of red, green, and blue intensity values.  The n color map entries 
+("color registers") are stored in the order 0 through n-1, totaling 3n bytes. 
+Thus n is the ckSize/3.  Normally, n would equal 2^(nPlanes).
+
+A CMAP chunk contains a ColorMap array as defined below.  Note that these 
+typedefs assume a C compiler that implements packed arrays of 3-byte elements.
+
+    typedef struct {
+        UBYTE red, green, blue;           /* color intensities 0..255 */
+        } ColorRegister;                  /* size = 3 bytes           */
+
+    typedef ColorRegister ColorMap[n];    /* size = 3n bytes          */
+
+The color components red, green, and blue represent fractional intensity 
+values in the range 0 through 255 256ths.  White is (255, 255, 255) and black 
+is (0, 0, 0).  If your machine has less color resolution, use the high order 
+bits.  Shift each field right on reading (or left on writing) and assign it 
+to (from) a field in a local packed format like Color4, below.  This achieves 
+automatic conversion of images across environments with different color 
+resolutions.  On reading an ILBM, use defaults if the color map is absent or 
+has fewer color registers than you need.  Ignore any extra color registers.  
+(See Appendix E for a better way to write colors)
+
+The example type Color4 represents the format of a color register in the 
+memory of an Amiga with the original graphics chip set, i.e., 4 bit video 
+DACs.  (The ":4" tells smarter C compilers to pack the field into 4 bits.)
+
+    typedef struct {
+        unsigned pad1 :4, red :4, green :4, blue :4;
+        } Color4;                      /*   Amiga RAM format.  Not filed.  */
+
+With the latest generation of Amigas, there is a new complication.  Amigas 
+with the AA chip set support a full 8 bits of color resolution.  In order 
+to distinguish older CMAPs with 4-bit values from newer CMAP chunks with full 
+8-bit values, use the high order bit of BMHD.Flags (1 << 7).  If this bit is 
+set, it means this CMAP is a full 8-bit value.  If this bit is clear, it is 
+probably an older 4-bit CMAP with values either left justified or scaled.
+
+Remember that every chunk must be padded to an even length, so a color map 
+with an odd number of entries would be followed by a 0 byte, not included 
+in the ckSize.
+
+
+GRAB
+
+The optional property "GRAB" locates a "handle" or "hotspot" of the image 
+relative to its upper left corner, e.g., when used as a mouse cursor or a 
+"paint brush".  A GRAB chunk contains a Point2D.
+
+    typedef struct {
+        WORD x, y;         /* relative coordinates (pixels) */
+        } Point2D;
+
+
+DEST
+
+The optional property "DEST" is a way to say how to scatter zero or more 
+source bitplanes into a deeper destination image.  Some readers may ignore DEST.
+
+The contents of a DEST chunk is DestMerge structure:
+
+   typedef struct {
+       UBYTE depth;      /* # bitplanes in the original source               */
+       UBYTE pad1;       /* unused; for consistency put 0 here               */
+       UWORD planePick;  /* how to scatter source bitplanes into destination */
+       UWORD planeOnOff; /* default bitplane data for planePick              */
+       UWORD planeMask;  /* selects which bitplanes to store into            */
+       } DestMerge;
+
+
+The low order depth number of bits in planePick, planeOnOff, and planeMask 
+correspond one-to-one with destination bitplanes.  Bit 0 with bitplane 0, etc. 
+(Any higher order bits should be ignored.)  "1" bits in planePick mean "put 
+the next source bitplane into this bitplane", so the number of "1" bits should 
+equal nPlanes.  "0" bits mean "put the corresponding bit from planeOnOff into 
+this bitplane".  Bits in planeMask gate writing to the destination bitplane: 
+"1" bits mean "write to this bitplane" while "0" bits mean "leave this 
+bitplane alone".  The normal case (with no DEST property) is equivalent to 
+planePick = planeMask = 2^(nPlanes) - 1.
+
+Remember that color numbers are formed by pixels in the destination bitmap 
+(depth planes deep) not in the source bitmap (nPlanes planes deep).
+
+
+SPRT
+
+The presence of an "SPRT" chunk indicates that this image is intended as a 
+sprite.  It's up to the reader program to actually make it a sprite, if even 
+possible, and to use or overrule the sprite precedence data inside the SPRT 
+chunk:
+
+    typedef UWORD SpritePrecedence; /* relative precedence, 0 is the highest */
+
+Precedence 0 is the highest, denoting a sprite that is foremost.
+
+Creating a sprite may imply other setup.  E.g., a 2 plane Amiga sprite would 
+have transparentColor = 0.  Color registers 1, 2, and 3 in the CMAP would be 
+stored into the correct hardware color registers for the hardware sprite 
+number used, while CMAP color register 0 would be ignored.
+
+
+CAMG
+
+A "CAMG" chunk is specifically for Commodore Amiga ILBM's.  All Amiga-based 
+reader and writer software should deal with CAMG.  The Amiga supports many 
+different video display modes including interlace, Extra Halfbrite, hold and 
+modify (HAM), plus a variety of new modes under the 2.0 operating system.
+A CAMG chunk contains a single long word (length=4) which specifies the Amiga 
+display mode of the picture.
+
+Prior to 2.0, it was possible to express all available Amiga ViewModes in 16 
+bits of flags (Viewport->Modes or NewScreen->ViewModes).  Old-style writers and 
+readers place a 16-bit Amiga ViewModes value in the low word of the CAMG, and 
+zeros in the high word.  The following Viewmode flags should always be 
+removed from old-style 16-bit ViewModes values when writing or reading them:
+
+EXTENDED_MODE | SPRITES | VP_HIDE | 
+          GENLOCK_AUDIO | GENLOCK_VIDEO (=0x7102, mask=0x8EFD)
+
+New ILBM readers and writers, should treat the full CAMG longword as a 32-bit 
+ModeID to support new and future display modes.
+
+New ILBM writers, when running under the 2.0 Amiga operating system, should 
+directly store the full 32-bit return value of the graphics function 
+GetVPModeID(vp) in the CAMG longword.  When running under 1.3, store a 16-bit 
+Viewmodes value masked as described above.
+
+
+ILBM readers should only mask bits out of a CAMG if the CAMG has a zero upper 
+word (see exception below).  New ILBM readers, when running under 2.0, should 
+then treat the 32-bit CAMG value as a ModeID, and should use the graphics 
+ModeNotAvailable() function to determine if the mode is available.  If the 
+mode is not available, fall back to another suitable display mode.  When 
+running under 1.3, the low word of the CAMG may generally be used to open a 
+compatible display.
+
+Note that one popular graphics package stores junk in the upper word of the 
+CAMG of brushes, and incorrect values (generally zero) in the low word.  You 
+can screen for such junk values by testing for non-zero in the upper word of 
+a ModeID in conjunction with the 0x00001000 bit NOT set in the low word.
+
+The following code fragment demonstrates ILBM reader filtering of
+inappropriate bits in 16-bit CAMG values.
+
+#include <graphics/view.h>
+#include <graphics/displayinfo.h>
+
+/* Knock bad bits out of old-style CAMG modes before checking availability.
+ * (some ILBM CAMG's have these bits set in old 1.3 modes, and should not)
+ * If not an extended monitor ID, or if marked as extended but missing
+ * upper 16 bits, screen out inappropriate bits now.
+ */
+if((!(modeid & MONITOR_ID_MASK)) ||
+    ((modeid & EXTENDED_MODE)&&(!(modeid & 0xFFFF0000))))
+   modeid &= 
+      (~(EXTENDED_MODE|SPRITES|GENLOCK_AUDIO|GENLOCK_VIDEO|VP_HIDE));
+
+/* Check for bogus CAMG like some brushes have, with junk in
+ * upper word and extended bit NOT set not set in lower word.
+ */
+if((modeid & 0xFFFF0000)&&(!(modeid & EXTENDED_MODE)))
+    {
+    /* Bad CAMG, so ignore CAMG and determine a mode based on 
+     * based on pagesize or aspect
+     */
+     modeid = NULL;
+     if(wide >= 640) modeid |= HIRES;
+     if(high >= 400) modeid |= LACE;
+     }
+
+/* Now, ModeNotAvailable() may be used to determine if the mode is available.
+ *
+ * If the mode is not available, you may prompt the user for a mode
+ * choice, or search the 2.0 display database for an appropriate
+ * replacement mode, or you may be able to get a relatively compatible
+ * old display mode by masking out all bits except
+ * HIRES | LACE | HAM | EXTRA_HALFBRITE
+ */
+
+   if((modeid & 0xFFFF0000)&&(!(modeid & 0x00001000)))
+{
+/* Then probably invalid ModeID */
+}
+
+
+3. Standard "BODY" Data Chunk
+
+Raster Layout
+
+Raster scan proceeds left-to-right (increasing X) across scan lines, then 
+top-to-bottom (increasing Y) down columns of scan lines.  The coordinate 
+system is in units of pixels, where (0,0) is the upper left corner.
+
+The raster is typically organized as bitplanes in memory.  The corresponding 
+bits from each plane, taken together, make up an index into the color map 
+which gives a color value for that pixel.  The first bitplane, plane 0, is 
+the low order bit of these color indexes.
+
+A scan line is made of one "row" from each bitplane.  A row is one plane's bits 
+for one scan line, but padded out to a word (2 byte) boundary (not necessarily 
+the first word boundary).  Within each row, successive bytes are displayed in 
+order and the most significant bit of each byte is displayed first.
+
+A "mask" is an optional "plane" of data the same size (w, h) as a bitplane.  
+It tells how to "cut out" part of the image when painting it onto another 
+image.  "One" bits in the mask mean "copy the corresponding pixel to the 
+destination".  "Zero" mask bits mean "leave this destination pixel alone".  In 
+other words, "zero" bits designate transparent pixels.
+
+The rows of the different bitplanes and mask are interleaved in the file (see 
+below).  This localizes all the information pertinent to each scan line.  It 
+makes it much easier to transform the data while reading it to adjust the 
+image size or depth.  It also makes it possible to scroll a big image by 
+swapping rows directly from the file without the need for random-access to 
+all the bitplanes.
+
+
+
+BODY
+
+The source raster  is stored in a "BODY" chunk.  This one chunk holds all 
+bitplanes and the optional mask, interleaved by row.
+
+The BitMapHeader, in a BMHD property chunk, specifies the raster's dimensions 
+w, h, and nPlanes.  It also holds the masking field which indicates if there 
+is a mask plane and the compression field which indicates the compression 
+algorithm used.  This information is needed to interpret the BODY chunk, so 
+the BMHD chunk must appear first.  While reading an ILBM's BODY, a program 
+may convert the image to another size by filling (with transparentColor) or 
+clipping.
+
+The BODY's content is a concatenation of scan lines.  Each scan line is a 
+concatenation of one row of data from each plane in order 0 through nPlanes-1 
+followed by one row from the mask (if masking = hasMask ).  If the BitMapHeader 
+field compression is cmpNone, all h rows are exactly (w+15)/16 words wide. 
+Otherwise, every row is compressed according to the specified algorithm and 
+the stored widths depend on the data compression.
+
+Reader programs that require fewer bitplanes than appear in a particular ILBM 
+file can combine planes or drop the high-order (later) planes.  Similarly, 
+they may add bitplanes and/or discard the mask plane.
+
+Do not compress across rows, and don't forget to compress the mask just like 
+the bitplanes.  Remember to pad any BODY chunk that contains an odd number of 
+bytes and skip the pad when reading.
+
+
+4. Nonstandard Data Chunks
+
+The following data chunks were defined after various programs began using FORM 
+ILBM so they are "nonstandard" chunks.  See the registry document for the 
+latest information on additional non-standard chunks.
+
+
+CRNG
+
+A "CRNG" chunk contains "color register range" information.  It's used by 
+Electronic Arts' Deluxe Paint program to identify a contiguous range of 
+color registers for a "shade range" and color cycling.  There can be zero or 
+more CRNG chunks in an ILBM, but all should appear before the BODY chunk. 
+Deluxe Paint normally writes 4 CRNG chunks in an ILBM when the user asks it 
+to "Save Picture".
+
+    typedef struct {
+        WORD  pad1;      /* reserved for future use; store 0 here    */
+        WORD  rate;      /* color cycle rate                         */
+        WORD  flags;     /* see below                                */
+        UBYTE low, high; /* lower and upper color registers selected */
+        } CRange;
+
+
+The bits of the flags word are interpreted as follows: if the low bit is set 
+then the cycle is "active", and if this bit is clear it is not active.  
+Normally, color cycling is done so that colors move to the next higher 
+position in the cycle, with the color in the high slot moving around to the
+low slot.  If the second bit of the flags word is set, the cycle moves in the 
+opposite direction.  As usual, the other bits of the flags word are reserved 
+for future expansion.  Here are the masks to test these bits:
+
+#define RNG_ACTIVE  1
+#define RNG_REVERSE 2
+
+The fields low and high indicate the range of color registers (color numbers) 
+selected by this CRange.
+
+The field active indicates whether color cycling is on or off.  Zero means off.
+
+The field rate determines the speed at which the colors will step when color 
+cycling is on.  The units are such that a rate of 60 steps per second is 
+represented as 2^14 = 16384.  Slower rates can be obtained by linear scaling: 
+for 30 steps/second, rate = 8192; for 1 step/second, rate = 16384/60 * 273.
+
+
+CCRT
+
+Commodore's Graphicraft program uses a similar chunk "CCRT" (for Color 
+Cycling Range and Timing).  This chunk contains a CycleInfo structure.
+
+    typedef struct {
+        WORD  direction;    /* 0 = don't cycle.  1 = cycle forwards      */
+                            /* (1, 2, 3). -1 = cycle backwards (3, 2, 1) */
+        UBYTE start, end;   /* lower and upper color registers selected  */
+        LONG  seconds;      /* # seconds between changing colors plus... */
+        LONG  microseconds; /* # microseconds between changing colors    */
+        WORD  pad;          /* reserved for future use; store 0 here     */
+        } CycleInfo;
+
+This is very similar to a CRNG chunk.  A program would probably only use one 
+of these two methods of expressing color cycle data, new programs should use 
+CRNG.  You could write out both if you want to communicate this information 
+to both Deluxe Paint and Graphicraft.
+
+
+Appendix A. ILBM Regular Expression
+
+Here's a regular expression summary of the FORM ILBM syntax.  This could be an 
+IFF file or a part of one.
+
+ILBM ::= "FORM" #{    "ILBM" BMHD [CMAP] [GRAB] [DEST] [SPRT] [CAMG]
+    CRNG* CCRT* [BODY]    }
+
+BMHD ::= "BMHD" #{    BitMapHeader    }
+CMAP ::= "CMAP" #{    (red green blue)*    } [0]
+GRAB ::= "GRAB" #{    Point2D    }
+DEST ::= "DEST" #{    DestMerge    }
+SPRT ::= "SPRT" #{    SpritePrecedence    }
+CAMG ::= "CAMG" #{    LONG    }
+
+CRNG ::= "CRNG" #{    CRange    }
+CCRT ::= "CCRT" #{    CycleInfo    }
+BODY ::= "BODY" #{    UBYTE*    } [0]
+
+
+
+The token "#" represents a ckSize LONG count of the following {braced} data 
+bytes.  E.g., a BMHD's "#" should equal sizeof(BitMapHeader).  Literal strings 
+are shown in "quotes", [square bracket items] are optional, and "*" means 0 
+or more repetitions.  A sometimes-needed pad byte is shown as "[0]".
+
+The property chunks BMHD, CMAP, GRAB, DEST, SPRT, CAMG and any CRNG and CCRT 
+data chunks may actually be in any order but all must appear before the BODY 
+chunk since ILBM readers usually stop as soon as they read the BODY.  If any 
+of the 6 property chunks are missing, default values are inherited from any 
+shared properties (if the ILBM appears inside an IFF LIST with PROPs) or from 
+the reader program's defaults.  If any property appears more than once, the 
+last occurrence before the BODY is the one that counts since that's the one 
+that modifies the BODY.
+
+
+Appendix B. ILBM Box Diagram
+
+Here's a box diagram for a simple example: an uncompressed image 320 x 200 
+pixels x 3 bitplanes.  The text to the right of the diagram shows the outline 
+that would be printed by the Sift utility program for this particular file.
+
+
+          +--------------------+
+          |                    |
+          |  'FORM'     24070  |  FORM 24070 ILBM
+          |                    |
+       -- +--------------------+ 
+       |  |                    |
+       |  |  'ILBM'            |
+       |  |                    |
+       |  | +----------------+ |
+       |  | |  'BMHD'    20  | |  .BMHD 20
+       |  | |----------------| |  
+       |  | |  320, 200,     | |
+       |  | |  0 ....        | |
+       |  | +----------------+ |
+       |  |                    |
+       |  | +----------------+ |
+24070 <   | |  'CMAP'    21  | |  .CMAP 21
+ bytes |  | |----------------| |  
+       |  | |  0, 0, 0,      | |
+       |  | |  255 ....      | |
+       |  | +----------------+ |
+       |  |   0                |  
+       |  | +----------------+ |
+       |  | |  'BODY'  24000 | |  .BODY 24000
+       |  | |----------------| |  
+       |  | |  0, 0, 0....   | |
+       |  | +----------------+ |
+       |  |                    |
+       -- +--------------------+
+
+The "0" after the CMAP chunk is a pad byte.
+
+
+
+Appendix C. IFF Hints
+
+Hints on ILBM files from Jerry Morrison, Oct 1988.  How to avoid some 
+pitfalls when reading ILBM files:
+
+oDon't ignore the BitMapHeader.masking field.  A bitmap with a mask 
+(such as a partially-transparent DPaint brush or a DPaint picture with 
+a stencil) will read as garbage if you don't de-interleave the mask.
+
+oDon't assume all images are compressed.  Narrow images aren't usually 
+run-compressed since that would actually make them longer.
+
+oDon't assume a particular image size.  You may encounter overscan 
+pictures and PAL pictures.
+
+There's a better way to read a BODY than the example IFF code.  The GetBODY 
+routine should call a GetScanline routine once per scan line, which calls a 
+GetRow routine for each bitplane in the file.  This in turn calls a 
+GetUnpackedBytes routine, which calls a GetBytes routine as needed and unpacks 
+the result.  (If the picture is uncompressed, GetRow calls GetBytes directly.) 
+Since theunpacker knows how many packed bytes to read, this avoids juggling 
+buffers for a memory-to-memory UnPackBytes routine.
+
+Caution: If you make many AmigaDOS calls to read or write a few bytes at a 
+time, performance will be mud! AmigaDOS has a high overhead per call, even 
+with RAM disk.  So use buffered read/write routines.
+
+Different hardware display devices have different color resolutions:
+
+    Device        R:G:B bits    maxColor
+    -------       ----------    --------
+    Mac SE            1              1
+    IBM EGA       2:2:2              3
+    Atari ST      3:3:3              7
+    Amiga         4:4:4             15 
+    CD-I          5:5:5             31
+    IBM VGA       6:6:6             63
+    Mac II        8:8:8            255
+
+An ILBM CMAP defines 8 bits of Red, Green and Blue (i.e., 8:8:8 bits of R:G:B). 
+When displaying on hardware which has less color resolution, just take the 
+high order bits.  For example, to convert ILBM's 8-bit Red to the Amiga's 
+4-bit Red, right shift the data by 4 bits  (R4 := R8 >> 4).
+
+To convert hardware colors to ILBM colors, the ILBM specification says just 
+set the high bits (R8 := R4 << 4).  But you can transmit higher contrast to 
+foreign display devices by scaling the data [0..maxColor] to the full range 
+[0..255].  In other words, R8 := (Rn x 255) w maxColor.  (Example #1:  EGA 
+color 1:2:3 scales to 85:170:255.  Example #2:  Amiga 15:7:0 scales to
+255:119:0).  This makes a big difference where maxColor is less than 15.  In 
+the extreme case, Mac SE white (1) should be converted to ILBM white (255), 
+not to ILBM gray (128).
+
+
+
+CGA and EGA subtleties
+
+IBM EGA colors in 350 scan line mode are 2:2:2 bits of R:G:B, stored in memory 
+as xxR'G'B'RBG.  That's 3 low-order bits followed by 3 high-order bits.
+
+IBM CGA colors are 4 bits stored in a byte as xxxxIRGB.  (EGA colors in 200 
+scan line modes are the same as CGA colors, but stored in memory as xxxIxRGB.) 
+That's 3 high-order bits (one for each of R, G, and B) plus one low-order "
+Intensity" bit for all 3 components R, G, and B.  Exception: IBM monitors show 
+IRGB = 0110 as brown, which is really the EGA color R:G:B = 2:1:0, not dark 
+yellow 2:2:0.
+
+
+24-bit ILBMS
+
+When storing deep images as ILBMs (such as images with 8 bits each of R,G, 
+and B), the bits for each pixel represent an absolute RGB value for that 
+pixel rather than an index into a limited color map.  The order for saving 
+the bits is critical since a deep ILBM would not contain the usual CMAP of 
+RGB values (such a CMAP would be too large and redundant).
+
+To interpret these "deep" ILBMs, it is necessary to have a standard order in 
+which the bits of the R, G, and B values will be stored.  A number of 
+different orderings have already been used in deep ILBMs, so it was necessary 
+to us chose one of these orderings as a standard.
+
+The following bit ordering has been chosen as the default bit ordering for 
+deep ILBMs.
+
+Default standard deep ILBM bit ordering:
+saved first -------------------------------------------------> saved last
+R0 R1 R2 R3 R4 R5 R6 R7  G0 G1 G2 G3 G4 G5 G6 G7  B0 B1 B2 B3 B4 B5 B6 B7
+
+One other existing deep bit ordering that you may encounter is the 21-bit 
+NewTek format.
+
+NewTek deep ILBM bit ordering:
+saved first ------------------------------------------------------> saved last
+R7 G7 B7  R6 G6 B6  R5 G5 B5  R4 G4 B4  R3 G3 B3  R2 G2 B2  R1 G1 B1  R0 G0 B0
+
+
+Note that you may encounter CLUT chunks in deep ILBM's.  See the Third Party 
+Specs appendix for more information on CLUT chunks.
+
+
+
+Appendix D. ByteRun1 Run Encoding
+
+The run encoding scheme byteRun1 is best described by pseudo code for the 
+decoder Unpacker (called UnPackBits in the Macintosh(tm) toolbox):
+
+  UnPacker:
+    LOOP until produced the desired number of bytes
+        Read the next source byte into n
+        SELECT n FROM
+            [0..127]   => copy the next n+1 bytes literally
+            [-1..-127] => replicate the next byte -n+1 times
+            -128       => no operation
+            ENDCASE;
+        ENDLOOP;
+
+In the inverse routine Packer, it's best to encode a 2 byte repeat run as a 
+replicate run except when preceded and followed by a literal run, in which 
+case it's best to merge the three into one literal run.  Always encode 3 byte 
+repeats as replicate runs.
+
+Remember that each row of each scan line of a raster is separately packed.
+
+
+
+
+
+           Intro to IFF Amiga ILBM Files and Amiga Viewmodes
+           =================================================
+
+The IFF (Interchange File Format) for graphic images on the Amiga is called 
+FORM ILBM (InterLeaved BitMap).  It follows a standard parsable IFF format.
+
+Sample hex dump of beginning of an ILBM:
+========================================
+
+Important note!  You can NOT ever depend on any particular ILBM chunk being 
+at any particular offset into the file!  IFF files are composed, in their 
+simplest form, of chunks within a FORM.  Each chunk starts starts with a 
+4-letter chunkID, followed by a 32-bit length of the rest of the chunk.  You 
+PARSE IFF files, skipping past unneeded or unknown chunks by seeking their 
+length (+1 if odd length) to the next 4-letter chunkID.
+
+0000: 464F524D 00016418 494C424D 424D4844    FORM..d.ILBMBMHD
+0010: 00000014 01400190 00000000 06000100    .....@..........
+0020: 00000A0B 01400190 43414D47 00000004    .....@..CAMG....
+0030: 00000804 434D4150 00000030 001100EE    ....CMAP...0....
+0040: EEEE0000 22000055 33333355 55550033    .... ..P000PPP.0
+0050: 99885544 77777711 66EE2266 EE6688DD    ..P@ppp.`. `.`..
+0060: AAAAAAAA 99EECCCC CCDDAAEE 424F4459    ............BODY
+0070: 000163AC F8000F80 148A5544 2ABDEFFF    ..c.......UD*...  etc.
+
+Interpretation:
+
+      'F O R M' length  'I L B M''B M H D'<-start of BitMapHeader chunk
+0000: 464F524D 00016418 494C424D 424D4844    FORM..d.ILBMBMHD
+
+       length  WideHigh XorgYorg PlMkCoPd <- Planes Mask Compression Pad
+0010: 00000014 01400190 00000000 06000100    .....@..........
+
+      TranAspt PagwPagh 'C A M G' length  <- start of C-AMiGa View modes chunk
+0020: 00000A0B 01400190 43414D47 00000004    .....@..CAMG....
+
+      Viewmode 'C M A P' length  R g b R  <- Viewmode 800=HAM | 4=LACE 
+0030: 00000804 434D4150 00000030 001100EE    ....CMAP...0....
+
+      g b R g  b R g b  R g b R  g b R g  <- Rgb's are for reg0 thru regN
+0040: EEEE0000 22000055 33333355 55550033    .... ..P000PPP.0
+
+      b R g b  R g b R  g b R g  b R g b
+0050: 99885544 77777711 66EE2266 EE6688DD    ..P@ppp.`. `.`..
+
+      R g b R  g b R g  b R g b 'B O D Y' 
+0060: AAAAAAAA 99EECCCC CCDDAAEE 424F4459    ............BODY
+
+       length   start of body data        <- Compacted (Compression=1 above)
+0070: 000163AC F8000F80 148A5544 2ABDEFFF    ..c.......UD*...
+0080: FFBFF800 0F7FF7FC FF04F85A 77AD5DFE    ...........Zw.].  etc.
+
+Notes on CAMG Viewmodes:  HIRES=0x8000  LACE=0x4  HAM=0x800  HALFBRITE=0x80
+
+
+
+
+Interpreting ILBMs
+==================
+      
+ILBM is a fairly simple IFF FORM.  All you really need to deal with to 
+extract the image are the following chunks:
+
+(Note - Also watch for AUTH Author chunks and (c) Copyright chunks
+ and preserve any copyright information if you rewrite the ILBM)
+
+   BMHD - info about the size, depth, compaction method
+          (See interpreted hex dump above)
+
+   CAMG - optional Amiga viewmodes chunk
+          Most HAM and HALFBRITE ILBMs should have this chunk.  If no
+          CAMG chunk is present, and image is 6 planes deep, assume
+          HAM and you'll probably be right.  Some Amiga viewmodes
+          flags are HIRES=0x8000, LACE=0x4, HAM=0x800, HALFBRITE=0x80.
+  Note that new Amiga 2.0 ILBMs may have more complex 32-bit
+  numbers (modeid) stored in the CAMG.  However, the bits
+  described above should get you a compatible old viewmode.
+  
+   CMAP - RGB values for color registers 0 to n
+          (each component left justified in a byte)
+  If a deep ILBM (like 12 or 24 planes), there should be no CMAP
+  and instead the BODY planes are interpreted as the bits of RGB
+  in the order R0...Rn G0...Gn B0...Bn
+
+   BODY - The pixel data, stored in an interleaved fashion as follows:
+          (each line individually compacted if BMHD Compression = 1)
+             plane 0 scan line 0
+             plane 1 scan line 0
+             plane 2 scan line 0
+             ...
+             plane n scan line 0
+             plane 0 scan line 1
+             plane 1 scan line 1
+             etc.
+
+ 
+Body Compression
+================
+
+The BODY contains pixel data for the image.  Width, Height, and depth 
+(Planes) is specified in the BMHD.
+
+If the BMHD Compression byte is 0, then the scan line data is not compressed.
+If Compression=1, then each scan line is individually compressed as follows:
+
+   More than 2 bytes the same stored as BYTE code value n from  -1 to -127 
+     followed by byte to be repeated (-n) + 1 times.
+   Varied bytes stored as BYTE code n from 0 to 127 followed by n+1 bytes 
+     of data.
+   The byte code -128 is a NOP.
+
+
+
+
+Interpreting the Scan Line Data:
+================================
+
+If the ILBM is not HAM or HALFBRITE, then after parsing and uncompacting if 
+necessary, you will have N planes of pixel data.  Color register used for 
+each pixel is specified by looking at each pixel thru the planes.  I.e., 
+if you have 5 planes, and the bit for a particular pixel is set in planes 
+0 and 3:
+
+       PLANE     4 3 2 1 0
+       PIXEL     0 1 0 0 1
+
+then that pixel uses color register binary 01001 = 9
+
+The RGB value for each color register is stored in the CMAP chunk of the 
+ILBM, starting with register 0, with each register's RGB value stored as
+one byte of R, one byte G, and one byte of B, with each component scaled
+to 8-bits.  (ie. 4-bit Amiga R, G, and B components are each stored in the
+high nibble of a byte.  The low nibble may also contain valid data if the 
+color was stored with 8-bit-per-gun color resolution).
+
+
+BUT - if the picture is HAM or HALFBRITE, it is interpreted differently.
+                        ===    =========
+
+Hopefully, if the picture is HAM or HALFBRITE, the package that saved it 
+properly saved a CAMG chunk (look at a hex dump of your file with ACSII 
+interpretation - you will see the chunks - they all start with a 4-ASCII-
+character chunk ID).  If the picture is 6 planes deep and has no CAMG chunk, 
+it is probably HAM.   If you see a CAMG chunk, the "CAMG" is followed by the 
+32-bit chunk length, and then the 32-bit Amiga Viewmode flags.  
+
+HAM pics with a 16-bit CAMG will have the 0x800 bit set in CAMG ViewModes.
+HALBRITE pics will have the 0x80 bit set.
+
+To transport a HAM or HALFBRITE picture to another machine, you must 
+understand how HAM and HALFBRITE work on the Amiga.
+
+
+How Amiga HAM mode works:
+=========================
+
+Amiga HAM (Hold and Modify) mode lets the Amiga display all 4096 RGB values.  
+In HAM mode, the bits in the two last planes describe an R G or B 
+modification to the color of the previous pixel on the line to create the 
+color of the current pixel.  So a 6-plane HAM picture has 4 planes for 
+specifying absolute color pixels giving up to 16 absolute colors which would 
+be specified in the ILBM CMAP chunk.  The bits in the last two planes are 
+color modification bits which cause the Amiga, in HAM mode, to take the RGB 
+value of the previous pixel (Hold and), substitute the 4 bits in planes 0-3 
+for the previous color's R G or B component (Modify) and display the result 
+for the current pixel.  If the first pixel of a scan line is a modification 
+pixel, it modifies the RGB value of the border color (register 0).  The color 
+modification bits in the last two planes (planes 4 and 5) are interpreted as 
+follows:
+
+   00 - no modification.  Use planes 0-3 as normal color register index
+   10 - hold previous, replacing Blue component with bits from planes 0-3 
+   01 - hold previous, replacing Red component with bits from planes 0-3
+   11 - hold previous. replacing Green component with bits from planes 0-3
+
+
+
+How Amiga HALFBRITE mode works:
+===============================
+
+This one is simpler.  In HALFBRITE mode, the Amiga interprets the bit in the 
+last plane as HALFBRITE modification.  The bits in the other planes are 
+treated as normal color register numbers (RGB values for each color register 
+is specified in the CMAP chunk).  If the bit in the last plane is set (1), 
+then that pixel is displayed at half brightness.  This can provide up to 64 
+absolute colors.
+
+
+Other Notes:
+============
+
+Amiga ILBMs images must be a even number of bytes wide.  Smaller images (such 
+as brushes) are padded to an even byte width.
+
+ILBMs created with Electronic Arts IBM and Amiga "DPaintII" packages are 
+compatible (though you may have to use a '.lbm' filename extension on an 
+IBM).  The ILBM graphic files may be transferred between the machines (or 
+between the Amiga and IBM sides your Amiga if you have a CBM Bridgeboard 
+card installed) and loaded into either package.
+
+
+Color Lookup Table chunk
+
+
+TITLE: CLUT IFF chunk proposal
+
+"CLUT" IFF 8-Bit Color Look Up Table
+
+Date:July 2, 1989
+From:Justin V. McCormick
+Status:Public Proposal
+Supporting Software:  FG 2.0 by Justin V. McCormick for PP&S
+
+
+Introduction:
+
+  This memo describes the IFF supplement for the new chunk "CLUT".
+
+Description:
+
+  A CLUT (Color Look Up Table) is a special purpose data module
+containing table with 256 8-bit entries.  Entries in this table
+can be used directly as a translation for one 8-bit value to
+another.
+
+Purpose:
+
+  To store 8-bit data look up tables in a simple format for
+later retrieval.  These tables are used to translate or bias
+8-bit intensity, contrast, saturation, hue, color registers, or
+other similar data in a reproducable manner.
+
+Specifications:
+
+/* Here is the IFF chunk ID macro for a CLUT chunk */
+#define ID_CLUT MakeID('C','L','U','T')
+
+/*
+ * Defines for different flavors of 8-bit CLUTs.
+ */
+#define CLUT_MONO0L/* A Monochrome, contrast or intensity LUT */
+#define CLUT_RED1L/* A LUT for reds */
+#define CLUT_GREEN2L/* A LUT for greens */
+#define CLUT_BLUE3L/* A LUT for blues */
+#define CLUT_HUE4L/* A LUT for hues */
+#define CLUT_SAT5L/* A LUT for saturations */
+#define CLUT_UNUSED66L/* How about a Signed Data flag */
+#define CLUT_UNUSED77L/* Or an Assumed Negative flag*/
+
+/* All types > 7 are reserved until formally claimed */
+#define CLUT_RESERVED_BITS 0xfffffff8L
+
+/* The struct for Color Look-Up-Tables of all types */
+typedef struct
+{
+  ULONG type;/* See above type defines */
+  ULONG res0;/* RESERVED FOR FUTURE EXPANSION */
+  UBYTE lut[256];/* The 256 byte look up table */
+} ColorLUT;
+
+
+CLUT Example:
+
+  Normally, the CLUT chunk will appear after the BMHD of an FORM
+ILBM before the BODY chunk, in the same "section" as CMAPs are
+normally found.  However, a FORM may contain only CLUTs with no
+other supporting information.
+
+  As a general guideline, it is desirable to group all CLUTs
+together in a form without other chunk types between them.
+If you were using CLUTs to store RGB intensity corrections, you
+would write three CLUTs in a row, R, G, then B.
+
+  Here is a box diagram for a 320x200x8 image stored as an IFF ILBM
+with a single CLUT chunk for intensity mapping:
+
+      +-----------------------------------+   
+      |'FORM'64284    |     FORM 64284 ILBM
+      +-----------------------------------+   
+      |'ILBM'    |     
+      +-----------------------------------+   
+      | +-------------------------------+ |   
+      | | 'BMHD'20  | |     .BMHD 20
+      | | 320, 200, 0, 0, 8, 0, 0, ...  | |   
+      | | ------------------------------+ |   
+      | | 'CLUT'264          | |     .CLUT 264
+      | | 0, 0, 0; 32, 0, 0; 64,0,0; .. | |   
+      | +-------------------------------+ |   
+      | +-------------------------------+ |   
+      | |'BODY'64000     | |     .BODY 64000
+      | |0, 0, 0, ...  | |   
+      | +-------------------------------+ |   
+      +-----------------------------------+   
+
+
+Design Notes:
+-------------
+
+  I have deliberately kept this chunk simple (KISS) to
+facilitate implementation.  In particular, no provision is made
+for expansion to 16-bit or 32-bit tables.  My reasoning is that
+a 16-bit table can have 64K entries, and thus would benefit from
+data compression.  My suggestion would be to propose another
+chunk or FORM type better suited for large tables rather than
+small ones like CLUT.
+
+
+
+Newtek Dynamic Ham color chunks
+
+Newtek for Digiview IV (dynamic Ham)
+
+ILBM.DYCP - dynamic color palette
+3 longwords (file setup stuff)
+
+ILBM.CTBL - array of words, one for each color (0rgb)
+Dots per inch chunk
+
+
+
+ILBM DPI chunk (1-16-90)
+==============
+
+ILBM.DPI   Dots Per Inch   to allow output of an image at the
+same resolution it was scanned at
+
+typedef struct {
+UWORD dpi_x;
+UWORD dpi_y;
+} DPIHeader ;
+
+For example, an image scanned at horizontal resolution of
+240dpi and vertical resolution of 300dpi would be saved as:
+
+44504920 00000004 00F0 012C
+D P I    size     dpi_x dpi_y
+
+
+DPaint perspective chunk (EA)
+
+IFF FORM / CHUNK DESCRIPTION
+============================
+
+Form/Chunk ID:   Chunk DPPV  (DPaint II ILBM perspective chunk)
+Date Submitted:  12/86
+Submitted by:    Dan Silva 
+
+Chunk Description:
+
+   The DPPV chunk describes the perspective state in a DPaintII ILBM.
+
+Chunk Spec:
+
+/* The chunk identifier DPPV */
+#define ID_DPPV    MakeID('D','P','P','V')
+
+typedef LONG LongFrac;
+typedef struct ( LongFrac x,y,z; )  LFPoint;
+typedef LongFrac  APoint[3];
+
+typedef union {
+   LFPoint l;
+   APoint  a;
+   } UPoint;
+
+/* values taken by variable rotType */
+#define ROT_EULER  0
+#define ROT_INCR   1
+
+/* Disk record describing Perspective state */
+
+typedef struct {
+   WORD     rotType;           /* rotation type */
+   WORD     iA, iB, iC;        /* rotation angles (in degrees) */
+   LongFrac Depth;             /* perspective depth */
+   WORD     uCenter, vCenter;  /* coords of center perspective,
+                                * relative to backing bitmap,
+                                * in Virtual coords
+                                */
+   WORD     fixCoord;          /* which coordinate is fixed */
+   WORD     angleStep;         /* large angle stepping amount */
+   UPoint   grid;              /* gridding spacing in X,Y,Z */
+   UPoint   gridReset;         /* where the grid goes on Reset */
+   UPoint   gridBrCenter;      /* Brush center when grid was last on,
+                                * as reference point
+                                */
+   UPoint   permBrCenter;      /* Brush center the last time the mouse
+                                * button was clicked, a rotation performed,
+                                * or motion along "fixed" axis
+                                */
+   LongFrac rot[3][3];         /* rotation matrix */
+   } PerspState;
+
+SUPPORTING SOFTWARE
+===================
+DPaint II   by Dan Silva for Electronic Arts
+
+
+
+DPaint IV enhanced color cycle chunk (EA)
+
+DRNG Chunk for FORM ILBM
+========================
+
+Submitted by Lee Taran
+
+Purpose:
+
+Enhanced Color Cycling Capabilities
+-------------------------------------
+   * DPaintIV supports a new color cycling model which does NOT
+     require that color cycles contain a contiguous range of color
+     registers.
+
+     For example:
+       If your range looks like:  [1][3][8][2]
+       then at each cycle tick
+          temp = [2], 
+          [2] = [8],
+          [8] = [3],
+          [3] = [1], 
+          [1] = temp
+
+   * You can now cycle a single register thru a series of rgb values.
+     For example:
+        If your range looks like: [1] [orange] [blue] [purple]
+        then at each cycle tick color register 1 will take on the
+        next color in the cycle.
+         
+        ie:  t=0:  [1] = curpal[1]
+             t=1:  [1] = purple
+             t=2:  [1] = blue
+             t=3:  [1] = orange
+             t=4:  goto t=0
+
+   * You can combine rgb cycling with traditional color cycling.
+     For example:
+         Your range can look like:
+             [1] [orange] [blue] [2] [green] [yellow]
+
+         t=0: [1] = curpal[1], [2] = curpal[2]
+         t=1: [1] = yellow,    [2] = blue
+         t=2: [1] = green,     [2] = orange
+         t=3: [1] = curpal[2], [2] = curpal[1]
+         t=4: [1] = blue,      [2] = yellow
+         t=5: [1] = orange,    [2] = green
+         t=6: goto t=0
+
+Note:
+   * DPaint will save out an old style range CRNG if the range fits
+     the CRNG model otherwise it will save out a DRNG chunk. 
+   * no thought has been given (yet) to interlocking cycles
+
+
+
+/* --------------------------------------------------------------------- 
+
+ IFF Information:  DPaintIV DRNG chunk
+
+          DRNG ::= "DRNG" # { DRange DColor* DIndex* }
+                                                                      
+ a <cell> is where the color or register appears within the range     
+
+ The RNG_ACTIVE flags is set when the range is cyclable. A range 
+ should only have the RNG_ACTIVE if it:
+      1> contains at least one color register
+      2> has a defined rate 
+      3> has more than one color and/or color register
+ If the above conditions are met then RNG_ACTIVE is a user/program 
+ preference.  If the bit is NOT set the program should NOT cycle the
+ range.
+
+ The RNG_DP_RESERVED flags should always be 0!!!
+ --------------------------------------------------------------------- */
+typedef struct {
+   UBYTE min;           /* min cell value */
+   UBYTE max;           /* max cell value */
+   SHORT rate;          /* color cycling rate, 16384 = 60 steps/second */
+   SHORT flags;         /* 1=RNG_ACTIVE,4=RNG_DP_RESERVED */
+   UBYTE ntrue;         /* number of DColor structs to follow */
+   UBYTE nregs;         /* number of DIndex structs to follow */
+   } DRange;           
+
+typedef struct { UBYTE cell; UBYTE r,g,b; } DColor; /* true color cell */
+typedef struct { UBYTE cell; UBYTE index; } DIndex; /* color register cell */
+
+
+
+Encapsulated Postscript chunk
+
+ILBM EPSF Chunk
+===============
+
+Pixelations   Kevin Saltzman   617-277-5414
+
+Chunk to hold encapsulated postscript
+
+Used by PixelScript in their clip art.  Holds a postscript
+representation of the ILBM's graphic image.
+
+EPSF length
+   ; Bounding box
+   WORD lowerleftx;
+   WORD lowerlefty;
+   WORD upperrightx;
+   WORD upperrighty;
+   CHAR []    ; ascii postscript file
+
+
+
+RGB image forms, Turbo Silver (Impulse)
+
+                    FORM RGBN and FORM RGB8
+    -----------------------
+
+RGBN and RGB8 files are used in Impulse's Turbo Silver and Imagine.
+They are almost identical to FORM ILBM's except for the BODY chunk
+and slight differences in the BMHD chunk.
+
+A CAMG chunk IS REQUIRED.
+
+The BMHD chunk specfies the number of bitplanes as 13 for type RGBN
+and 25 for type RGB8, and the compression type as 4.
+
+The FORM RGBN uses 12 bit RGB values, and the FORM RGB8 uses
+24 bit RGB values.
+
+The BODY chunk contains RGB values, a "genlock" bit, and repeat
+counts.  In Silver, when "genlock" bit is set, a "zero color" is
+written into the bitplanes for genlock video to show through.
+In Diamond and Light24 (Impulse 12 & 24 bit paint programs),
+the genlock bit is ignored if the file is loaded as a picture
+(and the RGB color is used instead), and if the file is loaded
+as a brush the genlock bit marks pixels that are not part of
+the brush.
+
+For both RGBN and RGB8 body chunks, each RGB value always has a
+repeat count.  The values are written in different formats depending
+on the magnitude of the repeat count.
+
+For the RGBN BODY chunk:
+
+For each RGB value, a WORD (16-bits) is written: with the
+12 RGB bits in the MSB (most significant bit) positions;
+the "genlock" bit next; and then a 3 bit repeat count.  
+If the repeat count is greater than 7, the 3-bit count is
+zero, and a BYTE repeat count follows.  If the repeat count
+is greater than 255, the BYTE count is zero, and a WORD
+repeat count follows.  Repeat counts greater than 65536 are
+not supported.
+
+For the RGB8 body chunk:
+
+For each RGB value, a LONG-word (32 bits) is written:
+with the 24 RGB bits in the MSB positions; the "genlock"
+bit next, and then a 7 bit repeat count.
+
+In a previous version of this document, there appeared the
+following line:
+
+"If the repeat count is greater than 127, the same rules apply
+as in the RGBN BODY."
+
+But Impulse has never written more than a 7 bit repeat count,
+and when Imagine and Light24 were written, they didn't support
+reading anything but 7 bit counts.
+
+Sample BODY code:
+
+if(!count) {
+if (Rgb8) {
+fread (&w, 4, 1, RGBFile);
+lock = w & 0x00000080;
+rgb = w >> 8;
+count = w & 0x0000007f;
+} else {
+w = (UWORD) getw (RGBFile);
+lock = w & 8;
+rgb = w >> 4;
+count = w & 7;
+}
+if (!count)
+if (!(count = (UBYTE) getc (RGBFile)))
+count = (UWORD) getw (RGBFile);
+}
+
+The pixels are scanned from left to right across horizontal
+lines, processing from top to bottom.  The (12 or 24 bit) RGB
+values are stored with the red bits as the MSB's, the green
+bits next, and the blue bits as the LSB's.
+
+Special note:  As of this writing (Sep 88), Silver does NOT
+support anything but black for color zero.
