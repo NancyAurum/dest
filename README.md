@@ -8,7 +8,7 @@ The project's goal is recovering original code in a form compilable by Borland C
 
 # Milestones
 * Decompiled small part of the init code and mapped most of the asset init code.
-* Recovered the raw asset files (LBMs, VOCs, etc), which can be assembled back into the STRONG.DAT stash file by going to assets and typing `st.exe grab`.
+* Recovered the raw asset files (LBMs, VOCs, etc), which can be assembled back into the STRONG.DAT stash file by going to assets and typing `st.exe grab`. The LBM files can be edited with [Deluxe Paint](https://winworldpc.com/product/deluxepaint/2x). These are PBM LBMs, so most ILBM software doesn't work with them.
 
 
 # TODO
