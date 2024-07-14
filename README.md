@@ -3,12 +3,21 @@ WIP decompilation of the 1993 AD&D Stronghold game for DOS.
 
 The project's goal is recovering original code in a form compilable by Borland C++ 3.0.
 
+![Dragon Image](https://github.com/NancyAurum/dest/blob/main/dragon.png)
+
+
 # Milestones
-- Decompiled small part of the init code and mapped most of the asset init code.
-- Recovered the raw asset files (LBMs, VOCs, etc), which can be assembled back into the STRONG.DAT stash file by going to assets and typing `st.exe grab`.
+* Decompiled small part of the init code and mapped most of the asset init code.
+* Recovered the raw asset files (LBMs, VOCs, etc), which can be assembled back into the STRONG.DAT stash file by going to assets and typing `st.exe grab`.
 
 
-# Development:
+# TODO
+
+* Fix skylines palettes and and entity frame rect markers, which are used to determine sprite centering.
+* Fix RLE encoding for PBM LBM files.
+
+
+# Development
 
 See dest/gpr for the Ghidra project file
 
