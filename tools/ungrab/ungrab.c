@@ -1644,7 +1644,7 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
     //if (stg->type!=3) continue;
     //if (stg->type!=4) continue;
 
-    //if (strcmp(name, "demfont1.lbm")) continue;
+    //if (strcmp(name, "nwpanel2.lbm")) continue;
 
     if (strcmp(prev_name, name)) {
       printf("Extracting %s...\n", name);
@@ -1683,6 +1683,8 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
           w = 320;
           h = 200;
         }
+        if (w&1) w++;
+        if (h&1) h++;
         sheet = picNew(w, h, 8);
         sheet->K = 0;
       }
