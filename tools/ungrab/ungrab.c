@@ -1644,7 +1644,7 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
     //if (stg->type!=3) continue;
     //if (stg->type!=4) continue;
 
-    //if (strcmp(name, "nwpanel2.lbm")) continue;
+    //if (strcmp(name, "pfdwarf.lbm")) continue;
 
     if (strcmp(prev_name, name)) {
       printf("Extracting %s...\n", name);

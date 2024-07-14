@@ -363,6 +363,7 @@ void sprDel(spr_t *S) {
 
 
 #if 1
+#define MAX_RUN 128
 int lbmLineRLE(uint8_t *dst, uint8_t *src, uint16_t length) {
   uint8_t *s = src;
   uint8_t *d = dst;
@@ -372,7 +373,7 @@ int lbmLineRLE(uint8_t *dst, uint8_t *src, uint16_t length) {
   while (s < end) {
     uint8_t *p = s;
     uint16_t run_length = end - s;
-    if (run_length > 64) run_length = 64;
+    if (run_length > MAX_RUN) run_length = MAX_RUN;
 
     uint8_t *run_end = s + run_length;
     b = *s++;
@@ -380,7 +381,59 @@ int lbmLineRLE(uint8_t *dst, uint8_t *src, uint16_t length) {
 
     uint16_t run_size = s - p;
     if (run_size < 3) { //literal run?
-      while (s+2 < run_end && s[0] != s[1]) s++;
+#if 0
+      while (s < run_end) {
+        if (s+1<run_end && s[0] == s[1]) break;
+        s++;
+      }
+#else
+      while (s < run_end) {
+        if (s+2<run_end && s[0] == s[1] && s[0] == s[2]) break;
+        s++;
+      }
+#endif
+      *d++ = s - p - 1;
+      while (p < s) *d++ = *p++;
+    } else  { //replicate run
+      *d++ = (int)0xFF - run_size + 2; // Store run-length
+      *d++ = b; // Store the byte
+    }
+  }
+  if ((d-dst) & 1) *d++ = 0x80; //align with NOP
+  return d - dst;
+}
+#endif
+
+#if 0
+#define MAX_RUN 128
+int lbmLineRLE(uint8_t *dst, uint8_t *src, uint16_t length) {
+  uint8_t *s = src;
+  uint8_t *d = dst;
+  uint8_t *end = src + length;
+  uint8_t b;
+
+  while (s < end) {
+    uint8_t *p = s;
+    uint16_t run_length = end - s;
+    if (run_length > MAX_RUN) run_length = MAX_RUN;
+
+    uint8_t *run_end = s + run_length;
+    b = *s++;
+    while (s < run_end && *s == b) s++;
+
+    uint16_t run_size = s - p;
+    if (run_size < 3) { //literal run?
+#if 0
+      while (s < run_end) {
+        if (s+1<run_end && s[0] == s[1]) break;
+        s++;
+      }
+#else
+      while (s < run_end) {
+        if (s+2<run_end && s[0] == s[1] && s[0] == s[2]) break;
+        s++;
+      }
+#endif
       *d++ = s - p - 1;
       while (p < s) *d++ = *p++;
     } else  { //replicate run
@@ -432,12 +485,15 @@ static int lbmLineRLE(u1 *Dst, u1 *Src, int N) {
 #endif
 
 
-//#define UNCOMP
 
 // FIXME: align chunks to 16-bit words
 void lbmSave(char *FileName, pic_t *P) {
+  int uncomp = 0;
   u1 *D = new(u1, 1024*1024*8);
   int B, I, J, L = 0;
+
+  // we don't really know how the origianl RLE worked
+  if (P->W*P->H <= 64000) uncomp = 1;
 
   s4bePut(D+L, CHK_FORM); L+=4;
   s4bePut(D+L, 0); L+=4;
@@ -453,11 +509,11 @@ void lbmSave(char *FileName, pic_t *P) {
   s2bePut(D+L, 0); L+=2; // y-origin
   D[L++] = P->B; // number of color planes
   D[L++] = 0; // color key type (mask)
-#ifdef UNCOMP
-  D[L++] = cmpNone; // compression type
-#else
-  D[L++] = cmpByteRun1; // compression type
-#endif
+  if (uncomp) {
+    D[L++] = cmpNone; // compression type
+  } else {
+    D[L++] = cmpByteRun1; // compression type
+  }
   D[L++] = 0; // color map flags
   s2bePut(D+L, 0xFF); L+=2; // color key
 #if 1
@@ -525,17 +581,17 @@ void lbmSave(char *FileName, pic_t *P) {
   s4bePut(D+L, 0); L+=4;
   B = L;
 
-#ifdef UNCOMP
-  times(I, P->H) {
-    memcpy(D+L, P->D + I*P->I, P->W);
-    L += P->W;
-    if (L&1) L++;
+  if (uncomp) {
+    times(I, P->H) {
+      memcpy(D+L, P->D + I*P->I, P->W);
+      L += P->W;
+      if (L&1) L++;
+    }
+  } else {
+    times(I, P->H) {
+      L += lbmLineRLE(D+L, P->D+I*P->I, (P->W+1)/2*2);
+    }
   }
-#else
-  times(I, P->H) {
-    L += lbmLineRLE(D+L, P->D+I*P->I, (P->W+1)/2*2);
-  }
-#endif
 
   s4bePut(D+4, L-8);
   s4bePut(D+B-4, L-B);
