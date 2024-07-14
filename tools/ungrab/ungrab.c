@@ -1588,6 +1588,40 @@ void dump(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
   printf("Done!\n");
 }
 
+//portraits and skylines are allowed to have a set of unique colors,
+//which we have to recover to their original arrangement
+void recoverUniquePalette(pic_t *pic) {
+  int j;
+  uint8_t cmap[256*4];
+  for (j = 0; j < pic->W*pic->H; j++) {
+    int c = pic->D[j];
+    if (c < 0x50) { //leave these as is
+    } else if (0x50 <= c && c <= 0x7f) {
+      c += 0x30;
+    } else {
+      c -= 0x50;
+    }
+    pic->D[j] = c;
+  }
+
+  for (j = 0; j < 256; j++) {
+    int c = j;
+    if (c < 0x50) { //leave these as is
+    } else if (0x50 <= c && c <= 0x7f) {
+      c += 0x50;
+    } else {
+      c -= 0x30;
+    }
+    cmap[j*4+0] = pic->P[c*4+0];
+    cmap[j*4+1] = pic->P[c*4+1];
+    cmap[j*4+2] = pic->P[c*4+2];
+    cmap[j*4+3] = pic->P[c*4+3];
+  }
+  memcpy(pic->P, cmap, 256*4);
+}
+
+
+
 void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
   int i, j, k;
   int anm_id=0, frm_id=0;
@@ -1613,6 +1647,9 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
   uint8_t *bpal = file+ct[741].ofs; //base palette
   uint8_t *pal = file+ct[741].ofs;
 
+  int prev_i = 0; 
+  int prev_skyline = 0;
+
 
   for (i = 0; i < nitems; i++) {
     einfo_t *ei = &einfo[i];
@@ -1628,10 +1665,20 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
 
     if (strcmp(prev_name, name)) {
       if (sheet) {
+        if (((stg_t*)(file+ct[prev_i].ofs))->type == 2) {
+          if (1170 <= prev_i && prev_i <= 3402) {
+            recoverUniquePalette(sheet);
+          }
+        } else if (prev_skyline) {
+          recoverUniquePalette(sheet);
+        }
         savePic(fmt("%s%s", outpath, prev_name), sheet);
         sheet = 0;
       }
     }
+
+    prev_skyline = 0;
+    prev_i = i;
 
     stg_t *stg = (stg_t*)(file+ct[i].ofs);
     stg2_t *stg2 = (stg2_t*)(file+ct[i].ofs);
@@ -1645,6 +1692,8 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
     //if (stg->type!=4) continue;
 
     //if (strcmp(name, "pfdwarf.lbm")) continue;
+
+    //if (!(stg->type==2 && 1170 <= i && i <= 3402)) continue;
 
     if (strcmp(prev_name, name)) {
       printf("Extracting %s...\n", name);
@@ -1694,8 +1743,14 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
       pic_t *pic = picNew(stg->w, stg->h, 8);
       unrle((uint8_t*)(stg+1), pic->D, stg->w*stg->h);
       uint8_t *q = pal;
-      if (ei && ei->type == 6) q = normalizeSkylinePal(bpal,file+ct[i+1].ofs);
-      if (ei && ei->type == 7) q = normalizeSkylinePal(bpal,file+ct[i-1].ofs);
+      if (ei && ei->type == 6) {
+        q = normalizeSkylinePal(bpal,file+ct[i+1].ofs);
+        prev_skyline = 1;
+      }
+      if (ei && ei->type == 7) {
+        q = normalizeSkylinePal(bpal,file+ct[i-1].ofs);
+        prev_skyline = 1;
+      }
       for (j = 0; j < 256; j++) {
         sheet->P[j*4+0] = q[j*3 + 0]<<2;
         sheet->P[j*4+1] = q[j*3 + 1]<<2;
@@ -1706,6 +1761,8 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
     } else if (stg2->type==2 && stg2->w && stg2->h && stg2->sz && stg2->w <= 320 && stg2->h <= 200 && stg2->sz <= 320*200+0xE) {
       pic_t *pic = picNew(stg2->w, stg2->h, 8);
       unrle((uint8_t*)(stg2+1), pic->D, stg2->w*stg2->h);
+
+
       uint8_t *q = pal;
       if (ei && ei->nid == 78) q = file+ct[906].ofs;
       if (ei && ei->type == 3) q = file+ct[i+1].ofs;
@@ -1715,6 +1772,7 @@ void ungrab(char *outpath, uint8_t *file, cte_t *ct, int nitems) {
         sheet->P[j*4+2] = q[j*3 + 2]<<2;
         sheet->P[j*4+3] = 0;
       }
+
       picBlt(sheet, pic, 0, ei->sx, ei->sy, 0, 0, stg2->w, stg2->h);
     } else if (stg3->type==3 && stg3->sz && stg3->sz <= ct[i].sz && !stg3->w && !stg3->h) {
       //continue;

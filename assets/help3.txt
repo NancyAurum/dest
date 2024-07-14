@@ -1,0 +1,2 @@
+Look at the building card!  On it is useful information.  Hint: abandoned buildings will deteriorate.  To prevent this, keep a person "homed" on each block which has a building.  To "home" a person, click on him or her, then select "home" at the bottom of the screen.  Notes: 1. Only one homed person is necessary for each block.  Before homing another, click on one, then use the "next" and "previous" buttons to see if anyone else is already homed.  2. To fix a damaged building, click on it, then select "repair."  There will be a small cost.
+
