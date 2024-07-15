@@ -399,6 +399,13 @@ int lbmLineRLE(uint8_t *dst, uint8_t *src, uint16_t length) {
       *d++ = b; // Store the byte
     }
   }
+  //Some versions of Adobe Photoshop incorrectly use the n=128 no-op as
+  //a repeat code, which breaks strictly conforming readers.
+  //To read Photoshop ILBMs, allow the use of n=128 as a repeat.
+  //This is pretty safe, since no known program writes real no-ops into
+  //their ILBMs. The reason n=128 is a no-op is historical:
+  //the Mac Packbits buffer was only 128 bytes, and a repeat code of
+  //128 generates 129 bytes.
   if ((d-dst) & 1) *d++ = 0x80; //align with NOP
   return d - dst;
 }
